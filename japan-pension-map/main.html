@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>都道府県別老齢年金マップ</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: #8892b0;
+            font-weight: 300;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .map-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 20px;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e8e8e8;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            white-space: nowrap;
+            flex: 0 1 auto;
+        }
+
+        @media (max-width: 900px) {
+            .controls {
+                gap: 6px;
+            }
+            .control-btn {
+                padding: 5px 10px;
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                gap: 4px;
+            }
+            .control-btn {
+                padding: 4px 8px;
+                font-size: 0.65rem;
+                flex: 1 1 calc(33% - 8px);
+                text-align: center;
+            }
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(135deg, #ff6600, #ffa500);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            display: block;
+        }
+
+        #map svg {
+            display: block;
+            max-height: 100%;
+        }
+
+        .prefecture {
+            stroke: #333;
+            stroke-width: 0.5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .prefecture:hover {
+            stroke: #ff6600;
+            stroke-width: 2;
+            filter: brightness(1.1);
+        }
+
+        .legend-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            clear: both;
+        }
+
+        .legend-title {
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            color: #8892b0;
+        }
+
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-bar {
+            height: 12px;
+            flex: 1;
+            border-radius: 6px;
+        }
+
+        .legend-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #8892b0;
+            margin-top: 5px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .info-card h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #ffa500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, #ffa500, #ff6600);
+            border-radius: 2px;
+        }
+
+        .selected-info {
+            min-height: 200px;
+        }
+
+        .prefecture-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .data-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .data-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .data-label {
+            font-size: 0.75rem;
+            color: #8892b0;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .data-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .data-value.kousei {
+            color: #006837;
+        }
+
+        .data-value.kokumin {
+            color: #a50f15;
+        }
+
+        .ranking-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .ranking-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .ranking-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .ranking-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ranking-item:hover {
+            background: rgba(255, 165, 0, 0.15);
+            transform: translateX(5px);
+        }
+
+        .rank-number {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-right: 12px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .rank-number.top3 {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #1a1a2e;
+        }
+
+        .ranking-pref {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .ranking-value {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #ffa500;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(22, 33, 62, 0.95);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+
+        .tooltip-label {
+            color: #8892b0;
+        }
+
+        .tooltip-value {
+            font-weight: 500;
+        }
+
+        .no-selection {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8892b0;
+        }
+
+        .no-selection-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px;
+            color: #8892b0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #8892b0;
+            font-size: 0.8rem;
+        }
+
+        .source-note {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>都道府県別老齢年金受給者数及び平均年金月額</h1>
+            <p class="subtitle">令和6年度末現在 | 厚生年金保険（第1号）・国民年金</p>
+        </header>
+
+        <div class="main-content">
+            <div class="map-container">
+                <div class="controls">
+                    <button class="control-btn active" data-metric="combined_avg">合算 平均月額</button>
+                    <button class="control-btn" data-metric="kousei_avg">厚生年金 平均月額</button>
+                    <button class="control-btn" data-metric="kokumin_avg">国民年金 平均月額</button>
+                    <button class="control-btn" data-metric="total_count">合計 受給者数</button>
+                    <button class="control-btn" data-metric="kousei_count">厚生年金 受給者数</button>
+                    <button class="control-btn" data-metric="kokumin_count">国民年金 受給者数</button>
+                </div>
+                <div id="map">
+                    <div class="loading">地図を読み込み中...</div>
+                </div>
+                <div class="legend-container">
+                    <div class="legend-title" id="legend-title">厚生年金 平均月額</div>
+                    <div class="legend">
+                        <div class="legend-bar" id="legend-bar"></div>
+                    </div>
+                    <div class="legend-labels">
+                        <span id="legend-min">低</span>
+                        <span id="legend-max">高</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="info-card selected-info">
+                    <h3>選択中の都道府県</h3>
+                    <div id="selected-content">
+                        <div class="no-selection">
+                            <div class="no-selection-icon">🗾</div>
+                            <p>都道府県をクリックして<br>詳細を表示</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>ランキング TOP 10</h3>
+                    <div class="ranking-list" id="ranking-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="source-note">
+                注1. 新法老齢厚生年金については、旧法の老齢年金に相当するものを「老齢年金」としている。新法退職共済年金についても同様。<br>
+                注2. 厚生年金保険（第1号）の平均年金月額には、基礎年金月額を含む。<br>
+                注3. 国民年金については、旧法老齢年金の受給者と新法老齢基礎年金の受給者（受給資格期間を原則として25年以上有する者）の合計であり、老齢基礎年金受給者には、被用者年金を上乗せして受給している者を含む。
+            </div>
+        </footer>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Prefecture data from the image
+        const prefectureData = {
+            "北海道": { kousei_count: 645946, kousei_avg: 141069, kokumin_count: 1518702, kokumin_avg: 58435 },
+            "青森県": { kousei_count: 154131, kousei_avg: 128129, kokumin_count: 387393, kokumin_avg: 57137 },
+            "岩手県": { kousei_count: 180514, kousei_avg: 132943, kokumin_count: 385355, kokumin_avg: 60720 },
+            "宮城県": { kousei_count: 296629, kousei_avg: 144920, kokumin_count: 619968, kokumin_avg: 59532 },
+            "秋田県": { kousei_count: 157668, kousei_avg: 129503, kokumin_count: 337028, kokumin_avg: 59147 },
+            "山形県": { kousei_count: 179536, kousei_avg: 131169, kokumin_count: 343800, kokumin_avg: 60827 },
+            "福島県": { kousei_count: 285764, kousei_avg: 136880, kokumin_count: 555955, kokumin_avg: 59922 },
+            "茨城県": { kousei_count: 359236, kousei_avg: 152963, kokumin_count: 793374, kokumin_avg: 59395 },
+            "栃木県": { kousei_count: 256643, kousei_avg: 149631, kokumin_count: 536581, kokumin_avg: 59544 },
+            "群馬県": { kousei_count: 258559, kousei_avg: 148666, kokumin_count: 547280, kokumin_avg: 60564 },
+            "埼玉県": { kousei_count: 840139, kousei_avg: 161752, kokumin_count: 1802777, kokumin_avg: 59007 },
+            "千葉県": { kousei_count: 722926, kousei_avg: 165103, kokumin_count: 1592783, kokumin_avg: 59354 },
+            "東京都": { kousei_count: 1264691, kousei_avg: 163892, kokumin_count: 2763123, kokumin_avg: 58313 },
+            "神奈川県": { kousei_count: 1015785, kousei_avg: 170457, kokumin_count: 2133754, kokumin_avg: 59342 },
+            "新潟県": { kousei_count: 376592, kousei_avg: 138683, kokumin_count: 681115, kokumin_avg: 61957 },
+            "富山県": { kousei_count: 187459, kousei_avg: 144644, kokumin_count: 314111, kokumin_avg: 62989 },
+            "石川県": { kousei_count: 172813, kousei_avg: 141792, kokumin_count: 314120, kokumin_avg: 61923 },
+            "福井県": { kousei_count: 135133, kousei_avg: 140787, kokumin_count: 222217, kokumin_avg: 62290 },
+            "山梨県": { kousei_count: 106918, kousei_avg: 144665, kokumin_count: 237977, kokumin_avg: 59275 },
+            "長野県": { kousei_count: 333971, kousei_avg: 144668, kokumin_count: 621746, kokumin_avg: 62030 },
+            "岐阜県": { kousei_count: 272398, kousei_avg: 149910, kokumin_count: 567973, kokumin_avg: 61248 },
+            "静岡県": { kousei_count: 548712, kousei_avg: 151960, kokumin_count: 1049839, kokumin_avg: 61150 },
+            "愛知県": { kousei_count: 869651, kousei_avg: 160766, kokumin_count: 1779193, kokumin_avg: 60034 },
+            "三重県": { kousei_count: 248879, kousei_avg: 151949, kokumin_count: 499990, kokumin_avg: 61403 },
+            "滋賀県": { kousei_count: 189781, kousei_avg: 154456, kokumin_count: 363441, kokumin_avg: 61172 },
+            "京都府": { kousei_count: 306792, kousei_avg: 151483, kokumin_count: 667161, kokumin_avg: 58206 },
+            "大阪府": { kousei_count: 955206, kousei_avg: 156272, kokumin_count: 2071773, kokumin_avg: 57122 },
+            "兵庫県": { kousei_count: 685504, kousei_avg: 159086, kokumin_count: 1449849, kokumin_avg: 59138 },
+            "奈良県": { kousei_count: 166147, kousei_avg: 162292, kokumin_count: 394017, kokumin_avg: 58961 },
+            "和歌山県": { kousei_count: 114135, kousei_avg: 145933, kokumin_count: 284033, kokumin_avg: 57784 },
+            "鳥取県": { kousei_count: 93936, kousei_avg: 133459, kokumin_count: 168311, kokumin_avg: 61502 },
+            "島根県": { kousei_count: 119738, kousei_avg: 133918, kokumin_count: 213251, kokumin_avg: 62287 },
+            "岡山県": { kousei_count: 289388, kousei_avg: 146429, kokumin_count: 532668, kokumin_avg: 61564 },
+            "広島県": { kousei_count: 400511, kousei_avg: 150745, kokumin_count: 766938, kokumin_avg: 60991 },
+            "山口県": { kousei_count: 214048, kousei_avg: 148166, kokumin_count: 429537, kokumin_avg: 61120 },
+            "徳島県": { kousei_count: 112045, kousei_avg: 134131, kokumin_count: 221933, kokumin_avg: 58797 },
+            "香川県": { kousei_count: 151903, kousei_avg: 144026, kokumin_count: 286088, kokumin_avg: 61718 },
+            "愛媛県": { kousei_count: 190493, kousei_avg: 140301, kokumin_count: 411652, kokumin_avg: 59792 },
+            "高知県": { kousei_count: 103252, kousei_avg: 132202, kokumin_count: 220934, kokumin_avg: 57926 },
+            "福岡県": { kousei_count: 634167, kousei_avg: 145822, kokumin_count: 1303188, kokumin_avg: 58300 },
+            "佐賀県": { kousei_count: 114954, kousei_avg: 134191, kokumin_count: 235463, kokumin_avg: 61084 },
+            "長崎県": { kousei_count: 178334, kousei_avg: 136825, kokumin_count: 404364, kokumin_avg: 58617 },
+            "熊本県": { kousei_count: 233506, kousei_avg: 132740, kokumin_count: 516458, kokumin_avg: 59907 },
+            "大分県": { kousei_count: 163188, kousei_avg: 136507, kokumin_count: 346542, kokumin_avg: 58397 },
+            "宮崎県": { kousei_count: 149658, kousei_avg: 129224, kokumin_count: 325307, kokumin_avg: 59234 },
+            "鹿児島県": { kousei_count: 217632, kousei_avg: 133343, kokumin_count: 484282, kokumin_avg: 59659 },
+            "沖縄県": { kousei_count: 113770, kousei_avg: 128819, kokumin_count: 304952, kokumin_avg: 54217 }
+        };
+
+        // Calculate combined average (weighted by recipient count)
+        Object.keys(prefectureData).forEach(pref => {
+            const d = prefectureData[pref];
+            const totalCount = d.kousei_count + d.kokumin_count;
+            const combinedAvg = Math.round((d.kousei_avg * d.kousei_count + d.kokumin_avg * d.kokumin_count) / totalCount);
+            d.combined_avg = combinedAvg;
+            d.total_count = totalCount;
+        });
+
+        // Color scales - blue (low) to red (high)
+        const colorScales = {
+            combined_avg: { colors: ['#0571b0', '#ca0020'], label: '合算 平均月額', format: v => `¥${v.toLocaleString()}` },
+            kousei_avg: { colors: ['#0571b0', '#ca0020'], label: '厚生年金 平均月額', format: v => `¥${v.toLocaleString()}` },
+            kokumin_avg: { colors: ['#0571b0', '#ca0020'], label: '国民年金 平均月額', format: v => `¥${v.toLocaleString()}` },
+            kousei_count: { colors: ['#0571b0', '#ca0020'], label: '厚生年金 受給者数', format: v => `${v.toLocaleString()}人` },
+            kokumin_count: { colors: ['#0571b0', '#ca0020'], label: '国民年金 受給者数', format: v => `${v.toLocaleString()}人` },
+            total_count: { colors: ['#0571b0', '#ca0020'], label: '合計 受給者数', format: v => `${v.toLocaleString()}人` }
+        };
+
+        let currentMetric = 'combined_avg';
+        let selectedPrefecture = null;
+        let geoData = null;
+
+        const tooltip = d3.select("#tooltip");
+
+        function getColor(value, metric) {
+            const values = Object.values(prefectureData).map(d => d[metric]);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const scale = colorScales[metric];
+            
+            const t = (value - min) / (max - min);
+            return d3.interpolate(scale.colors[0], scale.colors[1])(t);
+        }
+
+        function updateLegend(metric) {
+            const values = Object.values(prefectureData).map(d => d[metric]);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const scale = colorScales[metric];
+            
+            document.getElementById('legend-title').textContent = scale.label;
+            document.getElementById('legend-bar').style.background = 
+                `linear-gradient(90deg, ${scale.colors[0]}, ${scale.colors[1]})`;
+            document.getElementById('legend-min').textContent = scale.format(min);
+            document.getElementById('legend-max').textContent = scale.format(max);
+        }
+
+        function updateRanking(metric) {
+            const scale = colorScales[metric];
+            const sorted = Object.entries(prefectureData)
+                .map(([name, data]) => ({ name, value: data[metric] }))
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 10);
+
+            const list = document.getElementById('ranking-list');
+            list.innerHTML = sorted.map((item, i) => `
+                <div class="ranking-item" data-pref="${item.name}">
+                    <div class="rank-number ${i < 3 ? 'top3' : ''}">${i + 1}</div>
+                    <div class="ranking-pref">${item.name}</div>
+                    <div class="ranking-value">${scale.format(item.value)}</div>
+                </div>
+            `).join('');
+
+            list.querySelectorAll('.ranking-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    selectPrefecture(item.dataset.pref);
+                });
+            });
+        }
+
+        function selectPrefecture(name) {
+            selectedPrefecture = name;
+            const data = prefectureData[name];
+            
+            if (!data) return;
+            
+            document.getElementById('selected-content').innerHTML = `
+                <div class="prefecture-name">${name}</div>
+                <div class="data-grid">
+                    <div class="data-item" style="background: rgba(128, 0, 128, 0.2);">
+                        <div class="data-label">合算 平均月額</div>
+                        <div class="data-value" style="color: #da70d6;">¥${data.combined_avg.toLocaleString()}</div>
+                    </div>
+                    <div class="data-item" style="background: rgba(128, 0, 128, 0.2);">
+                        <div class="data-label">合計 受給者数</div>
+                        <div class="data-value" style="color: #da70d6;">${data.total_count.toLocaleString()}人</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">厚生年金 平均月額</div>
+                        <div class="data-value">¥${data.kousei_avg.toLocaleString()}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">厚生年金 受給者数</div>
+                        <div class="data-value">${data.kousei_count.toLocaleString()}人</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">国民年金 平均月額</div>
+                        <div class="data-value">¥${data.kokumin_avg.toLocaleString()}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">国民年金 受給者数</div>
+                        <div class="data-value">${data.kokumin_count.toLocaleString()}人</div>
+                    </div>
+                </div>
+            `;
+
+            d3.selectAll('.prefecture')
+                .attr('stroke-width', function() {
+                    const prefName = d3.select(this).attr('data-name');
+                    return prefName === name ? 3 : 0.5;
+                })
+                .attr('stroke', function() {
+                    const prefName = d3.select(this).attr('data-name');
+                    return prefName === name ? '#ff6600' : '#333';
+                });
+        }
+
+        function drawMap(geojson) {
+            document.getElementById('map').innerHTML = '';
+            
+            const svg = d3.select("#map")
+                .append("svg")
+                .attr("viewBox", "0 0 800 600")
+                .attr("preserveAspectRatio", "xMidYMid meet")
+                .style("display", "block")
+                .style("max-width", "100%")
+                .style("height", "auto");
+
+            // Main projection for Japan (excluding Okinawa)
+            const projection = d3.geoMercator()
+                .center([137.5, 37])
+                .scale(1500)
+                .translate([420, 350]);
+
+            const path = d3.geoPath().projection(projection);
+
+            // Okinawa projection (inset) - top left position
+            const okinawaProjection = d3.geoMercator()
+                .center([127.5, 26.3])
+                .scale(2200)
+                .translate([85, 80]);
+
+            const okinawaPath = d3.geoPath().projection(okinawaProjection);
+
+            // Draw inset box for Okinawa
+            svg.append("rect")
+                .attr("x", 15)
+                .attr("y", 15)
+                .attr("width", 130)
+                .attr("height", 100)
+                .attr("fill", "rgba(0,0,0,0.2)")
+                .attr("stroke", "rgba(255,255,255,0.3)")
+                .attr("stroke-width", 1)
+                .attr("rx", 8);
+
+            svg.append("text")
+                .attr("x", 80)
+                .attr("y", 128)
+                .attr("text-anchor", "middle")
+                .attr("fill", "rgba(255,255,255,0.5)")
+                .attr("font-size", "10px")
+                .text("沖縄県（拡大）");
+
+            // Draw prefectures
+            geojson.features.forEach(feature => {
+                // Try multiple property names for Japanese name
+                const jpName = feature.properties.nam_ja || 
+                               feature.properties.name_ja || 
+                               feature.properties.NAME_JA ||
+                               feature.properties.name ||
+                               feature.properties.nam;
+                
+                const data = prefectureData[jpName];
+                
+                if (!data) {
+                    console.log('No data for:', jpName, feature.properties);
+                    return;
+                }
+
+                const isOkinawa = jpName === '沖縄県';
+                const pathGen = isOkinawa ? okinawaPath : path;
+
+                svg.append('path')
+                    .datum(feature)
+                    .attr('class', 'prefecture')
+                    .attr('data-name', jpName)
+                    .attr('d', pathGen)
+                    .attr('fill', getColor(data[currentMetric], currentMetric))
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 0.5)
+                    .on('mousemove', function(event) {
+                        tooltip.classed('visible', true)
+                            .style('left', (event.pageX + 15) + 'px')
+                            .style('top', (event.pageY - 10) + 'px')
+                            .html(`
+                                <div class="tooltip-title">${jpName}</div>
+                                <div class="tooltip-row">
+                                    <span class="tooltip-label">合算 平均</span>
+                                    <span class="tooltip-value" style="color:#da70d6">¥${data.combined_avg.toLocaleString()}</span>
+                                </div>
+                                <div class="tooltip-row">
+                                    <span class="tooltip-label">厚生年金 平均</span>
+                                    <span class="tooltip-value" style="color:#ff6600">¥${data.kousei_avg.toLocaleString()}</span>
+                                </div>
+                                <div class="tooltip-row">
+                                    <span class="tooltip-label">国民年金 平均</span>
+                                    <span class="tooltip-value" style="color:#ffa500">¥${data.kokumin_avg.toLocaleString()}</span>
+                                </div>
+                            `);
+                    })
+                    .on('mouseout', function() {
+                        tooltip.classed('visible', false);
+                    })
+                    .on('click', function() {
+                        selectPrefecture(jpName);
+                    });
+            });
+
+            if (selectedPrefecture) {
+                d3.selectAll('.prefecture')
+                    .attr('stroke-width', function() {
+                        const prefName = d3.select(this).attr('data-name');
+                        return prefName === selectedPrefecture ? 3 : 0.5;
+                    })
+                    .attr('stroke', function() {
+                        const prefName = d3.select(this).attr('data-name');
+                        return prefName === selectedPrefecture ? '#ff6600' : '#333';
+                    });
+            }
+        }
+
+        function updateColors() {
+            d3.selectAll('.prefecture').each(function() {
+                const prefName = d3.select(this).attr('data-name');
+                const data = prefectureData[prefName];
+                if (data) {
+                    d3.select(this).attr('fill', getColor(data[currentMetric], currentMetric));
+                }
+            });
+        }
+
+        // Load GeoJSON
+        async function init() {
+            try {
+                // Try loading from multiple sources
+                const sources = [
+                    'https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson',
+                    'https://geoshape.ex.nii.ac.jp/jma/resource/AreaForecastLocalM/20190107/000000.geojson'
+                ];
+
+                let geojson = null;
+                
+                for (const url of sources) {
+                    try {
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            geojson = await response.json();
+                            break;
+                        }
+                    } catch (e) {
+                        console.log('Failed to load from:', url);
+                    }
+                }
+
+                if (geojson) {
+                    geoData = geojson;
+                    drawMap(geojson);
+                } else {
+                    throw new Error('Could not load map data');
+                }
+            } catch (error) {
+                console.error('Error loading map:', error);
+                document.getElementById('map').innerHTML = `
+                    <div class="loading">
+                        地図データの読み込みに失敗しました。<br>
+                        ページを再読み込みしてください。
+                    </div>
+                `;
+            }
+
+            updateLegend(currentMetric);
+            updateRanking(currentMetric);
+        }
+
+        // Control buttons
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMetric = this.dataset.metric;
+                updateColors();
+                updateLegend(currentMetric);
+                updateRanking(currentMetric);
+            });
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
