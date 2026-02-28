@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ja"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<html lang="ja">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>減税計画シート</title>
-<link href="%E6%B8%9B%E7%A8%8E%E8%A8%88%E7%94%BB%E3%82%B7%E3%83%BC%E3%83%88_files/css2.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #1a1a2e;
@@ -479,13 +479,13 @@
     <div class="field-group">
       <label>年度<span class="required">*</span></label>
       <div class="input-wrap">
-        <input type="text" id="year" placeholder="例：令和7" oninput="updateSummary()" style="width:100px;" value="令和８">
+        <input type="text" id="year" placeholder="例：令和7" oninput="updateSummary()" style="width:100px;">
         <span class="unit">年度</span>
       </div>
     </div>
     <div class="field-group">
       <label>地方自治体名<span class="required">*</span></label>
-      <input type="text" id="municipality" placeholder="例：○○市・○○町" oninput="updateSummary()" style="width:200px;" value="広島県呉市">
+      <input type="text" id="municipality" placeholder="例：○○市・○○町" oninput="updateSummary()" style="width:200px;">
     </div>
   </div>
 
@@ -495,7 +495,7 @@
     <div class="field-group">
       <label>歳出総額<span class="required">*</span></label>
       <div class="input-wrap">
-        <input type="number" id="totalExpenditure" placeholder="0" min="0" oninput="updateAll()" value="108112091">
+        <input type="number" id="totalExpenditure" placeholder="0" min="0" oninput="updateAll()">
         <span class="unit">千円</span>
       </div>
     </div>
@@ -507,7 +507,7 @@
     <div class="field-group">
       <label>市町村税　合計</label>
       <div class="input-wrap">
-        <div class="computed-field" id="totalMunicipalTax">2,053,950 千円</div>
+        <div class="computed-field" id="totalMunicipalTax">―</div>
         <span class="unit">千円（自動計算）</span>
       </div>
     </div>
@@ -583,14 +583,14 @@
           <div class="field-group">
             <label>税額</label>
             <div class="input-wrap">
-              <input type="number" id="corporateRate" placeholder="0" min="0" oninput="updateAll()" value="2053950">
+              <input type="number" id="corporateRate" placeholder="0" min="0" oninput="updateAll()">
               <span class="unit">千円</span>
             </div>
           </div>
           <div class="field-group">
             <label>うち超過課税額</label>
             <div class="input-wrap">
-              <input type="number" id="corporateRateExtra" placeholder="0" min="0" oninput="updateAll()" value="586982">
+              <input type="number" id="corporateRateExtra" placeholder="0" min="0" oninput="updateAll()">
               <span class="unit">千円</span>
             </div>
           </div>
@@ -601,7 +601,7 @@
       <div class="field-group" style="margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
         <label style="font-weight:600; color:var(--ink);">超過課税額　合計</label>
         <div class="input-wrap">
-          <div class="computed-field" id="totalExtra">586,982 千円</div>
+          <div class="computed-field" id="totalExtra">―</div>
           <span class="unit">千円（自動計算）</span>
         </div>
       </div>
@@ -649,19 +649,19 @@
     <div class="subsection">
       <div class="subsection-title">
         <span class="plan-badge">プラン１</span>
-        <input type="text" id="planName1" placeholder="プラン名を入力（例：所得割10%減税）" style="border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);width:320px;outline:none;" oninput="updateSummary()" value="法人税割の超過課税廃止">
+        <input type="text" id="planName1" placeholder="プラン名を入力（例：所得割10%減税）" style="border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);width:320px;outline:none;" oninput="updateSummary()">
       </div>
       <div class="field-group">
         <label>必要額<span class="required">*</span></label>
         <div class="input-wrap">
-          <input type="number" id="planAmount1" placeholder="0" min="0" oninput="updateAll()" value="586982">
+          <input type="number" id="planAmount1" placeholder="0" min="0" oninput="updateAll()">
           <span class="unit">千円</span>
         </div>
       </div>
       <div class="field-group">
         <label>削減率（必要額 ÷ 歳出総額）</label>
         <div class="input-wrap">
-          <div class="computed-field" id="planRate1">0.54%</div>
+          <div class="computed-field" id="planRate1">―</div>
           <span class="unit">（自動計算）</span>
         </div>
       </div>
@@ -671,19 +671,19 @@
     <div class="subsection">
       <div class="subsection-title">
         <span class="plan-badge">プラン２</span>
-        <input type="text" id="planName2" placeholder="プラン名を入力（例：均等割廃止）" style="border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);width:320px;outline:none;" oninput="updateSummary()" value="固定資産を１％減税">
+        <input type="text" id="planName2" placeholder="プラン名を入力（例：均等割廃止）" style="border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);width:320px;outline:none;" oninput="updateSummary()">
       </div>
       <div class="field-group">
         <label>必要額<span class="required">*</span></label>
         <div class="input-wrap">
-          <input type="number" id="planAmount2" placeholder="0" min="0" oninput="updateAll()" value="1250775">
+          <input type="number" id="planAmount2" placeholder="0" min="0" oninput="updateAll()">
           <span class="unit">千円</span>
         </div>
       </div>
       <div class="field-group">
         <label>削減率（必要額 ÷ 歳出総額）</label>
         <div class="input-wrap">
-          <div class="computed-field" id="planRate2">1.16%</div>
+          <div class="computed-field" id="planRate2">―</div>
           <span class="unit">（自動計算）</span>
         </div>
       </div>
@@ -696,19 +696,19 @@
     <div class="summary-grid">
       <div class="summary-item">
         <label>自治体</label>
-        <div class="value" id="sumMunicipality">令和８年度　広島県呉市</div>
+        <div class="value" id="sumMunicipality">―</div>
       </div>
       <div class="summary-item">
         <label>歳出総額</label>
-        <div class="value" id="sumExpenditure">108,112,091 千円</div>
+        <div class="value" id="sumExpenditure">―</div>
       </div>
       <div class="summary-item">
         <label>プラン１　削減率</label>
-        <div class="value highlight" id="sumRate1">法人税割の超過課税廃止　0.54%</div>
+        <div class="value highlight" id="sumRate1">―</div>
       </div>
       <div class="summary-item">
         <label>プラン２　削減率</label>
-        <div class="value highlight" id="sumRate2">固定資産を１％減税　1.16%</div>
+        <div class="value highlight" id="sumRate2">―</div>
       </div>
     </div>
   </div>
@@ -876,5 +876,5 @@ function exportCSV() {
   URL.revokeObjectURL(url);
 }
 </script>
-
-</body></html>
+</body>
+</html>
