@@ -298,8 +298,21 @@
     border-color: var(--accent-light);
   }
 
-  .btn-export {
-    background: var(--ink);
+  .btn-copy {
+    background: #fff;
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .btn-copy:hover {
+    background: var(--paper-dark);
+  }
+
+  .btn-copy.copied {
+    background: #2ecc71;
+    color: #fff;
+    border-color: #2ecc71;
+  }
     color: #fff;
   }
 
@@ -715,6 +728,7 @@
 
   <div class="actions">
     <button class="btn btn-reset" onclick="resetForm()">リセット</button>
+    <button class="btn btn-copy" id="copyBtn" onclick="copyLink()">リンクをコピー</button>
     <button class="btn btn-export" onclick="exportCSV()">CSVエクスポート</button>
     <button class="btn btn-print" onclick="window.print()">印刷</button>
   </div>
@@ -837,6 +851,18 @@ function resetForm() {
 }
 
 window.addEventListener('DOMContentLoaded', loadFromQuery);
+
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'コピーしました！';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'リンクをコピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
 
 function exportCSV() {
   const rows = [
