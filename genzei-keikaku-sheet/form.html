@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>減税計画シート</title>
+<link href="%E6%B8%9B%E7%A8%8E%E8%A8%88%E7%94%BB%E3%82%B7%E3%83%BC%E3%83%88_files/css2.css" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #3d3d5c;
+    --paper: #f5f0e8;
+    --paper-dark: #ebe4d6;
+    --accent: #c0392b;
+    --accent-light: #e74c3c;
+    --gold: #c9a84c;
+    --border: #b8a89a;
+    --section-bg: #faf7f2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(180,160,140,0.15) 31px, rgba(180,160,140,0.15) 32px);
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fffef9;
+    border: 2px solid var(--border);
+    border-top: 6px solid var(--accent);
+    padding: 48px 52px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.08), 8px 8px 0 rgba(0,0,0,0.04);
+    position: relative;
+  }
+
+  .container::before {
+    content: '';
+    position: absolute;
+    top: 6px; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Header */
+  .sheet-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 2px double var(--border);
+    position: relative;
+    z-index: 1;
+  }
+
+  .sheet-header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .sheet-header .subtitle {
+    font-size: 12px;
+    color: var(--ink-light);
+    letter-spacing: 0.15em;
+  }
+
+  /* Meta Row */
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 36px;
+    padding: 20px 24px;
+    background: var(--paper-dark);
+    border-left: 4px solid var(--accent);
+    position: relative;
+    z-index: 1;
+  }
+
+  .meta-row .field-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    grid-template-columns: unset;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: '◆';
+    font-size: 10px;
+    color: var(--gold);
+  }
+
+  .subsection {
+    background: var(--section-bg);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--ink-light);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .subsection-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--border);
+    letter-spacing: 0.08em;
+  }
+
+  .plan-badge {
+    display: inline-block;
+    background: var(--ink);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 8px;
+    letter-spacing: 0.1em;
+    margin-right: 8px;
+  }
+
+  /* Fields */
+  .field-group {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .field-group.full {
+    grid-template-columns: 1fr;
+  }
+
+  .field-group label {
+    font-size: 12px;
+    color: var(--ink-light);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .field-group .required {
+    color: var(--accent);
+    font-size: 10px;
+    margin-left: 4px;
+  }
+
+  .field-group input[type="text"],
+  .field-group input[type="number"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    background: #fff;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field-group input:focus {
+    border-color: var(--accent);
+    background: #fffdf7;
+    box-shadow: 0 0 0 2px rgba(192,57,43,0.08);
+  }
+
+  .field-group .unit {
+    font-size: 11px;
+    color: var(--ink-light);
+    margin-left: 4px;
+    white-space: nowrap;
+  }
+
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .input-wrap input {
+    flex: 1;
+  }
+
+  /* Computed field */
+  .computed-field {
+    background: var(--paper-dark);
+    border: 1px dashed var(--border);
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--ink);
+    font-family: 'Noto Serif JP', serif;
+    min-width: 140px;
+    text-align: right;
+    letter-spacing: 0.05em;
+  }
+
+  .tax-indent {
+    padding-left: 16px;
+    border-left: 2px solid var(--paper-dark);
+    margin-left: 8px;
+  }
+
+  .tax-item {
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+  }
+
+  .tax-item-header {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--paper-dark);
+    padding: 5px 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tax-item-body {
+    padding: 10px 12px 4px;
+  }
+
+  .tax-item-body .field-group {
+    margin-bottom: 8px;
+  }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 2px double var(--border);
+  }
+
+  .btn {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    padding: 10px 28px;
+    cursor: pointer;
+    border: 2px solid var(--ink);
+    transition: all 0.15s;
+  }
+
+  .btn-reset {
+    background: #fff;
+    color: var(--ink);
+  }
+
+  .btn-reset:hover {
+    background: var(--paper-dark);
+  }
+
+  .btn-print {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .btn-print:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-light);
+  }
+
+  .btn-export {
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .btn-export:hover {
+    background: var(--ink-light);
+  }
+
+  /* Summary box */
+  .summary-box {
+    background: var(--ink);
+    color: #fff;
+    padding: 20px 24px;
+    margin-top: 32px;
+  }
+
+  .summary-box h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    margin-bottom: 14px;
+    color: var(--gold);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 8px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .summary-item label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.08em;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .summary-item .value {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    color: #fff;
+  }
+
+  .summary-item .value.highlight {
+    color: var(--gold);
+  }
+
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 12mm 14mm;
+    }
+
+    * {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    html, body {
+      padding: 0;
+      margin: 0;
+      background: none !important;
+      background-image: none !important;
+      font-size: 10px;
+    }
+
+    .container {
+      box-shadow: none;
+      border: 1px solid #ccc;
+      border-top: 4px solid var(--accent);
+      padding: 16px 20px;
+      max-width: 100%;
+    }
+
+    .container::before { display: none; }
+
+    .sheet-header {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+    }
+
+    .sheet-header h1 { font-size: 18px; }
+    .sheet-header .subtitle { font-size: 9px; }
+
+    .meta-row {
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      gap: 16px;
+    }
+
+    .section {
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+
+    .field-group {
+      margin-bottom: 6px;
+      gap: 8px;
+    }
+
+    .field-group label { font-size: 10px; }
+
+    .field-group input[type="text"],
+    .field-group input[type="number"] {
+      padding: 4px 8px;
+      font-size: 10px;
+      border: 1px solid #aaa;
+    }
+
+    .computed-field {
+      padding: 4px 8px;
+      font-size: 10px;
+    }
+
+    .unit { font-size: 9px; }
+
+    .tax-indent {
+      padding-left: 12px;
+    }
+
+    .subsection {
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .subsection-title {
+      font-size: 11px;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+    }
+
+    .summary-box {
+      padding: 12px 16px;
+      margin-top: 14px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .summary-box h3 { font-size: 11px; margin-bottom: 8px; }
+    .summary-item label { font-size: 9px; }
+    .summary-item .value { font-size: 13px; }
+
+    .actions { display: none; }
+
+    /* セクションが途中で切れないように */
+    .section { break-inside: avoid; page-break-inside: avoid; }
+    .meta-row { break-inside: avoid; page-break-inside: avoid; }
+    .sheet-header { break-inside: avoid; page-break-inside: avoid; }
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 24px 20px; }
+    .meta-row { grid-template-columns: 1fr; }
+    .field-group { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="sheet-header">
+    <h1>減　税　計　画　シ　ー　ト</h1>
+    <div class="subtitle">TAX REDUCTION PLANNING WORKSHEET</div>
+  </div>
+
+  <div class="meta-row">
+    <div class="field-group">
+      <label>年度<span class="required">*</span></label>
+      <div class="input-wrap">
+        <input type="text" id="year" placeholder="例：令和7" oninput="updateSummary()" style="width:100px;" value="令和８">
+        <span class="unit">年度</span>
+      </div>
+    </div>
+    <div class="field-group">
+      <label>地方自治体名<span class="required">*</span></label>
+      <input type="text" id="municipality" placeholder="例：○○市・○○町" oninput="updateSummary()" style="width:200px;" value="広島県呉市">
+    </div>
+  </div>
+
+  <!-- 歳出総額 -->
+  <div class="section">
+    <div class="section-title">歳出・税収概要</div>
+    <div class="field-group">
+      <label>歳出総額<span class="required">*</span></label>
+      <div class="input-wrap">
+        <input type="number" id="totalExpenditure" placeholder="0" min="0" oninput="updateAll()" value="108112091">
+        <span class="unit">千円</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 市町村税 -->
+  <div class="section">
+    <div class="section-title">市町村税</div>
+    <div class="field-group">
+      <label>市町村税　合計</label>
+      <div class="input-wrap">
+        <div class="computed-field" id="totalMunicipalTax">2,053,950 千円</div>
+        <span class="unit">千円（自動計算）</span>
+      </div>
+    </div>
+    <div class="tax-indent">
+
+      <!-- 個人均等割 -->
+      <div class="tax-item">
+        <div class="tax-item-header">個人均等割</div>
+        <div class="tax-item-body">
+          <div class="field-group">
+            <label>税額</label>
+            <div class="input-wrap">
+              <input type="number" id="personalFlat" placeholder="0" min="0" oninput="updateAll()">
+              <span class="unit">千円</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>うち超過課税額</label>
+            <div class="input-wrap">
+              <input type="number" id="personalFlatExtra" placeholder="0" min="0" oninput="updateAll()">
+              <span class="unit">千円</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 所得割 -->
+      <div class="tax-item">
+        <div class="tax-item-header">所得割</div>
+        <div class="tax-item-body">
+          <div class="field-group">
+            <label>税額</label>
+            <div class="input-wrap">
+              <input type="number" id="incomeRate" placeholder="0" min="0" oninput="updateAll()">
+              <span class="unit">千円</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>うち超過課税額</label>
+            <div class="input-wrap">
+              <input type="number" id="incomeRateExtra" placeholder="0" min="0" oninput="updateAll()">
+              <span class="unit">千円</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 法人均等割 -->
+      <div class="tax-item">
+        <div class="tax-item-header">法人均等割</div>
+        <div class="tax-item-body">
+          <div class="field-group">
+            <label>税額</label>
+            <div class="input-wrap">
+              <input type="number" id="corporateFlat" placeholder="0" min="0" oninput="updateAll()">
+              <span class="unit">千円</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>うち超過課税額</label>
+            <div class="input-wrap">
+              <input type="number" id="corporateFlatExtra" placeholder="0" min="0" oninput="updateAll()">
+              <span class="unit">千円</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 法人税割 -->
+      <div class="tax-item">
+        <div class="tax-item-header">法人税割</div>
+        <div class="tax-item-body">
+          <div class="field-group">
+            <label>税額</label>
+            <div class="input-wrap">
+              <input type="number" id="corporateRate" placeholder="0" min="0" oninput="updateAll()" value="2053950">
+              <span class="unit">千円</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>うち超過課税額</label>
+            <div class="input-wrap">
+              <input type="number" id="corporateRateExtra" placeholder="0" min="0" oninput="updateAll()" value="586982">
+              <span class="unit">千円</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 超過課税合計 -->
+      <div class="field-group" style="margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
+        <label style="font-weight:600; color:var(--ink);">超過課税額　合計</label>
+        <div class="input-wrap">
+          <div class="computed-field" id="totalExtra">586,982 千円</div>
+          <span class="unit">千円（自動計算）</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 目的税 -->
+  <div class="section">
+    <div class="section-title">目的税</div>
+    <div class="field-group">
+      <label>目的税　合計</label>
+      <div class="input-wrap">
+        <div class="computed-field" id="totalPurposeTax">―</div>
+        <span class="unit">千円（自動計算）</span>
+      </div>
+    </div>
+    <div class="tax-indent">
+      <div class="field-group">
+        <label>
+          <input type="text" id="purposeTaxName1" placeholder="税目名（例：都市計画税）" style="border:none;border-bottom:1px solid var(--border);background:transparent;font-family:inherit;font-size:12px;color:var(--ink-light);width:160px;outline:none;padding-bottom:1px;" oninput="updateAll()">
+        </label>
+        <div class="input-wrap">
+          <input type="number" id="purposeTax1" placeholder="0" min="0" oninput="updateAll()">
+          <span class="unit">千円</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>
+          <input type="text" id="purposeTaxName2" placeholder="税目名（例：入湯税）" style="border:none;border-bottom:1px solid var(--border);background:transparent;font-family:inherit;font-size:12px;color:var(--ink-light);width:160px;outline:none;padding-bottom:1px;" oninput="updateAll()">
+        </label>
+        <div class="input-wrap">
+          <input type="number" id="purposeTax2" placeholder="0" min="0" oninput="updateAll()">
+          <span class="unit">千円</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 減税プラン -->
+  <div class="section">
+    <div class="section-title">減税プラン</div>
+
+    <!-- プラン１ -->
+    <div class="subsection">
+      <div class="subsection-title">
+        <span class="plan-badge">プラン１</span>
+        <input type="text" id="planName1" placeholder="プラン名を入力（例：所得割10%減税）" style="border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);width:320px;outline:none;" oninput="updateSummary()" value="法人税割の超過課税廃止">
+      </div>
+      <div class="field-group">
+        <label>必要額<span class="required">*</span></label>
+        <div class="input-wrap">
+          <input type="number" id="planAmount1" placeholder="0" min="0" oninput="updateAll()" value="586982">
+          <span class="unit">千円</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>削減率（必要額 ÷ 歳出総額）</label>
+        <div class="input-wrap">
+          <div class="computed-field" id="planRate1">0.54%</div>
+          <span class="unit">（自動計算）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- プラン２ -->
+    <div class="subsection">
+      <div class="subsection-title">
+        <span class="plan-badge">プラン２</span>
+        <input type="text" id="planName2" placeholder="プラン名を入力（例：均等割廃止）" style="border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);width:320px;outline:none;" oninput="updateSummary()" value="固定資産を１％減税">
+      </div>
+      <div class="field-group">
+        <label>必要額<span class="required">*</span></label>
+        <div class="input-wrap">
+          <input type="number" id="planAmount2" placeholder="0" min="0" oninput="updateAll()" value="1250775">
+          <span class="unit">千円</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>削減率（必要額 ÷ 歳出総額）</label>
+        <div class="input-wrap">
+          <div class="computed-field" id="planRate2">1.16%</div>
+          <span class="unit">（自動計算）</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- サマリー -->
+  <div class="summary-box">
+    <h3>▶ 計画サマリー</h3>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <label>自治体</label>
+        <div class="value" id="sumMunicipality">令和８年度　広島県呉市</div>
+      </div>
+      <div class="summary-item">
+        <label>歳出総額</label>
+        <div class="value" id="sumExpenditure">108,112,091 千円</div>
+      </div>
+      <div class="summary-item">
+        <label>プラン１　削減率</label>
+        <div class="value highlight" id="sumRate1">法人税割の超過課税廃止　0.54%</div>
+      </div>
+      <div class="summary-item">
+        <label>プラン２　削減率</label>
+        <div class="value highlight" id="sumRate2">固定資産を１％減税　1.16%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-reset" onclick="resetForm()">リセット</button>
+    <button class="btn btn-export" onclick="exportCSV()">CSVエクスポート</button>
+    <button class="btn btn-print" onclick="window.print()">印刷</button>
+  </div>
+
+</div>
+
+<script>
+function fmt(num) {
+  if (isNaN(num) || num === null || num === '') return '―';
+  return Number(num).toLocaleString('ja-JP') + ' 千円';
+}
+
+function pct(a, b) {
+  if (!b || b === 0 || isNaN(a) || isNaN(b)) return '―';
+  return (a / b * 100).toFixed(2) + '%';
+}
+
+function val(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? 0 : v;
+}
+
+function updateAll() {
+  // 市町村税合計
+  const municipal = val('personalFlat') + val('incomeRate') + val('corporateFlat') + val('corporateRate');
+  document.getElementById('totalMunicipalTax').textContent = 
+    municipal > 0 ? municipal.toLocaleString('ja-JP') + ' 千円' : '―';
+
+  // 超過課税合計
+  const extra = val('personalFlatExtra') + val('incomeRateExtra') + val('corporateFlatExtra') + val('corporateRateExtra');
+  document.getElementById('totalExtra').textContent =
+    extra > 0 ? extra.toLocaleString('ja-JP') + ' 千円' : '―';
+
+  // 目的税合計
+  const purposeTotal = val('purposeTax1') + val('purposeTax2');
+  document.getElementById('totalPurposeTax').textContent =
+    purposeTotal > 0 ? purposeTotal.toLocaleString('ja-JP') + ' 千円' : '―';
+
+  const total = val('totalExpenditure');
+
+  // プラン１削減率
+  const r1 = pct(val('planAmount1'), total);
+  document.getElementById('planRate1').textContent = r1;
+
+  // プラン２削減率
+  const r2 = pct(val('planAmount2'), total);
+  document.getElementById('planRate2').textContent = r2;
+
+  updateSummary();
+  syncToQuery();
+}
+
+function updateSummary() {
+  const year = document.getElementById('year').value;
+  const muni = document.getElementById('municipality').value;
+  document.getElementById('sumMunicipality').textContent = 
+    (year && muni) ? year + '年度　' + muni : (muni || year || '―');
+
+  const total = val('totalExpenditure');
+  document.getElementById('sumExpenditure').textContent = total > 0 ? fmt(total) : '―';
+
+  const r1 = pct(val('planAmount1'), total);
+  const r2 = pct(val('planAmount2'), total);
+  const n1 = document.getElementById('planName1').value;
+  const n2 = document.getElementById('planName2').value;
+
+  document.getElementById('sumRate1').textContent = (n1 ? n1 + '　' : '') + r1;
+  document.getElementById('sumRate2').textContent = (n2 ? n2 + '　' : '') + r2;
+  syncToQuery();
+}
+
+// クエリパラメータに対応するフィールドID一覧
+const FIELDS = [
+  'year', 'municipality',
+  'totalExpenditure',
+  'personalFlat', 'personalFlatExtra',
+  'incomeRate', 'incomeRateExtra',
+  'corporateFlat', 'corporateFlatExtra',
+  'corporateRate', 'corporateRateExtra',
+  'purposeTaxName1', 'purposeTax1', 'purposeTaxName2', 'purposeTax2',
+  'planName1', 'planAmount1',
+  'planName2', 'planAmount2',
+];
+
+// URLのクエリパラメータをフォームに復元
+function loadFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  FIELDS.forEach(id => {
+    const v = params.get(id);
+    if (v !== null) document.getElementById(id).value = v;
+  });
+  updateAll();
+}
+
+// フォームの値をURLクエリパラメータに反映（pushState）
+function syncToQuery() {
+  const params = new URLSearchParams();
+  FIELDS.forEach(id => {
+    const v = document.getElementById(id).value;
+    if (v !== '') params.set(id, v);
+  });
+  const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+  history.replaceState(null, '', newUrl);
+}
+
+function resetForm() {
+  if (!confirm('入力内容をすべてリセットしますか？')) return;
+  const inputs = document.querySelectorAll('input[type="text"], input[type="number"]');
+  inputs.forEach(i => i.value = '');
+  document.getElementById('totalMunicipalTax').textContent = '―';
+  document.getElementById('totalExtra').textContent = '―';
+  document.getElementById('totalPurposeTax').textContent = '―';
+  document.getElementById('planRate1').textContent = '―';
+  document.getElementById('planRate2').textContent = '―';
+  document.getElementById('sumMunicipality').textContent = '―';
+  document.getElementById('sumExpenditure').textContent = '―';
+  document.getElementById('sumRate1').textContent = '―';
+  document.getElementById('sumRate2').textContent = '―';
+  history.replaceState(null, '', window.location.pathname);
+}
+
+window.addEventListener('DOMContentLoaded', loadFromQuery);
+
+function exportCSV() {
+  const rows = [
+    ['項目', '金額（千円）'],
+    ['年度', document.getElementById('year').value],
+    ['自治体名', document.getElementById('municipality').value],
+    ['歳出総額', val('totalExpenditure')],
+    ['市町村税合計', val('personalFlat') + val('incomeRate') + val('corporateFlat') + val('corporateRate')],
+    ['　個人均等割', val('personalFlat')],
+    ['　　うち超過課税額', val('personalFlatExtra')],
+    ['　所得割', val('incomeRate')],
+    ['　　うち超過課税額', val('incomeRateExtra')],
+    ['　法人均等割', val('corporateFlat')],
+    ['　　うち超過課税額', val('corporateFlatExtra')],
+    ['　法人税割', val('corporateRate')],
+    ['　　うち超過課税額', val('corporateRateExtra')],
+    ['　超過課税額合計', val('personalFlatExtra') + val('incomeRateExtra') + val('corporateFlatExtra') + val('corporateRateExtra')],
+    ['目的税合計', val('purposeTax1') + val('purposeTax2')],
+    ['　' + (document.getElementById('purposeTaxName1').value || '目的税１'), val('purposeTax1')],
+    ['　' + (document.getElementById('purposeTaxName2').value || '目的税２'), val('purposeTax2')],
+    ['プラン１名', document.getElementById('planName1').value],
+    ['プラン１　必要額', val('planAmount1')],
+    ['プラン１　削減率', pct(val('planAmount1'), val('totalExpenditure'))],
+    ['プラン２名', document.getElementById('planName2').value],
+    ['プラン２　必要額', val('planAmount2')],
+    ['プラン２　削減率', pct(val('planAmount2'), val('totalExpenditure'))],
+  ];
+  const csv = '\uFEFF' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const year = document.getElementById('year').value || 'XXXX';
+  const muni = document.getElementById('municipality').value || '自治体';
+  a.download = year + '年度_' + muni + '_減税計画シート.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+
+</body></html>
