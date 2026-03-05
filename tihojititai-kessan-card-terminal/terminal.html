@@ -1,0 +1,1968 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>令和５年度　地方自治体決算状況ターミナル</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+JP:wght@300;400;500;700&display=swap");
+
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-panel: #111111;
+      --bg-hover: #1a1a1a;
+      --orange: #fb8b1e;
+      --orange-dim: #c96e12;
+      --orange-bright: #fda04a;
+      --yellow: #fb8b1e;
+      --green: #4af6c3;
+      --red: #ff433d;
+      --cyan: #4af6c3;
+      --blue: #0068ff;
+      --white: #ffb347;
+      --gray: #cc7722;
+      --gray-dim: #7a4a10;
+      --border: #222222;
+      --border-orange: #fb8b1e33;
+      --font-mono: "Share Tech Mono", monospace;
+      --font-jp: "Noto Sans JP", sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--white);
+      font-family: var(--font-jp);
+      font-size: 13px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── TOP BAR ── */
+    #topbar {
+      background: var(--bg-secondary);
+      border-bottom: 2px solid var(--orange);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      height: 44px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    #topbar .logo {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: var(--orange);
+      letter-spacing: 2px;
+      white-space: nowrap;
+      text-shadow: 0 0 12px #ff660066;
+    }
+
+    #topbar .title {
+      font-size: 12px;
+      color: var(--gray);
+      white-space: nowrap;
+    }
+
+    #topbar .clock {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--yellow);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    #layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      height: calc(100vh - 44px);
+    }
+
+    /* ── LEFT PANEL ── */
+    #left-panel {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--orange);
+      letter-spacing: 1px;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .panel-header::before {
+      display: none;
+    }
+
+    .pref-ctrl-btn {
+      background: none;
+      border: none;
+      border-right: 1px solid var(--border-orange);
+      color: var(--orange);
+      font-size: 11px;
+      line-height: 1;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 10px 0;
+      font-family: var(--font-mono);
+      opacity: 0.7;
+      white-space: nowrap;
+      letter-spacing: 0.5px;
+    }
+
+    .pref-ctrl-btn:last-child {
+      border-right: none;
+    }
+
+    .pref-ctrl-btn:hover {
+      opacity: 1;
+      background: var(--bg-hover);
+    }
+
+    /* 検索 */
+    #search-box {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-panel);
+    }
+
+    #search-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--white);
+      padding: 6px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #search-input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 8px #ff660022;
+    }
+
+    #search-input::placeholder {
+      color: var(--gray-dim);
+    }
+
+    /* 自治体リスト */
+    #entity-list {
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    #entity-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #entity-list::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    #entity-list::-webkit-scrollbar-thumb {
+      background: var(--orange-dim);
+    }
+
+    .pref-group {}
+
+    .pref-label {
+      padding: 6px 12px;
+      font-size: 10px;
+      color: var(--orange);
+      font-family: var(--font-mono);
+      background: #1a0a00;
+      border-top: 1px solid var(--border-orange);
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .pref-label:hover {
+      background: #2a1200;
+    }
+
+    .pref-label .toggle-icon {
+      font-size: 9px;
+      transition: transform 0.2s;
+    }
+
+    .pref-group.collapsed .toggle-icon {
+      transform: rotate(-90deg);
+    }
+
+    .pref-group.collapsed .entity-item {
+      display: none;
+    }
+
+    .entity-item {
+      padding: 7px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #1a1a1a;
+      transition: all 0.1s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .entity-item:hover {
+      background: var(--bg-hover);
+      border-left: 2px solid var(--orange);
+      padding-left: 14px;
+    }
+
+    .entity-item.active {
+      background: #1f0a00;
+      border-left: 3px solid var(--orange);
+      padding-left: 13px;
+      color: var(--orange-bright);
+    }
+
+    .entity-item .name {
+      font-size: 13px;
+    }
+
+    .entity-item .pop {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--gray);
+    }
+
+    /* ── RIGHT PANEL ── */
+    #right-panel {
+      overflow-y: auto;
+      background: var(--bg-primary);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #right-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #right-panel::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    #right-panel::-webkit-scrollbar-thumb {
+      background: var(--orange-dim);
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--orange-dim);
+    }
+
+    .card-header {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--orange);
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-header .badge {
+      background: var(--orange);
+      color: #000;
+      font-size: 9px;
+      padding: 1px 5px;
+      font-weight: bold;
+    }
+
+    .card-body {
+      padding: 0;
+    }
+
+    /* ── ENTITY HEADER ── */
+    #entity-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 16px;
+      padding: 6px;
+    }
+
+    #entity-name {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--orange-bright);
+      line-height: 1;
+      text-shadow: 0 0 20px #ff660033;
+    }
+
+    #entity-pref {
+      font-size: 12px;
+      color: var(--gray);
+      margin-top: 4px;
+      font-family: var(--font-mono);
+    }
+
+    #entity-year {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--yellow);
+      text-align: right;
+    }
+
+    /* ── KPI GRID ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .kpi-cell {
+      background: var(--bg-panel);
+      padding: 10px 12px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--gray);
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-value {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      color: var(--yellow);
+    }
+
+    .kpi-unit {
+      font-size: 12px;
+      color: var(--gray);
+      margin-left: 3px;
+    }
+
+    /* ── KPI DELTA ── */
+    .kpi-delta {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      margin-top: 4px;
+      padding: 2px 7px;
+      border-radius: 2px;
+    }
+
+    .kpi-delta.up {
+      background: #0068ff22;
+      border: 1px solid #0068ff66;
+      color: #0068ff;
+    }
+
+    .kpi-delta.down {
+      background: #ff433d22;
+      border: 1px solid #ff433d66;
+      color: #ff433d;
+    }
+
+    .kpi-delta.flat {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--gray);
+    }
+
+    .kpi-prev {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--gray);
+      font-family: var(--font-mono);
+    }
+
+    .kpi-prev-label {
+      opacity: 0.6;
+    }
+
+    .kpi-prev-val {
+      color: var(--gray);
+    }
+
+    /* ── CHARTS ROW ── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-wrap canvas {
+      flex: 1;
+    }
+
+    /* ── TABLE ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .data-table th {
+      background: #1a1a1a;
+      color: var(--orange);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 6px 10px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.5px;
+    }
+
+    .data-table th:first-child {
+      text-align: left;
+    }
+
+    .data-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid #1a1a1a;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-align: right;
+      color: var(--white);
+    }
+
+    .data-table td:first-child {
+      text-align: left;
+      color: var(--gray);
+      font-family: var(--font-jp);
+      font-size: 12px;
+    }
+
+    .data-table tr:hover td {
+      background: var(--bg-hover);
+    }
+
+    .data-table .highlight td {
+      color: var(--yellow);
+    }
+
+    .data-table .total-row td {
+      color: var(--orange-bright);
+      border-top: 1px solid var(--orange-dim);
+      font-weight: bold;
+    }
+
+    /* ── PLACEHOLDER ── */
+    #placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      color: var(--gray);
+    }
+
+    #placeholder .logo-big {
+      font-family: var(--font-mono);
+      font-size: 36px;
+      color: var(--orange-dim);
+      text-shadow: 0 0 30px #ff660033;
+      letter-spacing: 4px;
+    }
+
+    #placeholder p {
+      font-size: 12px;
+      color: var(--gray-dim);
+    }
+
+    /* ── SEPARATOR ── */
+    .sep {
+      height: 1px;
+      background: linear-gradient(to right, var(--orange), transparent);
+      margin: 8px 0;
+    }
+
+    /* ── SCANLINE EFFECT ── */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.03) 2px,
+          rgba(0, 0, 0, 0.03) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── STAT ROW ── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      margin-bottom: 12px;
+    }
+
+    .stat-cell {
+      background: var(--bg-panel);
+      padding: 8px 12px;
+    }
+
+    .stat-cell .label {
+      font-size: 10px;
+      color: var(--gray);
+      margin-bottom: 2px;
+    }
+
+    .stat-cell .value {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--cyan);
+    }
+
+    /* ── BLINK ── */
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .blink {
+      animation: blink 1.5s infinite;
+    }
+
+    /* responsive */
+    @media (max-width: 900px) {
+      #layout {
+        grid-template-columns: 220px 1fr;
+      }
+
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── TABLET / MOBILE DRAWER ── */
+    #sidebar-toggle {
+      display: none;
+    }
+
+    #sidebar-overlay {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      #topbar {
+        gap: 10px;
+        padding: 0 10px;
+      }
+
+      #topbar .title {
+        display: none;
+      }
+
+      #topbar .clock {
+        font-size: 11px;
+      }
+
+      /* サイドバートグルボタン */
+      #sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: 1px solid var(--orange-dim);
+        color: var(--orange);
+        font-family: var(--font-mono);
+        font-size: 13px;
+        width: 34px;
+        height: 28px;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.15s;
+      }
+
+      #sidebar-toggle:hover {
+        background: var(--bg-hover);
+        border-color: var(--orange);
+      }
+
+      /* レイアウト: サイドバーを非表示、メインを全幅 */
+      #layout {
+        grid-template-columns: 1fr;
+        position: relative;
+      }
+
+      /* サイドバーをドロワーとして絶対配置 */
+      #left-panel {
+        position: fixed;
+        top: 44px;
+        left: 0;
+        width: 85vw;
+        max-width: 320px;
+        height: calc(100vh - 44px);
+        z-index: 200;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.8);
+      }
+
+      #left-panel.open {
+        transform: translateX(0);
+      }
+
+      /* オーバーレイ */
+      #sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 44px 0 0 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 199;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+
+      #sidebar-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      /* メインパネルを全幅に */
+      #right-panel {
+        padding: 10px;
+        gap: 10px;
+      }
+
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      }
+
+      #entity-name {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <button id="sidebar-toggle" onclick="toggleSidebar()" title="自治体リスト">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#c96e12">
+        <path
+          d="M480-120q-151 0-255.5-46.5T120-280v-400q0-66 105.5-113T480-840q149 0 254.5 47T840-680v400q0 67-104.5 113.5T480-120Zm0-479q89 0 179-25.5T760-679q-11-29-100.5-55T480-760q-91 0-178.5 25.5T200-679q14 30 101.5 55T480-599Zm0 199q42 0 81-4t74.5-11.5q35.5-7.5 67-18.5t57.5-25v-120q-26 14-57.5 25t-67 18.5Q600-528 561-524t-81 4q-42 0-82-4t-75.5-11.5Q287-543 256-554t-56-25v120q25 14 56 25t66.5 18.5Q358-408 398-404t82 4Zm0 200q46 0 93.5-7t87.5-18.5q40-11.5 67-26t32-29.5v-98q-26 14-57.5 25t-67 18.5Q600-328 561-324t-81 4q-42 0-82-4t-75.5-11.5Q287-343 256-354t-56-25v99q5 15 31.5 29t66.5 25.5q40 11.5 88 18.5t94 7Z" />
+      </svg>
+    </button>
+    <span class="logo" style="font-size: 12px; color: var(--yellow)">令和５年度　地方自治体決算状況ターミナル</span>
+  </div>
+
+  <!-- オーバーレイ (モバイル用) -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div id="layout">
+    <!-- LEFT PANEL -->
+    <div id="left-panel">
+      <div id="search-box">
+        <input type="text" id="search-input" placeholder="自治体名で検索..." oninput="filterList()" />
+      </div>
+      <div class="panel-header">
+        <button class="pref-ctrl-btn" onclick="setPrefAll(false)" title="全展開">▼ 全展開</button>
+        <button class="pref-ctrl-btn" onclick="setPrefAll(true)" title="全縮小">▶ 全縮小</button>
+      </div>
+      <div id="entity-list"></div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div id="right-panel">
+      <div id="placeholder">
+        <div class="logo-big">財政革新会</div>
+        <p id="placeholder-hint">←左のリストから自治体を選択してください</p>
+        <p style="
+              font-family: var(--font-mono);
+              font-size: 10px;
+              color: var(--orange-dim);
+            " class="blink">
+          READY
+        </p>
+      </div>
+      <div id="detail" style="display: none"></div>
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════
+    // DATA (embedded JSON)
+    // ══════════════════════════════════════════════
+    let allData = [];
+    let activeIndex = null;
+    let chartInstances = {};
+    let header = []
+    // Fetch both JSON files
+    async function loadData() {
+      const response = await fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/all.csv").then(e => e.text())
+      const rowsWithHeader = response.split("\n")
+      header = rowsWithHeader[0].split(",")
+      allData = rowsWithHeader.splice(1).map(e => {
+        const m = {}
+        const list = e.split(",")
+        header.forEach((key, idx) => Object.assign(m, { [key]: list[idx] }))
+        return m
+      })
+      allData.sort((a, b) => {
+        parseInt(a['都道府県コード']) > parseInt(b['都道府県コード']) &&
+          parseInt(a['団体コード']) > parseInt(b['団体コード'])
+      })
+
+      buildList(allData);
+
+      // query parameter ?code= があれば自動選択
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (code) {
+        const idx = allData.findIndex((d) => String(d["団体コード"]) === code);
+        if (idx !== -1) selectEntity(idx);
+      }
+    }
+
+    // メタデータ
+    function metaOverview(d) {
+      var o = {}
+      const list = [
+        "都道府県名",
+        "団体名",
+        "都道府県コード",
+        "団体コード",
+        "地方交付税種地",
+        "市町村類型",
+      ]
+
+      list.forEach(e => o[e] = d[e])
+
+      o["面積_km2"] = `${o["面積_km2"]} km2`
+      o["人口密度_人_per_km2"] = `${o["人口密度_人_per_km2"]} 人km2`
+
+      return o
+    }
+
+    // 人口、住民基本台帳のみ
+    function populationStats(d) {
+      return {
+        title: '産業構造',
+        header: [
+          "項目名",
+          "令和6年1月1日",
+          "令和5年1月1日",
+          "増減率"
+        ],
+        rows: [
+          [
+            "住民基本台帳人口",
+            d["人口.住民基本台帳人口.令6_1_1"],
+            d["人口.住民基本台帳人口.令5_1_1"],
+            d["人口.住民基本台帳人口.増減率_percent"],
+          ],
+          [
+            "うち日本人",
+            d["人口.うち日本人.令6_1_1"],
+            d["人口.うち日本人.令5_1_1"],
+            d["人口.うち日本人.増減率_percent"],
+          ]
+        ]
+      }
+    }
+
+
+    // 産業構造
+    function industryStats(d) {
+      return {
+        title: '産業構造',
+        header: [
+          "項目",
+          "令和2年",
+          "平成27年",
+          "比率"
+        ],
+        unit: '人',
+        rows: [
+          [
+            "第1次産業",
+            d["産業構造.第1次_令2国調"],
+            d["産業構造.第1次_平27国調"],
+            d["産業構造.第1次比率_percent"],
+          ],
+          [
+            "第2次産業",
+            d["産業構造.第2次_令2国調"],
+            d["産業構造.第2次_平27国調"],
+            d["産業構造.第2次比率_percent"],
+          ],
+          [
+            "第3次産業",
+            d["産業構造.第3次_令2国調"],
+            d["産業構造.第3次_平27国調"],
+            d["産業構造.第3次比率_percent"],
+          ]
+        ]
+      }
+    }
+
+    // table base
+    function createTableFunc(title, prefix, col1, col2, d, unitOveride) {
+      const set = new Set()
+      const rows = header.map(e => {
+        const list = e.split(".").slice(1, list.length - 2)
+        const core = list.join(".")
+        if (set.has(core)) {
+          return
+        }
+
+        set.add(core)
+
+        const name = list[list.length - 2]
+        const col1val = [prefix, core, col1].join(".")
+        const col2val = [prefix, core, col2].join(".")
+        return { name, col1val, col2val, depth: list.length - 3 }
+      }).filter(e => e)
+
+      return {
+        title,
+        unit: '千円',
+        header: [
+          { name: '項目', key: name },
+          { name: col1, key: 'col1val' },
+          { name: col2, key: 'col2val' },
+        ],
+        rows
+      }
+    }
+
+    // 歳入の状況
+    function revStats(d) {
+      return createTableFunc('歳入の状況', '歳入の状況_千円', '決算額', '構成比', d)
+    }
+
+    // 歳入の状況 経常一般財源等
+    function regularRevStats(d) {
+      return createTableFunc('経常一般財源等の状況', '歳入の状況_千円', '経常一般財源等', '構成比', d)
+    }
+
+    // 市町村税の状況
+    function localTaxRevStats(d) {
+      return createTableFunc('市町村税の状況', '市町村税の状況_千円', '収入済額', '歳入合計構成比', d)
+    }
+
+    function localTaxRevChokaStats(d) {
+      return createTableFunc('超過課税分の状況', '市町村税の状況_千円', '超過課税分', '超過課税分歳入合計構成比', d)
+    }
+
+    // 指定団体等の指定状況
+    // check chart
+    function shiteiDantaiCheck(d) {
+      const title = "指定団体等の指定状況"
+      // records are boolean 
+      return {
+        title,
+        items: [
+          "旧新産",
+          "旧工特",
+          "低開発",
+          "旧産炭",
+          "山振",
+          "過疎",
+          "首都",
+          "近畿",
+          "中部",
+          "財政健全化等",
+          "指数表選定",
+          "財源超過",
+        ].map(e => d[`${title}.${e}`])
+      }
+    }
+
+    // 収支状況_千円 決算額
+    function compareYear5andYear4(prefixes, title, d) {
+      function showDelta(prefix, name, core, depth) {
+        const year5 = `${prefix}.${core}.令和5年度`
+        const year4 = `${prefix}.${core}.令和4年度`
+        return {
+          name,
+          year5,
+          year4,
+          changeDiff: parseFloat(d[year5] / d[year4]).toFixed(2),
+          depth
+        }
+      }
+
+      const set = new Set()
+      return {
+        title,
+        unit: '千円',
+        header: [
+          { name: '項目', key: 'name' },
+          { name: '令和5年度', key: 'year5' },
+          { name: '令和4年度', key: 'year4' },
+          { name: '増減率', key: 'changeDiff' }
+        ],
+        rows: header.filter(e => {
+          if (!prefixes.every(prefix => prefix.startsWith(e))) {
+            return
+          }
+
+          const list = e.split(".").slice(0, list.length - 2)
+          const prefix_ = list[0]
+          const core = list.join(".")
+          if (set.has(core)) {
+            return
+          }
+
+          set.add(core)
+
+          const cat = list[list.length - 1]
+          const name = cat.slice(0, cat.indexOf('_'))
+          return showDelta(prefix_, name, core, list.length - 3)
+        }).filter(e => e)
+      }
+    }
+
+    // 性質別歳出の状況_千円 充当一般財源等
+    function expenditureByQualityOverview_base(d) {
+      return createTableFunc('目的別歳出の状況_千円', '目的別歳出の状況', '充当一般財源等', '充当一般財源等歳出合計構成比', d)
+    }
+
+    function fiscalCond(d) {
+      return compareYear5andYear4(['財政指標'], '財政指標', d)
+    }
+
+    function capitalDebt(d) {
+      return compareYear5andYear4(['積立金現在高_千円', '地方債現在高_千円', '債務負担行為額支出予定額_千円'], '財政指標', d)
+    }
+
+    function shiteiDantaiCheck(d) {
+      const title = "一部事務組合加入の状況"
+      // records are boolean 
+      return {
+        title,
+        items: [
+          "議員公務災害",
+          "非常勤公務災害",
+          "退職手当",
+          "事務機共同",
+          "税務事務",
+          "老人福祉",
+          "伝染病",
+          "し尿処理",
+          "ごみ処理",
+          "火葬場",
+          "常備消防",
+          "小学校",
+          "中学校",
+          "その他",
+        ].map(e => d[`${title}.${e}`])
+      }
+    }
+
+    // 職員給与の状況
+    function departmentSalary(d) {
+      return // TODO
+    }
+
+    //収益事業収入_千円
+    function forProfit(params) {
+      // TODO 収益事業収入_千円
+    }
+
+    //土地開発基金現在高_千円
+    function forProfit(params) {
+      // TODO 土地開発基金現在高_千円
+    }
+
+    //徴収率_percent
+    function forProfit(params) {
+      // TODO 徴収率_percent
+    }
+
+    // ══════════════════════════════════════════════
+    // SIDEBAR TOGGLE (mobile/tablet)
+    // ══════════════════════════════════════════════
+    function toggleSidebar() {
+      const panel = document.getElementById("left-panel");
+      const overlay = document.getElementById("sidebar-overlay");
+      const isOpen = panel.classList.contains("open");
+      if (isOpen) {
+        closeSidebar();
+      } else {
+        panel.classList.add("open");
+        overlay.classList.add("open");
+      }
+    }
+
+    function closeSidebar() {
+      document.getElementById("left-panel").classList.remove("open");
+      document.getElementById("sidebar-overlay").classList.remove("open");
+    }
+
+    // プレースホルダーテキストをスクリーンサイズに合わせて更新
+    function updatePlaceholderHint() {
+      const el = document.getElementById("placeholder-hint");
+      if (!el) return;
+      el.textContent = window.innerWidth <= 768
+        ? "☰ ボタンで自治体を選択"
+        : "←左のリストから自治体を選択してください";
+    }
+    updatePlaceholderHint();
+    window.addEventListener("resize", updatePlaceholderHint);
+
+    // ══════════════════════════════════════════════
+    // CLOCK
+    // ══════════════════════════════════════════════
+    function updateClock() {
+      const now = new Date();
+      const s = now.toLocaleString("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+      //document.getElementById("clock").textContent = s;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ══════════════════════════════════════════════
+    // LIST
+    // ══════════════════════════════════════════════
+    function buildList(data) {
+      const container = document.getElementById("entity-list");
+      container.innerHTML = "";
+
+      // group by pref
+      const groups = {};
+      data.forEach((d, i) => {
+        const p = d._pref || d["都道府県名"] || "不明";
+        if (!groups[p]) groups[p] = [];
+        groups[p].push({ data: d, idx: allData.indexOf(d) });
+      });
+
+      Object.entries(groups).forEach(([pref, items]) => {
+        const g = document.createElement("div");
+        g.className = "pref-group";
+
+        const label = document.createElement("div");
+        label.className = "pref-label";
+        label.innerHTML = `<span>◆ ${pref}</span><span class="toggle-icon">▼</span>`;
+        label.addEventListener("click", () =>
+          g.classList.toggle("collapsed"),
+        );
+        g.appendChild(label);
+
+        items.forEach(({ data: d, idx }) => {
+          const pop = d["人口"]?.["住民基本台帳人口"]?.["令6_1_1"];
+          const popStr = pop ? (pop / 10000).toFixed(1) + "万" : "-";
+
+          const item = document.createElement("div");
+          item.className = "entity-item";
+          item.dataset.idx = idx;
+          item.innerHTML = `
+        <span class="name">${d["団体名"]}</span>
+        <span class="pop">${popStr}</span>
+      `;
+          item.addEventListener("click", () => selectEntity(idx));
+          g.appendChild(item);
+        });
+
+        container.appendChild(g);
+      });
+    }
+
+    function setPrefAll(collapse) {
+      document.querySelectorAll(".pref-group").forEach((g) => {
+        collapse
+          ? g.classList.add("collapsed")
+          : g.classList.remove("collapsed");
+      });
+    }
+
+    function filterList() {
+      const q = document.getElementById("search-input").value.trim();
+      const filtered = q
+        ? allData.filter(
+          (d) =>
+            d["団体名"].includes(q) || (d["都道府県名"] || "").includes(q),
+        )
+        : allData;
+      buildList(filtered);
+    }
+
+    // ══════════════════════════════════════════════
+    // SELECT ENTITY
+    // ══════════════════════════════════════════════
+    function selectEntity(idx) {
+      activeIndex = idx;
+
+      // highlight
+      document.querySelectorAll(".entity-item").forEach((el) => {
+        el.classList.toggle("active", parseInt(el.dataset.idx) === idx);
+      });
+
+      document.getElementById("placeholder").style.display = "none";
+      const detail = document.getElementById("detail");
+      detail.style.display = "block";
+
+      const d = allData[idx];
+      renderDetail(d, detail);
+
+      // モバイル: 自治体選択後にサイドバーを閉じる
+      if (window.innerWidth <= 768) {
+        closeSidebar();
+      }
+
+      // URL に団体コードを反映
+      const code = d["団体コード"];
+      if (code != null) {
+        const url = new URL(window.location);
+        url.searchParams.set("code", code);
+        history.pushState(null, "", url);
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    // UTILITIES
+    // ══════════════════════════════════════════════
+    function fmt(v) {
+      if (v === "-" || v === null || v === undefined) return "-";
+      if (typeof v === "number") return v.toLocaleString();
+      return v;
+    }
+    function fmtOku(v) {
+      if (v === "-" || v === null || v === undefined) return "-";
+      if (typeof v === "number") return (v / 100000).toFixed(1) + "億円";
+      return v;
+    }
+    function numVal(v) {
+      if (typeof v === "number") return v;
+      return null;
+    }
+
+    /**
+     * renderDelta(cur, prev, unit)
+     *   cur, prev : number | null
+     *   unit      : string  例) "人", "千円", "%"
+     *   戻り値    : delta UI の HTML 文字列（kpi-valueの下に添える）
+     *
+     *   表示例:  ▲ +1,234人 (+2.1%)  /  ▼ −567人 (−0.3%)  /  — 変化なし
+     */
+    function renderDelta(cur, prev, unit = "", prevLabel = "前年") {
+      if (cur === null || prev === null) return "";
+      const diff = cur - prev;
+      const dir = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+      const arrow = diff > 0 ? "▲" : diff < 0 ? "▼" : "—";
+      const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
+      const absDiff = Math.abs(diff);
+      const pct = prev !== 0 ? (absDiff / Math.abs(prev) * 100).toFixed(1) : null;
+      const pctStr = pct !== null ? ` (${sign}${pct}%)` : "";
+      const diffStr = diff !== 0
+        ? `<div class="kpi-delta ${dir}">${arrow} ${sign}${absDiff.toLocaleString()}${unit}<br><span style="padding-left:1em;opacity:0.85">(${sign}${pct}%)</span></div>`
+        : `<div class="kpi-delta flat">— 変化なし</div>`;
+      return `<div class="kpi-prev"><span class="kpi-prev-label">${prevLabel}&nbsp;</span><span class="kpi-prev-val">${prev.toLocaleString()}${unit}</span></div>${diffStr}`;
+    }
+
+    // ══════════════════════════════════════════════
+    // TABLE DATA
+    // ══════════════════════════════════════════════
+    function getTableData(d, tableId) {
+      const sai = d["歳入の状況_千円"];
+      const zeiStat = d["市町村税の状況_千円"];
+      const kyuyo = d["職員給与の状況"];
+      const zaiTotalVal = numVal(sai?.["歳入合計"]?.["決算額"]);
+
+      if (tableId === "sainyuu") {
+        const columns = ["項目", "決算額", "構成比"];
+        const rows = [];
+        const keys = sai ? Object.keys(sai).filter((k) => k !== "歳入合計") : [];
+        const pushRow = (label, row, indent) => {
+          const v = numVal(row?.["決算額"]);
+          if (v === null || v === 0) return;
+          const ko = row["構成比"];
+          rows.push({
+            cells: [label, fmt(v), ko !== "-" ? ko + "%" : "-"],
+            indent, dim: indent > 0, isTotal: false, highlight: !indent && ko > 10, highlightCol: 2
+          });
+        };
+        keys.forEach((k) => {
+          const row = sai?.[k];
+          if (!row) return;
+          pushRow(k, row, 0);
+          if (row["内訳"] && typeof row["内訳"] === "object") {
+            Object.entries(row["内訳"]).forEach(([subK, subRow]) => {
+              if (!subRow) return;
+              pushRow("└ " + subK, subRow, 1);
+              if (subRow["内訳"] && typeof subRow["内訳"] === "object") {
+                Object.entries(subRow["内訳"]).forEach(([gK, gRow]) => {
+                  if (!gRow) return;
+                  pushRow("└ " + gK, gRow, 2);
+                });
+              }
+            });
+          }
+        });
+        return { columns, rows, footer: ["歳入合計", fmt(numVal(sai?.["歳入合計"]?.["決算額"])), "100%"] };
+      }
+
+      if (tableId === "zei") {
+        const columns = ["税目", "収入済額", "構成比", "歳入合計比"];
+        const futsuu = zeiStat?.["普通税"]?.["法定普通税"];
+        const mokuteki = zeiStat?.["目的税"]?.["法定目的税"];
+        const defs = [
+          { label: "【普通税】市町村民税", data: futsuu?.["市町村民税"], indent: 0 },
+          { label: "└ 個人均等割", data: futsuu?.["市町村民税"]?.["個人均等割"], indent: 1 },
+          { label: "└ 所得割", data: futsuu?.["市町村民税"]?.["所得割"], indent: 1 },
+          { label: "└ 法人均等割", data: futsuu?.["市町村民税"]?.["法人均等割"], indent: 1 },
+          { label: "└ 法人税割", data: futsuu?.["市町村民税"]?.["法人税割"], indent: 1 },
+          { label: "固定資産税", data: futsuu?.["固定資産税"], indent: 0 },
+          { label: "軽自動車税", data: futsuu?.["軽自動車税"], indent: 0 },
+          { label: "市町村たばこ税", data: futsuu?.["市町村たばこ税"], indent: 0 },
+          { label: "鉱産税", data: futsuu?.["鉱産税"], indent: 0 },
+          { label: "【目的税】入湯税", data: mokuteki?.["入湯税"], indent: 0 },
+          { label: "事業所税", data: mokuteki?.["事業所税"], indent: 0 },
+          { label: "都市計画税", data: mokuteki?.["都市計画税"], indent: 0 },
+        ];
+        const rows = [];
+        defs.forEach(({ label, data, indent }) => {
+          if (!data) return;
+          const v = numVal(data["収入済額"]);
+          if (v === null) return;
+          const ko = data["構成比"];
+          const zaiRatio = zaiTotalVal && v ? ((v / zaiTotalVal) * 100).toFixed(1) + "%" : "-";
+          rows.push({
+            cells: [label, fmt(v), ko !== "-" ? ko + "%" : "-", zaiRatio],
+            indent, dim: indent > 0, isTotal: false, highlight: !indent && ko > 10, highlightCol: 2
+          });
+        });
+        const zeiTotal = zeiStat?.["合計"]?.["収入済額"];
+        const zeiTotalRatio = zaiTotalVal && numVal(zeiTotal)
+          ? ((numVal(zeiTotal) / zaiTotalVal) * 100).toFixed(1) + "%" : "-";
+        return { columns, rows, footer: ["合計", fmt(numVal(zeiTotal)), "100%", zeiTotalRatio] };
+      }
+
+      // ── 目的別歳出の状況
+      if (tableId === "mokuteki-shishutsu") {
+        const columns = ["目的", "決算額", "構成比"];
+        const mok = d["目的別歳出の状況_千円"] || {};
+        const rows = [];
+
+        Object.entries(mok).forEach(([key, item]) => {
+          if (!item || typeof item !== "object") return;
+          const v = numVal(item["決算額"]);
+          if (v === null) return;
+          const ko = item["構成比"];
+          const koStr = ko != null && ko !== "-" ? Number(ko).toFixed(1) + "%" : "-";
+          rows.push({
+            cells: [key, fmt(v), koStr],
+            indent: 0, dim: false, isTotal: false,
+            highlight: ko > 20, highlightCol: 2,
+          });
+        });
+
+        return { columns, rows, footer: null };
+      }
+
+      if (tableId === "kyuyo-ippan") {
+        const columns = ["職種", "職員数（人）", "給料月額（百円）", "一人当たり平均（百円）"];
+        const rows = [];
+        const ippan = kyuyo?.["一般職員等"] || {};
+        Object.entries(ippan).forEach(([shoku, v]) => {
+          if (!v) return;
+          rows.push({
+            cells: [shoku,
+              v["職員数_人"] != null ? Number(v["職員数_人"]).toLocaleString() : "-",
+              v["給料月額_百円"] != null ? Number(v["給料月額_百円"]).toLocaleString() : "-",
+              v["一人当たり平均給料月額_百円"] != null ? Number(v["一人当たり平均給料月額_百円"]).toLocaleString() : "-",
+            ], indent: 0, dim: false, isTotal: false
+          });
+        });
+        ["教育公務員", "臨時職員", "合計"].forEach((key) => {
+          const v = kyuyo?.[key];
+          if (!v) return;
+          rows.push({
+            cells: [key,
+              v["職員数_人"] != null ? Number(v["職員数_人"]).toLocaleString() : "-",
+              v["給料月額_百円"] != null ? Number(v["給料月額_百円"]).toLocaleString() : "-",
+              v["一人当たり平均給料月額_百円"] != null ? Number(v["一人当たり平均給料月額_百円"]).toLocaleString() : "-",
+            ], indent: 0, dim: key !== "合計", isTotal: key === "合計"
+          });
+        });
+        return { columns, rows, footer: null };
+      }
+
+      // ── 性質別歳出の状況
+      if (tableId === "sei-shitsu") {
+        const columns = ["性質", "決算額", "構成比"];
+        const sei = d["性質別歳出の状況_千円"] || {};
+        const rows = [];
+
+        // 合計を除いた歳出合計を先に計算（構成比の分母）
+        const seiTotal = numVal(sei["歳出合計"]?.["決算額"]);
+
+        // 表示定義：[ラベル, データキー, indent, サブキー列]
+        const defs = [
+          {
+            label: "人件費", key: "人件費", indent: 0,
+            subs: [{ label: "└ うち職員給", subKey: "うち職員給" },
+            { label: "└ うち一部事務組合負担金", subKey: "うち一部事務組合負担金" }]
+          },
+          { label: "物件費", key: "物件費", indent: 0 },
+          { label: "維持補修費", key: "維持補修費", indent: 0 },
+          { label: "扶助費", key: "扶助費", indent: 0 },
+          {
+            label: "補助費等", key: "補助費等", indent: 0,
+            subs: [{ label: "└ うち一部事務組合負担金", subKey: "うち一部事務組合負担金" }]
+          },
+          {
+            label: "普通建設事業費", key: "普通建設事業費", indent: 0,
+            subs: [{ label: "└ うち補助", subKey: "うち補助" },
+            { label: "└ うち単独", subKey: "うち単独" }]
+          },
+          { label: "災害復旧事業費", key: "災害復旧事業費", indent: 0 },
+          { label: "失業対策事業費", key: "失業対策事業費", indent: 0 },
+          { label: "公債費", key: "公債費", indent: 0 },
+          { label: "積立金", key: "積立金", indent: 0 },
+          { label: "投資及び出資金", key: "投資及び出資金", indent: 0 },
+          { label: "貸付金", key: "貸付金", indent: 0 },
+          { label: "繰出金", key: "繰出金", indent: 0 },
+          { label: "前年度繰上充用金", key: "前年度繰上充用金", indent: 0 },
+        ];
+
+        const pushSeiRow = (label, item, indent) => {
+          if (!item) return;
+          const v = numVal(item["決算額"]);
+          if (v === null) return;
+          const ko = item["構成比"];
+          const koStr = ko != null && ko !== "-" ? Number(ko).toFixed(1) + "%" : "-";
+          rows.push({
+            cells: [label, fmt(v), koStr],
+            indent, dim: indent > 0, isTotal: false,
+            highlight: indent === 0 && ko > 20, highlightCol: 2,
+          });
+        };
+
+        defs.forEach(({ label, key, indent, subs }) => {
+          const item = sei[key];
+          if (!item) return;
+          pushSeiRow(label, item, indent);
+          if (subs) {
+            subs.forEach(({ label: subLabel, subKey }) => {
+              pushSeiRow(subLabel, item[subKey], 1);
+            });
+          }
+        });
+
+        const footer = seiTotal != null
+          ? ["歳出合計", fmt(seiTotal), "100%"]
+          : null;
+        return { columns, rows, footer };
+      }
+
+      if (tableId === "kyuyo-tokubetsu") {
+        const columns = ["役職", "定数", "平均給料報酬月額（百円）", "適用開始年月日"];
+        const rows = [];
+        const tokubetsu = kyuyo?.["特別職等"] || {};
+        Object.entries(tokubetsu).forEach(([yakushoku, v]) => {
+          if (!v) return;
+          rows.push({
+            cells: [yakushoku,
+              v["定数"] != null ? Number(v["定数"]).toLocaleString() : "-",
+              v["一人当たり平均給料報酬月額_百円"] != null ? Number(v["一人当たり平均給料報酬月額_百円"]).toLocaleString() : "-",
+              v["適用開始年月日"] || "-",
+            ], indent: 0, dim: false, isTotal: false
+          });
+        });
+        return { columns, rows, footer: null };
+      }
+
+      return { columns: [], rows: [], footer: null };
+    }
+
+    function renderTable({ columns, rows, footer }) {
+      const thCells = columns.map((c) => `<th>${c}</th>`).join("");
+      const bodyRows = rows.map((row) => {
+        const indentPx = row.indent === 1 ? "1.8em" : row.indent === 2 ? "3.2em" : "0";
+        const opacity = "";
+        const trStyle = "";
+        const trClass = row.isTotal ? ` class="total-row"` : "";
+        const tdCells = row.cells.map((cell, i) => {
+          const styles = [];
+          if (i === 0 && row.indent > 0) styles.push(`padding-left:${indentPx}`, "color:var(--white)");
+          if (row.dim && i === 0 && row.indent === 0) styles.push("color:var(--white)");
+          if (i > 0) styles.push("text-align:right");
+          if (row.highlight && i === row.highlightCol) styles.push("color:var(--orange)");
+          const style = styles.length ? ` style="${styles.join(";")}"` : "";
+          return `<td${style}>${cell}</td>`;
+        }).join("");
+        return `<tr${trClass}>${tdCells}</tr>`;
+      }).join("");
+      const footerHtml = footer
+        ? `<tfoot><tr class="total-row">${footer.map((c) => `<td>${c}</td>`).join("")}</tr></tfoot>`
+        : "";
+      return `<table class="data-table"><thead><tr>${thCells}</tr></thead><tbody>${bodyRows}</tbody>${footerHtml}</table>`;
+    }
+
+    // ══════════════════════════════════════════════
+    // RENDER
+    // ══════════════════════════════════════════════
+    function renderDetail(d, container) {
+      Object.values(chartInstances).forEach((c) => c.destroy());
+      chartInstances = {};
+
+      const pop = d["人口"]?.["住民基本台帳人口"]?.["令6_1_1"];
+      const pop5 = d["人口"]?.["住民基本台帳人口"]?.["令5_1_1"];
+      const area = d["面積_km2"];
+      const density = d["人口密度_人_per_km2"];
+      const sai = d["歳入の状況_千円"];
+      const zaiTotal = sai?.["歳入合計"]?.["決算額"];
+      const shitei = d["指定団体等の指定状況"] || {};
+
+      // ── 指定団体LEDグリッド
+      const shiteiCells = Object.entries(shitei).map(([label, active]) => `
+          <div style="background:var(--bg-primary);padding:7px 10px;display:flex;align-items:center;gap:7px">
+            <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;${active
+          ? 'background:var(--orange);box-shadow:0 0 6px var(--orange),0 0 12px #fb8b1e44'
+          : 'background:var(--gray-dim)'}"></div>
+            <span style="font-size:11px;letter-spacing:0.5px;color:${active ? 'var(--white)' : 'var(--gray-dim)'}">${label}</span>
+          </div>`).join("");
+
+      let html = `
+    <div id="card-summary" class="card">
+      <div class="card-body">
+        <div id="entity-header">
+          <div>
+            <div id="entity-name">${d["都道府県名"]} ${d["団体名"]}</div>
+            <div id="entity-pref">団体コード ${d["団体コード"]}</div>
+          </div>
+          <div id="entity-year">${d["年度"]}<br><span style="color:var(--gray);font-size:10px">決算確定</span></div>
+        </div>
+        <div class="sep"></div>
+        <div id="kpi-grid" class="kpi-grid">
+          <div class="kpi-cell"><div class="kpi-label">住民基本台帳人口 <span style="opacity:0.6;font-size:9px">令6.1.1</span></div><div class="kpi-value">${fmt(pop)}<span class="kpi-unit">人</span></div>${renderDelta(numVal(pop), numVal(pop5), "人", "令5.1.1")}</div>
+          <div class="kpi-cell"><div class="kpi-label">面積</div><div class="kpi-value">${fmt(area)}<span class="kpi-unit">km²</span></div></div>
+          <div class="kpi-cell"><div class="kpi-label">人口密度</div><div class="kpi-value">${fmt(density)}<span class="kpi-unit">人/km²</span></div></div>
+          <div class="kpi-cell"><div class="kpi-label">歳入合計</div><div class="kpi-value" style="color:var(--orange-bright)">${fmtOku(zaiTotal)}</div></div>
+          <div class="kpi-cell"><div class="kpi-label">地方税</div><div class="kpi-value">${fmtOku(numVal(sai?.["地方税"]?.["決算額"]))}</div></div>
+          <div class="kpi-cell"><div class="kpi-label">地方交付税</div><div class="kpi-value">${fmtOku(numVal(sai?.["地方交付税"]?.["決算額"]))}</div></div>
+          <div class="kpi-cell">
+            <div class="kpi-label">地方債現在高 <span style="opacity:0.6;font-size:9px">令和5年度</span></div>
+            <div class="kpi-value">${fmtOku(numVal(d["地方債現在高_千円"]?.["令和5年度"]))}</div>
+            ${renderDelta(numVal(d["地方債現在高_千円"]?.["令和5年度"]), numVal(d["地方債現在高_千円"]?.["令和4年度"]), "千円", "令和4年度")}
+          </div>
+        </div>
+        ${Object.keys(shitei).length ? `
+        <div class="sep"></div>
+        <div style="font-size:10px;color:var(--gray);font-family:var(--font-mono);letter-spacing:1px;padding:5px 10px;border-bottom:1px solid var(--border)">指定団体等の指定状況</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:1px;background:var(--border)">${shiteiCells}</div>
+        ` : ""}
+      </div>
+    </div>
+  `;
+
+      html += `
+    <div id="row-charts" class="charts-row">
+      <div id="card-chart-sainyuu" class="card">
+        <div class="card-header">歳入の状況（構成比） <span class="badge">BREAKDOWN</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-sainyuu"></canvas></div></div>
+      </div>
+      <div id="card-chart-zei" class="card">
+        <div class="card-header">市町村税の状況（税目別） <span class="badge">TAX</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-zei"></canvas></div></div>
+      </div>
+    </div>
+  `;
+
+      html += `
+    <div id="row-tables-sainyuu-zei" class="charts-row">
+      <div id="card-table-sainyuu" class="card">
+        <div class="card-header">歳入の状況 <span class="badge">千円</span></div>
+        <div class="card-body" style="overflow-y:auto;max-height:400px;">
+          <div id="table-sainyuu">${renderTable(getTableData(d, "sainyuu"))}</div>
+        </div>
+      </div>
+      <div id="card-table-zei" class="card">
+        <div class="card-header">市町村税の状況 <span class="badge">千円</span></div>
+        <div class="card-body" style="overflow-y:auto;max-height:400px;">
+          <div id="table-zei">${renderTable(getTableData(d, "zei"))}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+      html += `
+    <div id="row-table-mokuteki" class="charts-row">
+      <div id="card-chart-mokuteki" class="card">
+        <div class="card-header">目的別歳出の状況（構成比） <span class="badge">BREAKDOWN</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-mokuteki"></canvas></div></div>
+      </div>
+      <div id="card-table-mokuteki" class="card">
+        <div class="card-header">目的別歳出の状況 <span class="badge">千円</span></div>
+        <div class="card-body" style="overflow-y:auto;max-height:400px;">
+          <div id="table-mokuteki">${renderTable(getTableData(d, "mokuteki-shishutsu"))}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+      html += `
+    <div id="row-table-sei-shitsu" class="charts-row">
+      <div id="card-chart-sei-shitsu" class="card">
+        <div class="card-header">性質別歳出の状況（構成比） <span class="badge">BREAKDOWN</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="chart-sei-shitsu"></canvas></div></div>
+      </div>
+      <div id="card-table-sei-shitsu" class="card">
+        <div class="card-header">性質別歳出の状況 <span class="badge">千円</span></div>
+        <div class="card-body" style="overflow-y:auto;max-height:400px;">
+          <div id="table-sei-shitsu">${renderTable(getTableData(d, "sei-shitsu"))}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+      const kyuyo = d["職員給与の状況"];
+      if (kyuyo) {
+        const laspa = kyuyo["ラスパイレス指数"];
+        const tokubetsuData = getTableData(d, "kyuyo-tokubetsu");
+        const tokubetsuHtml = tokubetsuData.rows.length
+          ? renderTable(tokubetsuData)
+          : `<p style="color:var(--gray);text-align:center;padding:16px">データなし</p>`;
+        html += `
+    <div id="row-tables-kyuyo" class="charts-row">
+      <div id="card-table-kyuyo-ippan" class="card">
+        <div class="card-header">職員給与の状況（一般職員等） <span class="badge">SALARY</span>${laspa != null ? `<span style="margin-left:auto;font-size:11px;color:var(--yellow)">ラスパイレス指数 <b>${laspa}</b></span>` : ""}</div>
+        <div class="card-body" style="overflow-y:auto;max-height:320px;">
+          <div id="table-kyuyo-ippan">${renderTable(getTableData(d, "kyuyo-ippan"))}</div>
+        </div>
+      </div>
+      <div id="card-table-kyuyo-tokubetsu" class="card">
+        <div class="card-header">職員給与の状況（特別職等） <span class="badge">SPECIAL</span></div>
+        <div class="card-body" style="overflow-y:auto;max-height:320px;">
+          <div id="table-kyuyo-tokubetsu">${tokubetsuHtml}</div>
+        </div>
+      </div>
+    </div>
+  `;
+      }
+
+      container.innerHTML = html;
+
+      drawSainyuuChart(d);
+      drawZeiChart(d);
+      drawMokutekiChart(d);
+      drawSeiShitsuChart(d);
+    }
+
+    // ══════════════════════════════════════════════
+    // CHART: 歳入
+    // ══════════════════════════════════════════════
+    const BLOOMBERG_COLORS = [
+      "#fb8b1e", // amber (primary)
+      "#4af6c3", // cyan/teal
+      "#0068ff", // blue
+      "#ff433d", // red
+      "#fda04a", // amber light
+      "#00aaff", // light blue
+      "#ff8c69", // salmon
+      "#2ecc71", // green
+      "#a29bfe", // purple
+      "#fdcb6e", // yellow
+      "#74b9ff", // sky blue
+      "#fd79a8", // pink
+      "#55efc4", // mint
+      "#e17055", // terra
+      "#6c5ce7", // violet
+    ];
+
+    function drawSainyuuChart(d) {
+      const sai = d["歳入の状況_千円"];
+      const keys = [
+        "地方税",
+        "地方譲与税",
+        "地方消費税交付金",
+        "地方特例交付金等",
+        "地方交付税",
+        "分担金負担金",
+        "使用料",
+        "手数料",
+        "国庫支出金",
+        "都道府県支出金",
+        "財産収入",
+        "寄附金",
+        "繰入金",
+        "繰越金",
+        "諸収入",
+        "地方債",
+      ];
+
+      const labels = [],
+        values = [],
+        colors = [];
+      keys.forEach((k, i) => {
+        const v = sai?.[k]?.["決算額"];
+        if (typeof v === "number" && v > 0) {
+          labels.push(k);
+          values.push(v);
+          colors.push(BLOOMBERG_COLORS[i % BLOOMBERG_COLORS.length]);
+        }
+      });
+
+      const ctx = document.getElementById("chart-sainyuu").getContext("2d");
+      chartInstances["sainyuu"] = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels,
+          datasets: [
+            {
+              data: values,
+              backgroundColor: colors,
+              borderColor: "#0a0a0a",
+              borderWidth: 2,
+              hoverBorderWidth: 3,
+              hoverBorderColor: "#ffffff",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                color: "#888",
+                font: { size: 10, family: "'Noto Sans JP'" },
+                padding: 8,
+                boxWidth: 12,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.raw;
+                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = ((val / total) * 100).toFixed(1);
+                  return ` ${(val / 100000).toFixed(1)}億円 (${pct}%)`;
+                },
+              },
+              backgroundColor: "#1a1a1a",
+              borderColor: "#ff6600",
+              borderWidth: 1,
+              titleColor: "#ff8833",
+              bodyColor: "#e8e8e8",
+            },
+          },
+          cutout: "55%",
+        },
+      });
+    }
+
+    // ══════════════════════════════════════════════
+    // CHART: 市町村税
+    // ══════════════════════════════════════════════
+    function drawZeiChart(d) {
+      const zeiStat = d["市町村税の状況_千円"];
+      const futsuu = zeiStat?.["普通税"]?.["法定普通税"];
+      const mokuteki = zeiStat?.["目的税"]?.["法定目的税"];
+      const sai = d["歳入の状況_千円"];
+
+      const taxMap = {
+        "市町村民税（個人）":
+          (futsuu?.["市町村民税"]?.["個人均等割"]?.["収入済額"] || 0) +
+          (futsuu?.["市町村民税"]?.["所得割"]?.["収入済額"] || 0),
+        "市町村民税（法人）":
+          (futsuu?.["市町村民税"]?.["法人均等割"]?.["収入済額"] || 0) +
+          (futsuu?.["市町村民税"]?.["法人税割"]?.["収入済額"] || 0),
+        固定資産税: futsuu?.["固定資産税"]?.["収入済額"],
+        軽自動車税: futsuu?.["軽自動車税"]?.["収入済額"],
+        たばこ税: futsuu?.["市町村たばこ税"]?.["収入済額"],
+        入湯税: mokuteki?.["入湯税"]?.["収入済額"],
+        事業所税: mokuteki?.["事業所税"]?.["収入済額"],
+        都市計画税: mokuteki?.["都市計画税"]?.["収入済額"],
+      };
+
+      const zaiTotal = numVal(sai?.["歳入合計"]?.["決算額"]) || 0;
+
+      const labels = [],
+        values = [],
+        colors = [];
+      let taxTotal = 0;
+      Object.entries(taxMap).forEach(([k, v], i) => {
+        if (typeof v === "number" && v > 0) {
+          labels.push(k);
+          values.push(v);
+          colors.push(BLOOMBERG_COLORS[(i + 3) % BLOOMBERG_COLORS.length]);
+          taxTotal += v;
+        }
+      });
+
+      // 市町村税以外の歳入を灰色セグメントとして追加
+      const nonTax = zaiTotal - taxTotal;
+      if (nonTax > 0) {
+        labels.push("市町村税以外の歳入");
+        values.push(nonTax);
+        colors.push("rgba(100,100,100,0.45)");
+      }
+
+      const ctx = document.getElementById("chart-zei").getContext("2d");
+      chartInstances["zei"] = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels,
+          datasets: [
+            {
+              data: values,
+              backgroundColor: colors,
+              borderColor: "#0a0a0a",
+              borderWidth: 2,
+              hoverBorderWidth: 3,
+              hoverBorderColor: "#ffffff",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                color: (context) => {
+                  const label = context.text || "";
+                  return label === "市町村税以外の歳入" ? "#555" : "#888";
+                },
+                font: { size: 10, family: "'Noto Sans JP'" },
+                padding: 8,
+                boxWidth: 12,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.raw;
+                  const pct =
+                    zaiTotal > 0 ? ((val / zaiTotal) * 100).toFixed(1) : "-";
+                  return ` ${(val / 100000).toFixed(1)}億円 (歳入合計比 ${pct}%)`;
+                },
+              },
+              backgroundColor: "#1a1a1a",
+              borderColor: "#ff6600",
+              borderWidth: 1,
+              titleColor: "#ff8833",
+              bodyColor: "#e8e8e8",
+            },
+          },
+          cutout: "55%",
+        },
+      });
+    }
+
+    // ══════════════════════════════════════════════
+    // CHART: 目的別歳出
+    // ══════════════════════════════════════════════
+    function drawMokutekiChart(d) {
+      const mok = d["目的別歳出の状況_千円"] || {};
+      const labels = [], values = [], colors = [];
+      Object.entries(mok).forEach(([key, item], i) => {
+        const v = numVal(item?.["決算額"]);
+        if (v != null && v > 0) {
+          labels.push(key);
+          values.push(v);
+          colors.push(BLOOMBERG_COLORS[i % BLOOMBERG_COLORS.length]);
+        }
+      });
+
+      const ctx = document.getElementById("chart-mokuteki").getContext("2d");
+      chartInstances["mokuteki"] = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors,
+            borderColor: "#0a0a0a",
+            borderWidth: 2,
+            hoverBorderWidth: 3,
+            hoverBorderColor: "#ffffff",
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: { color: "#888", font: { size: 10, family: "'Noto Sans JP'" }, padding: 8, boxWidth: 12 },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.raw;
+                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = ((val / total) * 100).toFixed(1);
+                  return ` ${(val / 100000).toFixed(1)}億円 (${pct}%)`;
+                },
+              },
+              backgroundColor: "#1a1a1a", borderColor: "#ff6600", borderWidth: 1,
+              titleColor: "#ff8833", bodyColor: "#e8e8e8",
+            },
+          },
+          cutout: "55%",
+        },
+      });
+    }
+
+    // ══════════════════════════════════════════════
+    // CHART: 性質別歳出
+    // ══════════════════════════════════════════════
+    function drawSeiShitsuChart(d) {
+      const sei = d["性質別歳出の状況_千円"] || {};
+      const keys = [
+        "人件費", "物件費", "維持補修費", "扶助費", "補助費等",
+        "普通建設事業費", "災害復旧事業費", "失業対策事業費",
+        "公債費", "積立金", "投資及び出資金", "貸付金", "繰出金",
+      ];
+
+      const labels = [], values = [], colors = [];
+      keys.forEach((k, i) => {
+        const v = numVal(sei[k]?.["決算額"]);
+        if (v != null && v > 0) {
+          labels.push(k);
+          values.push(v);
+          colors.push(BLOOMBERG_COLORS[i % BLOOMBERG_COLORS.length]);
+        }
+      });
+
+      const ctx = document.getElementById("chart-sei-shitsu").getContext("2d");
+      chartInstances["sei-shitsu"] = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors,
+            borderColor: "#0a0a0a",
+            borderWidth: 2,
+            hoverBorderWidth: 3,
+            hoverBorderColor: "#ffffff",
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                color: "#888",
+                font: { size: 10, family: "'Noto Sans JP'" },
+                padding: 8,
+                boxWidth: 12,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.raw;
+                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = ((val / total) * 100).toFixed(1);
+                  return ` ${(val / 100000).toFixed(1)}億円 (${pct}%)`;
+                },
+              },
+              backgroundColor: "#1a1a1a",
+              borderColor: "#ff6600",
+              borderWidth: 1,
+              titleColor: "#ff8833",
+              bodyColor: "#e8e8e8",
+            },
+          },
+          cutout: "55%",
+        },
+      });
+    }
+
+    // ══════════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════════
+    loadData();
+
+    // ブラウザの戻る/進むに対応
+    window.addEventListener("popstate", () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (code) {
+        const idx = allData.findIndex((d) => String(d["団体コード"]) === code);
+        if (idx !== -1) {
+          activeIndex = idx;
+          document.querySelectorAll(".entity-item").forEach((el) => {
+            el.classList.toggle("active", parseInt(el.dataset.idx) === idx);
+          });
+          document.getElementById("placeholder").style.display = "none";
+          const detail = document.getElementById("detail");
+          detail.style.display = "block";
+          renderDetail(allData[idx], detail);
+        }
+      } else {
+        // code なし → プレースホルダーに戻す
+        activeIndex = null;
+        document.querySelectorAll(".entity-item").forEach((el) => el.classList.remove("active"));
+        document.getElementById("placeholder").style.display = "flex";
+        document.getElementById("detail").style.display = "none";
+      }
+    });
+  </script>
+</body>
+
+</html>
