@@ -9,7 +9,7 @@ from pathlib import Path
 import polars as pl
 from multiprocessing import Pool
 from datetime import datetime
-
+import msgpack
 import json
 
 
@@ -18,6 +18,56 @@ try:
 except ImportError:
     print("openpyxl が必要です: pip install openpyxl")
     sys.exit(1)
+
+PERF_LIST = [
+    "北海道",
+    "青森県",
+    "岩手県",
+    "宮城県",
+    "秋田県",
+    "山形県",
+    "福島県",
+    "茨城県",
+    "栃木県",
+    "群馬県",
+    "埼玉県",
+    "千葉県",
+    "東京都",
+    "神奈川県",
+    "新潟県",
+    "富山県",
+    "石川県",
+    "福井県",
+    "山梨県",
+    "長野県",
+    "岐阜県",
+    "静岡県",
+    "愛知県",
+    "三重県",
+    "滋賀県",
+    "京都府",
+    "大阪府",
+    "兵庫県",
+    "奈良県",
+    "和歌山県",
+    "鳥取県",
+    "島根県",
+    "岡山県",
+    "広島県",
+    "山口県",
+    "徳島県",
+    "香川県",
+    "愛媛県",
+    "高知県",
+    "福岡県",
+    "佐賀県",
+    "長崎県",
+    "熊本県",
+    "大分県",
+    "宮崎県",
+    "鹿児島県",
+    "沖縄県"
+]
 
 
 def v(ws, coord):
@@ -336,8 +386,8 @@ def extract_sheet(ws):
         },
     }
 
-
 # ── ヘルパー関数 ────────────────────────────────────────────
+
 
 def _rev(ws, dec, comp, josei, josei_comp):
     """歳入行 (決算額, 構成比, 経常一般財源等, 経常一般財源等構成比)"""
@@ -415,25 +465,32 @@ def flatten(nested: dict, sep: str = ".") -> pl.DataFrame:
     _flatten(nested)
     return out
 
+
 def add_cols(df: pl.DataFrame):
+    perfmap = {}
+    for idx, perf in enumerate(PERF_LIST):
+        perfmap[perf] = idx
+
+    df = df.with_columns(
+        pl.col('都道府県名').replace_strict(perfmap).alias('都道府県番号')).drop('都道府県名')
+
     # 市町村税について、歳入構成比追加
     stack1 = []
-    stack2 = []
     for c in df.columns:
-        check = '市町村税の状況_千円' in i and ('超過課税分' in i or '収入済額' in i)
+        check = c.startswith('市町村税の状況_千円') or c in '超過課税分' or c in '収入済額'
         if check:
-            stack1.append(pl.col(c).alias(f"{c}歳入合計構成比"))
-            stack2.append(pl.col(c).alias(f"{c}歳入合計経常一般財源等構成比"))
+            stack1.extend([
+                pl.col(c).alias(
+                    f"{c}歳入合計構成比")/pl.col('歳入の状況_千円.歳入合計.決算額'),
+                pl.col(c).alias(
+                    f"{c}経常一般財源等構成比")/pl.col('歳入の状況_千円.歳入合計.経常一般財源等')
+            ])
 
-    print(f"col count: {len(df.columns)}")
-    df = df.with_columns(pl.col(stack1)/pl.col('歳入の状況_千円.歳入合計.決算額'))
-    print(f"col count2: {len(df.columns)}")
-    df = df.with_columns(pl.col(stack2)/pl.col('歳入の状況_千円.歳入合計.経常一般財源等'))
-    print(f"col count3: {len(df.columns)}")
-
-    return df
+    return df.with_columns(stack1)
 
 # ── メイン処理 ──────────────────────────────────────────────
+
+
 def main(xlsx_path: Path):
     print(f"読み込み中: {xlsx_path}")
     wb = load_workbook(xlsx_path, data_only=True)
@@ -452,14 +509,15 @@ def main(xlsx_path: Path):
             errors.append((name, str(e)))
             print(data)
             print(f"  [{i:3d}/{len(sheets)}] {name} … ERROR: {e}")
-        
+
     print(f"\n完了: {len(stack)} 件")
     if errors:
         print(f"エラー {len(errors)} 件:")
         for name, msg in errors:
             print(f"  {name}: {msg}")
-    
+
     return stack
+
 
 if __name__ == '__main__':
     input_xlsx = Path(sys.argv[1])
@@ -467,18 +525,19 @@ if __name__ == '__main__':
     output_path = Path(sys.argv[2])
     print(f"出力するディレクトリ: {output_path}")
 
-    pool = Pool(4)
+    pool = Pool(12)
     all_data = []
     for i in pool.map(main, input_xlsx.iterdir()):
         all_data.extend(i)
 
-    s = json.dumps(all_data, ensure_ascii=False, indent=2)
-
-    fp = open("./a.json", "w+")
-    fp.write(s)
-    fp.close()
-
     df = pl.DataFrame(all_data, infer_schema_length=len(all_data))
-    df = df.filter(pl.col("年度").is_not_null())
+    df = df.filter(pl.col("団体コード").is_not_null()).drop('年度')
     df = add_cols(df)
+    map_dict = df.to_dict()
+    for i in map_dict:
+        map_dict[i] = map_dict[i].to_list()
+
     df.write_csv(Path(output_path).with_name("r5_kessan_data.csv"))
+
+    Path(output_path).with_name("r5_kessan_data.msgpack").write_bytes(
+        msgpack.dumps(map_dict))
