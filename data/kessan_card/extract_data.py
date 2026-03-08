@@ -171,34 +171,34 @@ def extract_sheet(ws):
                 "法定普通税": {
                     "合計": _tax3(ws, 'AW17', 'BF17', 'BJ17'),
                     "市町村民税": {
-                        **_tax3(ws, 'AW18', 'BF18', 'BJ18'),
-                        "個人均等割": _tax2(ws, 'AW19', 'BF19'),
-                        "所得割":     _tax2(ws, 'AW20', 'BF20'),
-                        "法人均等割": _tax2(ws, 'AW21', 'BF21'),
-                        "法人税割":   _tax2(ws, 'AW22', 'BF22'),
+                        "合計": _tax3(ws, 'AW18', 'BF18', 'BJ18'),
+                        "個人均等割": _tax3(ws, 'AW19', 'BF19', 'BJ19'),
+                        "所得割":     _tax3(ws, 'AW20', 'BF20', 'BJ20'),
+                        "法人均等割": _tax3(ws, 'AW21', 'BF21', 'BJ21'),
+                        "法人税割":   _tax3(ws, 'AW22', 'BF22', 'BJ22'),
                     },
                     "固定資産税": {
-                        **_tax2(ws, 'AW23', 'BF23'),
-                        "うち純固定資産税": _tax2(ws, 'AW24', 'BF24'),
+                        **_tax3(ws, 'AW23', 'BF23', 'BJ23'),
+                        "うち純固定資産税": _tax3(ws, 'AW24', 'BF24', 'BJ24'),
                     },
-                    "軽自動車税":       _tax2(ws, 'AW25', 'BF25'),
-                    "市町村たばこ税":   _tax2(ws, 'AW26', 'BF26'),
-                    "鉱産税":           _tax2(ws, 'AW27', 'BF27'),
-                    "特別土地保有税":   _tax2(ws, 'AW28', 'BF28'),
+                    "軽自動車税":       _tax3(ws, 'AW25', 'BF25', 'BJ25'),
+                    "市町村たばこ税":   _tax3(ws, 'AW26', 'BF26', 'BJ26'),
+                    "鉱産税":           _tax3(ws, 'AW27', 'BF27', 'BJ27'),
+                    "特別土地保有税":   _tax3(ws, 'AW28', 'BF28', 'BJ28'),
                 },
-                "法定外普通税": _tax2(ws, 'AW29', 'BF29'),
+                "法定外普通税": _tax3(ws, 'AW29', 'BF29', 'BJ26'),
             },
             "目的税": {
-                "合計": _tax2(ws, 'AW30', 'BF30'),
+                "合計": _tax3(ws, 'AW30', 'BF30', 'BJ30'),
                 "法定目的税": {
-                    "入湯税":       _tax2(ws, 'AW32', 'BF32'),
-                    "事業所税":     _tax2(ws, 'AW33', 'BF33'),
-                    "都市計画税":   _tax2(ws, 'AW34', 'BF34'),
-                    "水利地益税等": _tax2(ws, 'AW35', 'BF35'),
+                    "入湯税":       _tax3(ws, 'AW32', 'BF32', 'BJ32'),
+                    "事業所税":     _tax3(ws, 'AW33', 'BF33', 'BJ33'),
+                    "都市計画税":   _tax3(ws, 'AW34', 'BF34', 'BJ34'),
+                    "水利地益税等": _tax3(ws, 'AW35', 'BF35', 'BJ35'),
                 },
-                "法定外目的税": _tax2(ws, 'AW36', 'BF36'),
+                "法定外目的税": _tax3(ws, 'AW36', 'BF36', 'BJ36'),
             },
-            "旧法による税": _tax2(ws, 'AW37', 'BF37'),
+            "旧法による税": _tax3(ws, 'AW37', 'BF37', 'BJ37'),
             "合計": _tax3(ws, 'AW38', 'BF38', 'BJ38'),
         },
         "指定団体等の指定状況": {
@@ -477,13 +477,17 @@ def add_cols(df: pl.DataFrame):
     # 市町村税について、歳入構成比追加
     stack1 = []
     for c in df.columns:
+        if c.endswith('構成比'):
+            continue
+
         check = c.startswith('市町村税の状況_千円') or c in '超過課税分' or c in '収入済額'
         if check:
             stack1.extend([
-                pl.col(c).alias(
-                    f"{c}歳入合計構成比")/pl.col('歳入の状況_千円.歳入合計.決算額'),
-                pl.col(c).alias(
-                    f"{c}経常一般財源等構成比")/pl.col('歳入の状況_千円.歳入合計.経常一般財源等')
+                (pl.col(c) /
+                 pl.col('歳入の状況_千円.歳入合計.決算額')*100).alias(f"{c}.歳入合計構成比"),
+
+                (pl.col(c).alias(f"{c}.経常一般財源等構成比") /
+                 pl.col('歳入の状況_千円.歳入合計.経常一般財源等')*100).alias(f"{c}.経常一般財源等構成比")
             ])
 
     return df.with_columns(stack1)
@@ -539,5 +543,5 @@ if __name__ == '__main__':
 
     df.write_csv(Path(output_path).with_name("r5_kessan_data.csv"))
 
-    Path(output_path).with_name("r5_kessan_data.msgpack").write_bytes(
+    Path(output_path).with_segments("r5_kessan_data.msgpack").write_bytes(
         msgpack.dumps(map_dict))
