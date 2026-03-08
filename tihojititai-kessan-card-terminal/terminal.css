@@ -32,6 +32,8 @@ body {
   font-size: 13px;
   min-height: 100vh;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── TOP BAR ── */
@@ -141,6 +143,7 @@ body {
   font-size: 9px;
   padding: 1px 5px;
   font-weight: bold;
+  margin-left: auto;
 }
 
 .card-body {
@@ -261,15 +264,80 @@ body {
   column-gap: 4px;
 }
 
+.chart-card-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+}
+
 .chart-wrap {
   position: relative;
-  height: 300px;
   display: flex;
   flex-direction: column;
+  flex: 0 1 350px;
+  min-width: 120px;
 }
 
 .chart-wrap canvas {
   flex: 1;
+}
+
+.chart-piechart {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+}
+
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.chart-legend-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+}
+
+.chart-legend-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gray);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-legend-value {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--white);
+  flex-shrink: 0;
+  display: flex;
+  gap: 3px;
+}
+
+.chart-legend-value span:first-child {
+  text-align: right;
+  min-width: 4em;
+}
+
+.chart-legend-value span:last-child {
+  text-align: right;
+  min-width: 3em;
+  color: var(--gray);
 }
 
 /* ── TABLE ── */
@@ -277,6 +345,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
+  table-layout: fixed;
 }
 
 .data-table th {
@@ -646,4 +715,88 @@ body::after {
 #back-btn:hover {
   border-color: var(--orange);
   color: var(--orange);
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--orange);
+  background: var(--bg-secondary);
+  padding: 8px 20px;
+  z-index: 100;
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--gray);
+  font-family: var(--font-jp);
+}
+
+.footer-sep {
+  color: var(--gray-dim);
+}
+
+.footer-source a {
+  color: var(--gray);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-source a:hover {
+  color: var(--orange-bright);
+}
+
+/* ── NO DATA: 斜め破線（案E） ── */
+.no-data-diagonal-orange {
+  max-height: 400px;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-data-diagonal-orange::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 22px,
+    var(--orange-dim) 22px,
+    var(--orange-dim) 23px
+  );
+  opacity: 0.15;
+}
+
+.no-data-diagonal-orange .nd-badge {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-panel);
+  border: 1px solid var(--orange-dim);
+  padding: 8px 20px;
+}
+
+.no-data-diagonal-orange .nd-badge-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--orange-dim);
+}
+
+.no-data-diagonal-orange .nd-badge-sub {
+  font-family: var(--font-jp);
+  font-size: 10px;
+  color: var(--gray);
 }

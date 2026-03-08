@@ -18,23 +18,21 @@
   <div id="topbar">
     <span class="logo" style="font-size: 12px; color: var(--yellow)">令和５年度　地方自治体決算</span>
     <nav id="tab-bar">
-      <!-- <button id="tab-btn-topics" class="tab-btn" onclick="switchTab('topics')">TOPICS</button> -->
-      <button id="tab-btn-search" class="tab-btn active" onclick="switchTab('search')">SEARCH</button>
+      <button id="tab-btn-search" class="tab-btn active" onclick="switchTab('search')">BROWSE</button>
       <button id="tab-btn-detail" class="tab-btn" onclick="switchTab('detail')">DETAIL</button>
     </nav>
-  </div>
-
-  <!-- TAB: TOPICS -->
-  <div id="tab-topics" class="tab-panel">
-
   </div>
 
   <!-- TAB: 検索 -->
   <div id="tab-search" class="tab-panel active">
     <div class="search-toolbar">
-      <div class="search-toolbar-title">
-        検索フォーム
-      </div>
+      <nav id="tab-search-bar">
+        <button id="topic-search" class="search-btn active" onclick="switchTab('search')">すべて</button>
+        <button id="topic-akaji" class="search-btn" onclick="switchTab('akaji')">赤字税</button>
+        <button id="topic-hakuri" class="search-btn" onclick="switchTab('hakuri')">薄利税</button>
+        <button id="topic-choka" class="search-btn" onclick="switchTab('choka')">超過課税</button>
+        <button id="topic-hakuri-choka" class="search-btn" onclick="switchTab('hakuri-choka')">薄利超過課税</button>
+      </nav>
       <div class="search-row">
         <input id="cb-search" class="search-input" type="text" placeholder="自治体名・都道府県名で検索..."
           oninput="onFilterChange()" />
@@ -49,14 +47,27 @@
     <div id="detail"></div>
   </div>
 
-  <footer></footer>
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-copy">&copy; 2025 財政革新会</span>
+      <span class="footer-sep">|</span>
+      <span class="footer-source">データ出典：
+        <a href="https://www.soumu.go.jp/iken/kessan_card.html" target="_blank" rel="noopener">
+          総務省「令和５年度　市町村別決算状況調」
+        </a>
+      </span>
+    </div>
+  </footer>
   <script>
-    const searchPageParameter = {
+    const searchType = [
+      "all", "akaji", "hakuri", "choka", "hakuri-choka"
+    ]
+    const searchParam = {
       searchText: '',
-      taxAtDeficit: false,
-      taxRevenueNegligible: false,
-      taxExcessRevenueNegligible: false,
-      excessTaxRateIntroduced: false
+      searchType: 'all'
+    }
+    function updatesearchParam(newSearchType) {
+      searchParam.searchType = newSearchType
     }
 
     // ══════════════════════════════════════════════
@@ -77,7 +88,8 @@
       prefArray = _prefArray
 
       const out = await msgpack.decode(await response.bytes())
-      console.log(out)
+
+
       header = Object.keys(out)
       for (let i = 0; i < out['団体名'].length; i++) {
         const m = {}
@@ -90,6 +102,7 @@
         const cardItem = buildCardItem(m, allData.length)
         Object.assign(m, { cardItem })
 
+        // build all data
         allData.push(m)
 
         if (!itemByPerf[cardItem.pref]) {
@@ -107,26 +120,12 @@
           a['団体コード'] > b['団体コード']
       })
 
-      renderCards();
-
-      // query parameter ?search-text= があれば検索を復元
-      const params = new URLSearchParams(window.location.search);
-      const searchText = params.get("search-text");
-      if (searchText) {
-        document.getElementById("cb-search").value = searchText;
-        filterCards();
-      }
-
-      // query parameter ?code= があれば自動選択、なければ tab= に従う
-      const name = params.get("name");
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get("code");
       const tab = params.get("tab");
-      const validTabCheck = tab === 'search' || tab === 'info'
-      if (validTabCheck) {
-        params.delete('tab')
-      }
 
-      if (!name) {
-        const idx = allData.findIndex((a) => a['団体名'] === '団体名')
+      if (!code) {
+        const idx = allData.findIndex((a) => String(a['団体コード']) === String(code))
         if (idx !== -1) {
           selectEntity(idx);
         } else {
@@ -135,6 +134,8 @@
       } else {
         switchTab('search');
       }
+
+      console.log(header)
     }
 
     // メタデータ
@@ -220,7 +221,7 @@
     }
 
     // table base
-    function createTableFunc(title, prefix, col1, col2, d, config = {}) {
+    function createTableAbsAndPct(id, title, prefix, absColName, pctColName, d) {
       function fmt(n) {
         if (null == n) {
           return "-"
@@ -238,12 +239,14 @@
         }
 
         if (Number.isFinite(n)) {
-          return `${n.toFixed(2)} %`
+          return `${n.toFixed(1)} %`
         }
 
       }
+
       const set = new Set()
-      const rows = header.map(e => {
+
+      const rows = header.map((e) => {
         if (!e.startsWith(prefix)) {
           return
         }
@@ -259,40 +262,301 @@
         set.add(core)
 
         const name = list[list.length - 2]
-        const col1val = [prefix, core, col1].join(".")
-        const col2val = [prefix, core, col2].join(".")
-        return { name, col1val: fmt(d[col1val]), col2val: fmtPercentage(d[col2val]), depth: list.length - 3, isTotal: name.includes('合計') }
-      }).filter(e => e)
+        const col1key = [prefix, core, absColName].join(".")
+        const col2key = [prefix, core, pctColName].join(".")
 
+        return {
+          name,
+          value: d[col1key],
+          col1val: fmt(d[col1key]),
+          col2val: fmtPercentage(d[col2key]),
+          depth: list.length - 4,
+          isTotal: name.includes('合計'),
+        }
+      }).filter(e => e)
+      console.log(rows)
       return {
+        id,
         title,
         header: [
           { name: '項目', key: 'name' },
-          { name: col1, key: 'col1val' },
+          { name: absColName, key: 'col1val' },
           { name: '構成比', key: 'col2val' },
         ],
         rows: rows.slice(0, rows.length - 2),
-        footerRow: rows[rows.length - 1]
+        footerRow: { ...rows[rows.length - 1], name: absColName + ' 合計' }
       }
     }
 
-    // 歳入の状況
-    function revStats(d) {
-      return createTableFunc('歳入の状況', '歳入の状況_千円', '決算額', '構成比', d)
+    function revStatsPieChart() {
+      return {
+        title: '',
+
+      }
     }
 
-    // 歳入の状況 経常一般財源等
-    function ogRevStats(d) {
-      return createTableFunc('経常一般財源等の状況', '歳入の状況_千円', '経常一般財源等', '経常一般財源等構成比', d)
+    function countDotsForDepth(key) {
+      let count = 0
+      if (!key) {
+        return count;
+      }
+
+
+      for (let i = 0; i < key.length; i++) {
+        if (key[i] === '.') count += 1;
+      }
+
+      if (key.endsWith("合計") || key.includes("内訳")) {
+        count -= 1;
+      }
+
+      return count;
+    }
+
+
+    // 歳入の状況
+    function revStats(d) {
+      return {
+        id: 'revStats',
+        title: '歳入の状況',
+        header: [
+          {
+            name: '項目名',
+            key: 'name',
+          },
+          {
+            name: '決算額',
+            key: 'value',
+          },
+          {
+            name: '構成比',
+            key: 'ratio',
+          }
+        ],
+        rows: [
+          { name: "地方税", key: "地方税" },
+          { name: "地方譲与税", key: "地方譲与税" },
+          { name: "利子割交付金", key: "利子割交付金" },
+          { name: "配当割交付金", key: "配当割交付金" },
+          { name: "株式等譲渡所得割交付金", key: "株式等譲渡所得割交付金" },
+          { name: "分離課税所得割交付金", key: "分離課税所得割交付金" },
+          { name: "地方消費税交付金", key: "地方消費税交付金" },
+          { name: "ゴルフ場利用税交付金", key: "ゴルフ場利用税交付金" },
+          { name: "特別地方消費税交付金", key: "特別地方消費税交付金" },
+          { name: "自動車取得税交付金", key: "自動車取得税交付金" },
+          { name: "軽油引取税交付金", key: "軽油引取税交付金" },
+          { name: "自動車税環境性能割交付金", key: "自動車税環境性能割交付金" },
+          { name: "法人事業税交付金", key: "法人事業税交付金" },
+          { name: "地方特例交付金等", key: "地方特例交付金等" },
+          { name: "地方特例交付金", key: "地方特例交付金等.内訳.地方特例交付金" },
+          { name: "新型コロナウイルス感染症対策地方税減収補塡特別交付金", key: "地方特例交付金等.内訳.新型コロナウイルス感染症対策地方税減収補塡特別交付金" },
+          { name: "地方交付税", key: "地方交付税" },
+          { name: "普通交付税", key: "地方交付税.内訳.普通交付税" },
+          { name: "特別交付税", key: "地方交付税.内訳.特別交付税" },
+          { name: "震災復興特別交付税", key: "地方交付税.内訳.震災復興特別交付税" },
+          { name: "一般財源計", key: "一般財源計" },
+          { name: "交通安全対策特別交付金", key: "交通安全対策特別交付金" },
+          { name: "分担金負担金", key: "分担金負担金" },
+          { name: "使用料", key: "使用料" },
+          { name: "手数料", key: "手数料" },
+          { name: "国庫支出金", key: "国庫支出金" },
+          { name: "国有提供交付金", key: "国有提供交付金" },
+          { name: "都道府県支出金", key: "都道府県支出金" },
+          { name: "財産収入", key: "財産収入" },
+          { name: "寄附金", key: "寄附金" },
+          { name: "繰入金", key: "繰入金" },
+          { name: "繰越金", key: "繰越金" },
+          { name: "諸収入", key: "諸収入" },
+          { name: "地方債", key: "地方債" },
+        ].map(e => {
+          const key = `歳入の状況_千円.${e.key}.決算額`
+          const ratioKey = `歳入の状況_千円.${e.key}.構成比`
+          const depth = countDotsForDepth(key) - 2
+
+          let value = d[key]
+          let ratio = d[ratioKey]
+          if (!value) {
+            value = '-'
+            ratio = '-'
+          } else {
+            if (Number.isFinite(value)) {
+              value = value.toLocaleString()
+            }
+
+            if (Number.isFinite(ratio)) {
+              ratio = `${ratio.toFixed(2)} %`
+            } else {
+              ratio = '-'
+            }
+          }
+
+          return {
+            ...e,
+            ratio,
+            value,
+            depth
+          }
+        }),
+        footerRow: { name: "歳入合計", value: d[`歳入の状況_千円.歳入合計.決算額`].toLocaleString(), ratio: "100.0 %" }
+      }
     }
 
     // 市町村税の状況
     function localTaxRevStats(d) {
-      return createTableFunc('市町村税の状況・収入済額', '市町村税の状況_千円', '収入済額', '収入済額歳入合計構成比', d)
+      const rowsBase = [
+        { name: "普通税 合計", key: "普通税.合計" },
+        { name: "法定普通税 合計", key: "普通税.法定普通税.合計" },
+        { name: "市町村民税 合計", key: "普通税.法定普通税.市町村民税.合計" },
+        { name: "個人均等割", key: "普通税.法定普通税.市町村民税.個人均等割" },
+        { name: "所得割", key: "普通税.法定普通税.市町村民税.所得割" },
+        { name: "法人均等割", key: "普通税.法定普通税.市町村民税.法人均等割" },
+        { name: "法人税割", key: "普通税.法定普通税.市町村民税.法人税割" },
+        { name: "固定資産税", key: "普通税.法定普通税.固定資産税" },
+        { name: "うち純固定資産税", key: "普通税.法定普通税.固定資産税.うち純固定資産税" },
+        { name: "軽自動車税", key: "普通税.法定普通税.軽自動車税" },
+        { name: "市町村たばこ税", key: "普通税.法定普通税.市町村たばこ税" },
+        { name: "鉱産税", key: "普通税.法定普通税.鉱産税" },
+        { name: "特別土地保有税", key: "普通税.法定普通税.特別土地保有税" },
+        { name: "法定外普通税", key: "普通税.法定外普通税" },
+        { name: "目的税 合計", key: "目的税.合計" },
+        { name: "入湯税", key: "目的税.法定目的税.入湯税" },
+        { name: "事業所税", key: "目的税.法定目的税.事業所税" },
+        { name: "都市計画税", key: "目的税.法定目的税.都市計画税" },
+        { name: "水利地益税等", key: "目的税.法定目的税.水利地益税等" },
+        { name: "法定外目的税", key: "目的税.法定外目的税" },
+        { name: "旧法による税", key: "旧法による税" },
+        { name: "合計", key: "合計" },
+      ]
+
+      return {
+        id: 'localTaxRevChokaStats',
+        title: '市町村税の状況',
+        header: [
+          {
+            name: '項目名',
+            key: 'name',
+          },
+          {
+            name: '収入済額',
+            key: 'value',
+          },
+          {
+            name: '構成比',
+            key: 'ratio',
+          }
+        ],
+        rows: rowsBase.map(row => {
+          const depth = countDotsForDepth(row.key)
+          Object.assign(row, { depth })
+
+          const cellKey = row.key
+          if (!row.key) {
+            row.key = '-'
+            row.ratio = '-'
+          } else {
+
+            row.value = d[`市町村税の状況_千円.${cellKey}.収入済額`] ?? '-'
+
+            if (Number.isFinite(row.value)) {
+              row.value = row.value.toLocaleString()
+            } else {
+              row.value = '-'
+            }
+
+            row.ratio = d[`市町村税の状況_千円.${cellKey}.収入済額.歳入合計構成比`]
+            if (Number.isFinite(row.ratio)) {
+              row.ratio = `${row.ratio.toFixed(2)} %`
+            } else {
+              row.ratio = '-'
+            }
+          }
+
+          return row
+        }),
+        footerRow: { "name": "合計", "value": d["市町村税の状況_千円.合計.収入済額"].toLocaleString(), ratio: d[`市町村税の状況_千円.合計.収入済額.歳入合計構成比`].toFixed(2) + ' %' },
+      }
     }
 
     function localTaxRevChokaStats(d) {
-      return createTableFunc('超過課税分の状況', '市町村税税の状況_千円', '超過課税分', '超過課税分歳入合計構成比', d)
+      const rowsBase = [
+        { ratio: null, "name": "普通税 合計", "choka": "普通税.合計" },
+        { ratio: null, "name": "法定普通税 合計", "choka": "普通税.法定普通税.合計" },
+        { ratio: null, "name": "市町村民税 合計", "choka": "普通税.法定普通税.市町村民税.合計" },
+        { ratio: null, "name": "個人均等割", "choka": "普通税.法定普通税.市町村民税.個人均等割" },
+        { ratio: null, "name": "所得割", "choka": "普通税.法定普通税.市町村民税.所得割" },
+        { ratio: null, "name": "法人均等割", "choka": "普通税.法定普通税.市町村民税.法人均等割" },
+        { ratio: null, "name": "法人税割", "choka": "普通税.法定普通税.市町村民税.法人税割" },
+        { ratio: null, "name": "固定資産税", "choka": "普通税.法定普通税.固定資産税" },
+        { ratio: null, "name": "うち純固定資産税", "choka": "普通税.法定普通税.固定資産税.うち純固定資産税" },
+        { ratio: null, "name": "軽自動車税", "choka": "普通税.法定普通税.軽自動車税" },
+        { ratio: null, "name": "鉱産税", "choka": "普通税.法定普通税.鉱産税" },
+        { ratio: null, "name": "目的税 合計", "choka": "目的税.合計" },
+        { ratio: null, "name": "入湯税", "choka": "目的税.法定目的税.入湯税" },
+      ]
+
+      return {
+        id: 'localTaxRevChokaStats',
+        title: '超過課税分の状況',
+        header: [
+          {
+            name: '項目名',
+            key: 'name',
+          },
+          {
+            name: '超過課税分',
+            key: 'choka',
+          },
+          {
+            name: '構成比',
+            key: 'ratio',
+          }
+        ],
+        rows: rowsBase.map(row => {
+          //const row = rowsBase[idx]
+          const countDepth = () => {
+            let i = 0
+            const rowChoka = row.choka
+            if (!rowChoka) return i;
+
+            let count = 0
+            for (; i < rowChoka.length; i++) {
+              if (rowChoka[i] === '.') count += 1;
+            }
+            if (row.choka.endsWith("合計")) {
+              count -= 1;
+            }
+
+            if (count < 0) count = 0
+
+            return count;
+          }
+
+          Object.assign(row, { depth: countDepth() })
+
+          const chokaKey = row.choka
+          if (!row.choka) {
+            row.choka = '-'
+            row.ratio = '-'
+          } else {
+            row.choka = d[`市町村税の状況_千円.${chokaKey}.超過課税分`] ?? '-'
+            if (Number.isFinite(row.choka)) {
+              row.choka = row.choka.toLocaleString()
+            } else {
+              row.choka = '-'
+            }
+
+            row.ratio = d[`市町村税の状況_千円.${chokaKey}.超過課税分.歳入合計構成比`]
+            if (Number.isFinite(row.ratio)) {
+              row.ratio = `${row.ratio.toFixed(2)} %`
+            } else {
+              row.ratio = '-'
+            }
+          }
+
+          return row
+        }),
+        footerRow: { "name": "合計", "choka": d["市町村税の状況_千円.合計.超過課税分"].toLocaleString(), ratio: d[`市町村税の状況_千円.合計.超過課税分.歳入合計構成比`].toFixed(2) + ' %' },
+      }
     }
 
     // 指定団体等の指定状況
@@ -361,11 +625,6 @@
           return showDelta(prefix_, name, core, list.length - 3)
         }).filter(e => e)
       }
-    }
-
-    // 性質別歳出の状況_千円 充当一般財源等
-    function expenditureByQualityOverview_base(d) {
-      return createTableFunc('目的別歳出の状況_千円', '目的別歳出の状況', '充当一般財源等', '充当一般財源等歳出合計構成比', d)
     }
 
     function fiscalCond(d) {
@@ -488,11 +747,7 @@
 
     let _filterTimer
     function onFilterChange() {
-      searchPageParameter.taxAtDeficit = document.getElementById('filter-taxAtDeficit').checked;
-      searchPageParameter.taxRevenueNegligible = document.getElementById('filter-taxRevenueNegligible').checked;
-      searchPageParameter.taxExcessRevenueNegligible = document.getElementById('filter-taxExcessRevenueNegligible').checked;
-      searchPageParameter.excessTaxRateIntroduced = document.getElementById('filter-excessTaxRateIntroduced').checked;
-      searchPageParameter.searchText = document.getElementById("cb-search").value.trim();
+      searchParam.searchText = document.getElementById("cb-search").value.trim();
 
       clearTimeout(_filterTimer);
 
@@ -527,9 +782,15 @@
     // TABS
     // ══════════════════════════════════════════════
     function switchTab(id) {
+      ["search", "赤字税", "薄利税", "超過課税", "薄利超過課税"]
+      let tabId = 'tab-search'
+      if ('data' === id) {
+        tabId = `tab-detail`
+      }
+      console.log(tabId)
       document.querySelectorAll(".tab-panel").forEach(p => p.style.display = 'none');
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      document.getElementById(`tab-${id}`).style.display = 'flex';
+      document.getElementById(tabId).style.display = 'flex';
       document.querySelectorAll(".tab-btn").forEach(b => {
         if (b.getAttribute("onclick") === `switchTab('${id}')`) b.classList.add("active");
       });
@@ -537,8 +798,8 @@
       const url = new URL(window.location);
       url.searchParams.set("tab", id);
       history.pushState(null, "", url);
-      console.log(url)
-      if (id === 'search') {
+
+      if (tabId === 'tab-search') {
         // グリッドを一時的に取り外し、空のタブを即座に表示してから
         // グループを少しずつ再アタッチしてブラウザのレイアウトコストを分散する
         const grid = document.getElementById('entity-grid');
@@ -572,25 +833,6 @@
       btn.disabled = false;
       btn.classList.add("lit");
     }
-
-    // ══════════════════════════════════════════════
-    // CLOCK
-    // ══════════════════════════════════════════════
-    function updateClock() {
-      const now = new Date();
-      const s = now.toLocaleString("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      });
-      //document.getElementById("clock").textContent = s;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
 
     // ══════════════════════════════════════════════
     // LIST
@@ -672,6 +914,7 @@
 
       // URL に団体コードと tab= を反映（1回の pushState）
       const code = d["団体コード"];
+      2
       if (code != null) {
         const url = new URL(window.location);
         url.searchParams.set("code", code);
@@ -748,32 +991,61 @@
     }
 
     function renderTableData({ id, title, unit, header, rows, footerRow }) {
+      if (rows.length === 0) {
+        return `
+            <div id="card-table-${id}" class="card">
+              <div class="card-header">${title}</div>
+              <div class="no-data-diagonal-orange">
+                <div class="nd-badge">
+                  <span class="nd-badge-label">データ無し</span>
+                  <span class="nd-badge-sub">超過課税は導入されていません</span>
+                </div>
+              </div>
+            </div>
+        `
+      }
       const thCells = header.map((c) => `<th>${c.name}</th>`).join("");
       const footerHtml = footerRow
         ? `<tfoot><tr class="total-row">${header.map((h) => `<td>${footerRow[h.key]}</td>`).join("")}</tr></tfoot>`
         : "";
       const bodyRows = rows.slice(0, rows.length - 1).map((row) => {
-        const indentPx = row.depth === 1 ? "1.8em" : row.depth === 2 ? "3.2em" : "0";
+        const emPerDepth = [
+          0.8,
+          1.8,
+          3.2,
+          4.6,
+        ]
+        const indentPx = `${emPerDepth[row.depth] ?? 0}em`
         const trClass = row.isTotal ? ` class="total-row"` : "";
         const tdCells = header.map((header, i) => {
-          const cell = row[header.key]
+          let cell = row[header.key]
           const styles = [];
-          if (i === 0 && row.depth > 0) styles.push(`padding-left:${indentPx}`, "color:var(--white)");
+          if (i === 0) styles.push(`padding-left:${indentPx}`, "color:var(--white)");
           if (row.dim && i === 0 && row.depth === 0) styles.push("color:var(--white)");
           if (i > 0) styles.push("text-align:right");
           if (row.highlight && i === row.highlightCol) styles.push("color:var(--orange)");
           const style = styles.length ? ` style="${styles.join(";")}"` : "";
+
           return `<td${style}>${cell}</td>`;
         }).join("\n");
         return `<tr${trClass}>${tdCells}</tr>`;
       }).join("\n");
 
-      const badge = unit ? `<span class="badge">${unit}</span>` : ``
+      const dataColWidth = `${Math.floor(60 / (header.length - 1))}%`;
+      const colgroup = `<colgroup>
+                  <col style="width:auto">
+                  <col style="width:10em">
+                  <col style="width:5em">
+                </colgroup>`;
+
       return `
           <div id="card-table-${id}" class="card">
-            <div class="card-header">${title}${badge}</div>
+            <div class="card-header">
+              ${title}
+            </div>
             <div class="card-body" style="overflow-y:auto;max-height:400px;">
               <table class="data-table">
+                ${colgroup}
                 <thead>
                   <tr>
                     ${thCells}
@@ -789,34 +1061,6 @@
       `
     }
 
-    function renderTable({ columns, rows, footer }) {
-      const thCells = columns.map((c) => `<th>${c}</th>`).join("");
-      const bodyRows = rows.map((row) => {
-        const indentPx = row.indent === 1 ? "1.8em" : row.indent === 2 ? "3.2em" : "0";
-        const opacity = "";
-        const trStyle = "";
-        const trClass = row.isTotal ? `class="total-row"` : "";
-        const tdCells = row.cells.map((cell, i) => {
-          const styles = [];
-
-          if (i === 0 && row.indent > 0) styles.push(`padding-left:${indentPx}`, "color:var(--white)");
-          if (row.dim && i === 0 && row.indent === 0) styles.push("color:var(--white)");
-          if (i > 0) styles.push("text-align:right");
-          if (row.highlight && i === row.highlightCol) styles.push("color:var(--orange)");
-          const style = styles.length ? ` style="${styles.join(";")}"` : "";
-
-          return `<td${style}>${cell}</td>`;
-        }).join("");
-
-        return `<tr${trClass}>${tdCells}</tr>`;
-
-      }).join("");
-      const footerHtml = footer
-        ? `<tfoot><tr class="total-row">${footer.map((c) => `<td>${c}</td>`).join("")}</tr></tfoot>`
-        : "";
-      return `<table class="data-table"><thead><tr>${thCells}</tr></thead><tbody>${bodyRows}</tbody>${footerHtml}</table>`;
-    }
-
     // ══════════════════════════════════════════════
     // RENDER
     // ══════════════════════════════════════════════
@@ -829,6 +1073,15 @@
       const area = d["面積_km2"];
       const density = d["人口密度_人_per_km2"];
 
+      const kpiGridData = {
+        id: "kpi-grid", items: [
+          { label: "市町村類型", value: d["市町村類型"] },
+          { label: "地方交付税種地", value: d["地方交付税種地"] },
+          { label: '住民基本台帳人口 <span style="opacity:0.6;font-size:9px">令6.1.1</span>', value: fmt(pop), suffix: "人" },
+          { label: "面積", value: fmt(area), suffix: "km²" },
+          { label: "人口密度", value: fmt(density), suffix: "人/km²" },
+        ]
+      }
       let html = `
     <div id="card-summary">
       <div class="card-body">
@@ -839,33 +1092,33 @@
           </div>
         </div>
         <div class="sep"></div>
-        ${renderKpiGrid({
-        id: "kpi-grid", items: [
-          { label: "市町村類型", value: d["市町村類型"] },
-          { label: "地方交付税種地", value: d["地方交付税種地"] },
-          { label: '住民基本台帳人口 <span style="opacity:0.6;font-size:9px">令6.1.1</span>', value: fmt(pop), suffix: "人" },
-          { label: "面積", value: fmt(area), suffix: "km²" },
-          { label: "人口密度", value: fmt(density), suffix: "人/km²" },
-        ]
-      })}
-        <div class="sep"></div>
+        ${renderKpiGrid(kpiGridData)}
       </div>
     </div>
   `;
 
       // 歳入の状況: chart-sainyu
       // 市町村税の状況: chart-sainyu
+      function revStatsPieChart() {
+
+      }
       const chartSainyuFunc = (d) => renderPieChart('chart-sainyuu', d)
       const chartZeiFunc = (d) => renderPieChart('chart-zei', d)
       html += `
     <div id="row-charts" class="charts-row">
       <div id="card-chart-sainyuu" class="card">
         <div class="card-header">歳入の状況</div>
-        <div class="card-body"><div class="chart-wrap"><canvas id="chart-sainyuu"></canvas></div></div>
+        <div class="card-body chart-card-body">
+          <div class="chart-wrap"><canvas id="chart-sainyuu" class="chart-piechart"></canvas></div>
+          <div id="chart-sainyuu-legend" class="chart-legend"></div>
+        </div>
       </div>
       <div id="card-chart-zei" class="card">
         <div class="card-header">市町村税の状況</div>
-        <div class="card-body"><div class="chart-wrap"><canvas id="chart-zei"></canvas></div></div>
+        <div class="card-body chart-card-body">
+          <div class="chart-wrap"><canvas id="chart-zei" class="chart-piechart"></canvas></div>
+          <div id="chart-zei-legend" class="chart-legend"></div>
+        </div>
       </div>
     </div>
   `;
@@ -879,27 +1132,32 @@
       `
 
       const revStatData = revStats(d)
-      const ogRevStatData = ogRevStats(d)
+      const localTaxRev = localTaxRevStats(d)
       html += `
     <div id="row-tables-rev-stat" class="charts-row">
         ${renderTableData(revStatData)}
-        ${renderTableData(ogRevStatData)}
+        ${renderTableData(localTaxRev)}
     </div>
   `;
-
-      const localTaxRev = localTaxRevStats(d)
       const localTaxRevChoka = localTaxRevChokaStats(d)
       html += `
     <div id="row-tables-sainyuu-zei" class="charts-row">
-        ${renderTableData(localTaxRev)}
         ${renderTableData(localTaxRevChoka)}
+              <div id="card-chart-zei" class="card">
+        <div class="card-header">市町村税の状況</div>
+        <div class="card-body chart-card-body">
+          <div class="chart-wrap"><canvas id="chart-zei" class="chart-piechart"></canvas></div>
+          <div id="chart-zei-legend" class="chart-legend"></div>
+        </div>
+      </div>
+
     </div>
   `;
 
       container.innerHTML = html;
 
-      chartSainyuFunc(revStatData)
-      chartZeiFunc(localTaxRev)
+      chartSainyuFunc(revStatData.rows)
+      chartZeiFunc(localTaxRev.rows)
     }
 
     // ══════════════════════════════════════════════
@@ -925,7 +1183,7 @@
 
 
     // itemList: {value: number, name: string}[]
-    function renderPieChart(canvasId, itemList) {
+    function renderPieChart(canvasId, itemList = []) {
       const labels = [], values = [], colors = [];
       itemList.forEach((item, i) => {
         labels.push(item.name);
@@ -933,20 +1191,61 @@
         colors.push(BLOOMBERG_COLORS[i % BLOOMBERG_COLORS.length]);
       });
 
+
+      const legendEl = document.getElementById(`${canvasId}-legend`);
+      if (legendEl) {
+        const total = values.reduce((s, v) => s + v, 0);
+        legendEl.innerHTML = labels.map((label, i) => `
+          <div class="chart-legend-item">
+            <span class="chart-legend-dot" style="background:${colors[i]}"></span>
+            <span class="chart-legend-label">
+              ${label}
+            </span>
+            <span class="chart-legend-value">
+              <span>${values[i] ? values[i] : '-'}</span>
+              <span>/</span>
+              <span>${total ? (values[i] / total * 100).toFixed(1) : 0}%</span>
+            </span>
+          </div>`).join("");
+      }
+
       const ctx = document.getElementById(canvasId).getContext("2d");
       chartInstances[canvasId] = new Chart(ctx, {
         type: "doughnut",
         data: {
           labels,
-          datasets: [
-            { data: values, backgroundColor: colors, borderColor: "#0a0a0a", borderWidth: 2 }
-          ],
+          datasets: [{
+            data: values,
+            backgroundColor: colors,
+            borderColor: "#0a0a0a",
+            borderWidth: 0.5,
+            hoverBorderWidth: 3,
+            hoverBorderColor: "#ffffff",
+          }],
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            position: "right",
+            labels: {
+              color: "#888",
+              font: { size: 10, family: "'Noto Sans JP'" },
+              padding: 8,
+              boxWidth: 12,
+            },
+          },
           plugins: {
             legend: { display: false },
             tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = ctx.raw;
+                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = ((val / total) * 100).toFixed(2);
+                  return `${(val / 100000).toFixed(1)}億円 (${pct}%)`;
+                },
+              },
               backgroundColor: "#1a1a1a",
               borderColor: "#ff6600",
               borderWidth: 1,
@@ -957,6 +1256,7 @@
           cutout: "55%",
         },
       });
+
     }
 
     // ══════════════════════════════════════════════
@@ -975,7 +1275,6 @@
 
       // 検索テキストを復元（filterCards の URL 更新は replaceState なので安全）
       document.getElementById("cb-search").value = searchText || "";
-      filterCards();
 
       if (tab === 'search') {
         switchTab('search')
