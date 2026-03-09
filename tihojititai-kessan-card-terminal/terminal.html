@@ -549,7 +549,7 @@
 
       return {
         id: 'localTaxRevChokaStats',
-        title: '超過課税分の状況',
+        title: '一般財源に占める超過課税分の状況',
         header: [
           {
             name: '項目名',
@@ -591,16 +591,17 @@
             row.choka = '-'
             row.ratio = '-'
           } else {
-            row.choka = d[`市町村税の状況_千円.${chokaKey}.超過課税分`] ?? '-'
+            row.rawValue = d[`市町村税の状況_千円.${chokaKey}.超過課税分`]
+            row.choka = row.rawValue ?? '-'
             if (Number.isFinite(row.choka)) {
               row.choka = row.choka.toLocaleString()
             } else {
               row.choka = '-'
             }
 
-            row.ratio = d[`市町村税の状況_千円.${chokaKey}.超過課税分.歳入合計構成比`]
-            if (Number.isFinite(row.ratio)) {
-              row.ratio = `${row.ratio.toFixed(2)} %`
+            row.rawRatio = d[`市町村税の状況_千円.${chokaKey}.超過課税分`] / d[`歳入の状況_千円.一般財源計.決算額`]
+            if (Number.isFinite(row.rawRatio)) {
+              row.ratio = `${row.rawRatio.toFixed(2)} %`
             } else {
               row.ratio = '-'
             }
@@ -1152,14 +1153,14 @@
       html += `
     <div id="row-charts" class="charts-row">
       <div id="card-chart-sainyuu" class="card">
-        <div class="card-header">歳入の状況</div>
+        <div class="card-header">歳入の状況・円グラフ</div>
         <div class="card-body chart-card-body">
           <div class="chart-wrap"><canvas id="chart-sainyuu" class="chart-piechart"></canvas></div>
           <div id="chart-sainyuu-legend" class="chart-legend"></div>
         </div>
       </div>
       <div id="card-chart-zei" class="card">
-        <div class="card-header">市町村税の状況</div>
+        <div class="card-header">市町村税の状況・円グラフ</div>
         <div class="card-body chart-card-body">
           <div class="chart-wrap"><canvas id="chart-zei" class="chart-piechart"></canvas></div>
           <div id="chart-zei-legend" class="chart-legend"></div>
@@ -1180,11 +1181,11 @@
       html += `
     <div id="row-tables-choka" class="charts-row">
         ${renderTableData(localTaxRevChoka)}
-      <div id="card-chart-choka" class="card">
-        <div class="card-header">合計歳入に占める超過課税分の状況</div>
+      <div id="card-chart-choka-in-keijyo" class="card">
+        <div class="card-header">一般財源に占める超過課税分の状況</div>
         <div class="card-body chart-card-body">
           <div class="chart-wrap"><canvas id="chart-choka-in-keijyo" class="chart-piechart"></canvas></div>
-          <div id="chart-zei-legend" class="chart-legend"></div>
+          <div id="chart-choka-in-keijyo-legend" class="chart-legend"></div>
         </div>
       </div>
     </div>
@@ -1235,6 +1236,27 @@
         }
       }
       renderPieChart('chart-zei', chartLocalTax())
+
+      function chartChokaInKeiJyo() {
+        const itemList = localTaxRevChokaStats(d).rows
+          .filter(e => !e.name.includes('合計') || e.name == "固定資産税")
+          .map(e => {
+            let name = e.name
+            if (e.name.startsWith("うち純固定資産税")) {
+              name = "純固定資産税"
+            }
+            return {
+              name,
+              value: e.rawValue == null ? '-' : e.rawValue,
+              ratio: e.rawRatio
+            }
+          })
+        return {
+          itemList,
+          total: d["歳入の状況_千円.一般財源計.決算額"]
+        }
+      }
+      renderPieChart('chart-choka-in-keijyo', chartChokaInKeiJyo())
     }
 
     // ══════════════════════════════════════════════
@@ -1308,13 +1330,15 @@
       }
 
       const ctx = document.getElementById(canvasId).getContext("2d");
+
+      const finiteItemList = itemList.filter(e => e.value !== '-')
       chartInstances[canvasId] = new Chart(ctx, {
         type: "doughnut",
         data: {
-          labels: itemList.map(e => e.name),
+          labels: finiteItemList.map(e => e.name),
           datasets: [{
-            data: itemList.map(e => e.value),
-            backgroundColor: itemList.map(e => e.color),
+            data: finiteItemList.map(e => e.value),
+            backgroundColor: finiteItemList.map(e => e.color),
             borderColor: "#0a0a0a",
             borderWidth: 0.5,
             hoverBorderWidth: 3,

@@ -337,7 +337,7 @@ body {
 
 .chart-legend-value span:last-child {
   text-align: right;
-  min-width: 3em;
+  min-width: 4em;
   color: var(--gray);
 }
 
