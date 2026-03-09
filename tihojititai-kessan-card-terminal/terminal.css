@@ -120,6 +120,7 @@ body {
 
 /* ── CARDS ── */
 .card {
+  margin-top: 4px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-top: 2px solid var(--orange-dim);
@@ -144,10 +145,6 @@ body {
   padding: 1px 5px;
   font-weight: bold;
   margin-left: auto;
-}
-
-.card-body {
-  padding: 0;
 }
 
 /* ── ENTITY HEADER ── */
@@ -204,7 +201,7 @@ body {
 
 .kpi-value {
   font-family: var(--font-mono);
-  font-size: 22px;
+  font-size: 18px;
   color: var(--yellow);
 }
 
@@ -266,43 +263,45 @@ body {
 
 .chart-card-body {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  margin: 16px;
+  justify-content: center;
+  gap: 12px;
+  overflow-x: scroll;
+  min-height: 280px;
 }
 
 .chart-wrap {
   position: relative;
   display: flex;
   flex-direction: column;
-  flex: 0 1 350px;
-  min-width: 120px;
-}
-
-.chart-wrap canvas {
-  flex: 1;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
 }
 
 .chart-piechart {
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1;
+  width: 250px;
+  height: 250px;
 }
 
 .chart-legend {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 6px;
   flex: 1;
   min-width: 0;
+  align-content: flex-start;
+  max-width: 320px;
+  padding-right: 4px;
 }
 
 .chart-legend-item {
   display: flex;
   align-items: center;
   gap: 7px;
-  min-width: 0;
+  min-width: 220px;
+  flex: 1 1 160px;
 }
 
 .chart-legend-dot {
@@ -483,13 +482,23 @@ body::after {
 }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 900px) {
+@media (max-width: 414px) {
   .charts-row {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 414px) {
+  .chart-card-body {
+    flex-direction: column;
+  }
+
+  .chart-wrap {
+    min-width: unset;
+  }
+}
+
+@media (max-width: 414px) {
   #topbar {
     gap: 10px;
     padding: 0 10px;
@@ -518,6 +527,13 @@ body::after {
 
   #entity-name {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-piechart {
+    width: 300px;
+    height: 300px;
   }
 }
 

@@ -84,7 +84,9 @@
   display: none;
   flex: 1;
   overflow-y: auto;
+  padding: 8px;
   padding-bottom: 40px;
+  gap: 14px;
 }
 
 .tab-panel.active {
@@ -139,11 +141,6 @@
   color: var(--orange);
   border-bottom-color: var(--orange);
   background: rgba(255, 102, 0, 0.08);
-}
-
-#tab-search {
-  padding: 14px;
-  gap: 14px;
 }
 
 .search-toolbar {

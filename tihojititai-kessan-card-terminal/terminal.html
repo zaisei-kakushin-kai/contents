@@ -5,12 +5,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>令和５年度　地方自治体決算状況</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/msgpack-lite/0.1.26/msgpack.min.js"
     integrity="sha512-harMiusNxs02ryf3eqc3iQalz2RSd0z38vzOyuFwvQyW046h2m+/47WiDmPW9soh/p71WQMRSkhSynEww3/bOA=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="renderQuadCardGrid.js"></script>
   <script src="renderTreeSidebarNav.js"></script>
+  <script src="terminalSchema.js"></script>
+  <script src="fmt.js"></script>
   <link rel="stylesheet" href="terminal.css" />
   <link rel="stylesheet" href="terminal-tabs.css" />
   <link rel="stylesheet" href="terminal-main.css" />
@@ -47,7 +49,7 @@
         <button id="topic-tab-btn-husaisan" class="search-btn" onclick="applySearchVisibility('husaisan')">不採算税</button>
         <button id="topic-tab-btn-choka" class="search-btn" onclick="applySearchVisibility('choka')">超過課税</button>
         <button id="topic-tab-btn-husaisanchoka" class="search-btn"
-          onclick="applySearchVisibility('husaisanchoka')">不採算・超過課税</button>
+          onclick="applySearchVisibility('husaisanchoka')">不採算超過課税</button>
       </nav>
       <div class="search-row" id="search-toolbar-input">
         <div class="search-terminal-line">
@@ -85,7 +87,7 @@
 
   <script>
     let isDataLoadingFinished = false
-    const searchType = [
+    const tabTypes = [
       "all", "akaji", "husaisan", "choka", "husaisanchoka"
     ]
     const searchParam = {
@@ -96,12 +98,7 @@
       searchParam.searchType = newSearchType
     }
 
-    function moveTabBySearchVariant(searchVariant) {
-      history.pushState(null, '', new URL(window.location, {
-        searchParams: { search: searchVariant }
-      }))
-    }
-    function moveTabToCode(code) {
+    function moveTabToCode(id) {
       history.pushState(null, '', new URL(window.location, {
         searchParams: { code }
       }))
@@ -111,22 +108,47 @@
     // DATA (embedded JSON)
     // ══════════════════════════════════════════════
     let allData = [];
-    let activeIndex = null;
     let chartInstances = {};
     let header = []
     let itemByPerf = {}
-    let prefArray = []
+    let prefNameArray = []
+    let topics = {
+      akaji: {},
+      husaisan: {},
+      choka: {},
+      husaisanchok: {}
+    }
+
     // Fetch both JSON files
     async function loadData() {
       isDataLoadingFinished = false
+      const urlPrefix = "https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/"
+      const prom = Promise.all([
+        fetch(urlPrefix + "entity-grid-akaji.json"),
+        fetch(urlPrefix + "entity-grid-husaisan.json"),
+        fetch(urlPrefix + "entity-grid-choka.json"),
+        fetch(urlPrefix + "entity-grid-husaisanchok.jsona")
+      ]).then(async (e) => {
+        const akaji = await e[0].json()
+        const husaisan = await e[1].json()
+        const choka = await e[2].json()
+        const husaisanchok = await e[3].json()
+        topics = {
+          akaji,
+          husaisan,
+          choka,
+          husaisanchok
+        }
+      })
+
+
       const [_prefArray, response] = await Promise.all([
         fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/pref2num.json").then(e => e.json()),
         fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/r5_kessan_data.msgpack").then(e => e.blob())
       ])
-      prefArray = _prefArray
+      prefNameArray = _prefArray
 
       const out = await msgpack.decode(await response.bytes())
-
 
       header = Object.keys(out)
       for (let i = 0; i < out['団体名'].length; i++) {
@@ -134,11 +156,11 @@
         for (const key in out) {
           Object.assign(m, { [key]: out[key][i] })
         }
+        Object.assign(m, { id: `${m['都道府県コード']}-${m['団体コード']}` })
 
-        Object.assign(m, { "都道府県名": prefArray[m['都道府県コード'] - 1] })
+        Object.assign(m, { "都道府県名": prefNameArray[m['都道府県コード'] - 1] })
         // build all data
         allData.push(m)
-
 
         // setup per pref data
         const cardItem = buildCardItem(m, allData.length)
@@ -154,23 +176,16 @@
       }
 
       allData.sort((a, b) => {
-        a['都道府県コード'] > b['都道府県コード']
+        return a['都道府県コード'] > b['都道府県コード'] & a['団体コード'] > b['団体コード']
       })
 
       const params = new URLSearchParams(window.location.search)
-      const code = params.get("code");
+      const id = params.get("id");
       const tab = params.get("tab");
       const search = params.get("search");
 
-      if (!code) {
-        const idx = allData.findIndex((a) => String(a['団体コード']) === String(code))
-        if (idx !== -1) {
-          selectEntity(idx);
-        } else {
-          showCardBrowser();
-          applySearchVisibility(search || 'search');
-        }
-      } else {
+      if (!selectEntity(id)) {
+        showCardBrowser();
         applySearchVisibility(search || 'search');
       }
 
@@ -183,6 +198,8 @@
           clearInterval(_handle)
         }
       })
+      await prom
+      handleRouteChange()
     }
 
 
@@ -421,25 +438,10 @@
           const ratioKey = `歳入の状況_千円.${e.key}.構成比`
           const depth = countDotsForDepth(key) - 2
 
-
-          let value = d[key]
-          let ratio = d[ratioKey]
-          const rawValue = value
-          if (!value) {
-            value = '-'
-            ratio = '-'
-          } else {
-            if (Number.isFinite(value)) {
-              value = value.toLocaleString()
-            }
-
-            if (Number.isFinite(ratio)) {
-              ratio = `${ratio.toFixed(2)} %`
-            } else {
-              ratio = '-'
-            }
-          }
-
+          const rawValue = d[key]
+          const rawRatio = d[ratioKey]
+          let value = fmt1000ennToKansuji(d[key])
+          let ratio = fmtPercentage(d[ratioKey])
           return {
             ...e,
             ratio,
@@ -448,7 +450,7 @@
             rawValue
           }
         }),
-        footerRow: { name: "歳入合計", value: d['歳入の状況_千円.歳入合計.決算額'].toLocaleString(), ratio: "100.0 %" }
+        footerRow: { name: "歳入合計", value: fmt1000ennToKansuji(d['歳入の状況_千円.歳入合計.決算額']), ratio: "100.0 %" }
       }
     }
 
@@ -475,13 +477,79 @@
         { name: "都市計画税", key: "目的税.法定目的税.都市計画税" },
         { name: "水利地益税等", key: "目的税.法定目的税.水利地益税等" },
         { name: "法定外目的税", key: "目的税.法定外目的税" },
-        { name: "旧法による税", key: "旧法による税" },
-        { name: "合計", key: "合計" },
+        { name: "旧法による税", key: "旧法による税" }
       ]
 
       return {
         id: 'localTaxRevChokaStats',
-        title: '市町村税の状況',
+        title: '歳入全体に占める市町村税の状況',
+        header: [
+          {
+            name: '項目名',
+            key: 'name',
+          },
+          {
+            name: '収入済額',
+            key: 'value',
+          },
+          {
+            name: '構成比',
+            key: 'ratio',
+          }
+        ],
+        rows: rowsBase.map(row => {
+          const depth = countDotsForDepth(row.key)
+          const key = `市町村税の状況_千円.${row.key}.収入済額`
+          const ratioKey = `市町村税の状況_千円.${row.key}.収入済額.歳入合計構成比`
+
+          const rawValue = d[key]
+          const rawRatio = d[ratioKey]
+          let value = fmt1000ennToKansuji(d[key])
+          let ratio = fmtPercentage(d[ratioKey])
+          return {
+            ...row,
+            ratio,
+            value,
+            depth,
+            rawValue
+          }
+        }),
+        footerRow: {
+          name: "市町村税 合計",
+          value: fmt1000ennToKansuji(d["市町村税の状況_千円.合計.収入済額"]),
+          ratio: fmtPercentage(d[`市町村税の状況_千円.合計.収入済額.歳入合計構成比`])
+        },
+      }
+    }
+
+    function localTaxRevenueInIppanZaigen(d) {
+      const rowsBase = [
+        { name: "普通税 合計", key: "普通税.合計" },
+        { name: "法定普通税 合計", key: "普通税.法定普通税.合計" },
+        { name: "市町村民税 合計", key: "普通税.法定普通税.市町村民税.合計" },
+        { name: "個人均等割", key: "普通税.法定普通税.市町村民税.個人均等割" },
+        { name: "所得割", key: "普通税.法定普通税.市町村民税.所得割" },
+        { name: "法人均等割", key: "普通税.法定普通税.市町村民税.法人均等割" },
+        { name: "法人税割", key: "普通税.法定普通税.市町村民税.法人税割" },
+        { name: "固定資産税", key: "普通税.法定普通税.固定資産税" },
+        { name: "うち純固定資産税", key: "普通税.法定普通税.固定資産税.うち純固定資産税" },
+        { name: "軽自動車税", key: "普通税.法定普通税.軽自動車税" },
+        { name: "市町村たばこ税", key: "普通税.法定普通税.市町村たばこ税" },
+        { name: "鉱産税", key: "普通税.法定普通税.鉱産税" },
+        { name: "特別土地保有税", key: "普通税.法定普通税.特別土地保有税" },
+        { name: "法定外普通税", key: "普通税.法定外普通税" },
+        { name: "目的税 合計", key: "目的税.合計" },
+        { name: "入湯税", key: "目的税.法定目的税.入湯税" },
+        { name: "事業所税", key: "目的税.法定目的税.事業所税" },
+        { name: "都市計画税", key: "目的税.法定目的税.都市計画税" },
+        { name: "水利地益税等", key: "目的税.法定目的税.水利地益税等" },
+        { name: "法定外目的税", key: "目的税.法定外目的税" },
+        { name: "旧法による税", key: "旧法による税" },
+      ]
+
+      return {
+        id: 'localTaxRevenueInIppanZaigen',
+        title: '一般財源に占める市町村税の状況',
         header: [
           {
             name: '項目名',
@@ -500,56 +568,50 @@
           const depth = countDotsForDepth(row.key)
           Object.assign(row, { depth })
 
-
-          const cellKey = row.key
+          const key = row.key
           if (!row.key) {
-            row.key = '-'
+            row.value = '-'
             row.ratio = '-'
           } else {
-
-            row.value = d[`市町村税の状況_千円.${cellKey}.収入済額`] ?? '-'
-            row.rawValue = row.value
-
-            if (Number.isFinite(row.value)) {
-              row.value = row.value.toLocaleString()
-            } else {
-              row.value = '-'
-            }
-
-            row.ratio = d[`市町村税の状況_千円.${cellKey}.収入済額.歳入合計構成比`]
-            if (Number.isFinite(row.ratio)) {
-              row.ratio = `${row.ratio.toFixed(2)} %`
-            } else {
-              row.ratio = '-'
-            }
+            row.rawValue = d[`市町村税の状況_千円.${key}.収入済額`]
+            row.value = fmt1000ennToKansuji(d[`市町村税の状況_千円.${key}.収入済額`])
+            row.rawRatio = d[`市町村税の状況_千円.${key}.収入済額`] / d[`歳入の状況_千円.一般財源計.決算額`] * 100
+            row.ratio = fmtPercentage(row.rawRatio)
           }
 
           return row
         }),
-        footerRow: { "name": "合計", "value": d["市町村税の状況_千円.合計.収入済額"].toLocaleString(), ratio: d[`市町村税の状況_千円.合計.収入済額.歳入合計構成比`].toFixed(2) + ' %' },
+        footerRow: {
+          name: "市町村税 合計",
+          value: fmt1000ennToKansuji(d["市町村税の状況_千円.合計.収入済額"]),
+          ratio: fmtPercentage(d["市町村税の状況_千円.合計.収入済額"] / d[`歳入の状況_千円.一般財源計.決算額`] * 100)
+        },
       }
     }
 
-    function localTaxRevChokaStats(d) {
+    function localTaxRevChokaInIppanZaigen(d) {
       const rowsBase = [
-        { ratio: null, "name": "普通税 合計", "choka": "普通税.合計" },
-        { ratio: null, "name": "法定普通税 合計", "choka": "普通税.法定普通税.合計" },
-        { ratio: null, "name": "市町村民税 合計", "choka": "普通税.法定普通税.市町村民税.合計" },
-        { ratio: null, "name": "個人均等割", "choka": "普通税.法定普通税.市町村民税.個人均等割" },
-        { ratio: null, "name": "所得割", "choka": "普通税.法定普通税.市町村民税.所得割" },
-        { ratio: null, "name": "法人均等割", "choka": "普通税.法定普通税.市町村民税.法人均等割" },
-        { ratio: null, "name": "法人税割", "choka": "普通税.法定普通税.市町村民税.法人税割" },
-        { ratio: null, "name": "固定資産税", "choka": "普通税.法定普通税.固定資産税" },
-        { ratio: null, "name": "うち純固定資産税", "choka": "普通税.法定普通税.固定資産税.うち純固定資産税" },
-        { ratio: null, "name": "軽自動車税", "choka": "普通税.法定普通税.軽自動車税" },
-        { ratio: null, "name": "鉱産税", "choka": "普通税.法定普通税.鉱産税" },
-        { ratio: null, "name": "目的税 合計", "choka": "目的税.合計" },
-        { ratio: null, "name": "入湯税", "choka": "目的税.法定目的税.入湯税" },
+        { "name": "普通税 合計", "choka": "普通税.合計" },
+        { "name": "法定普通税 合計", "choka": "普通税.法定普通税.合計" },
+        { "name": "市町村民税 合計", "choka": "普通税.法定普通税.市町村民税.合計" },
+        { "name": "個人均等割", "choka": "普通税.法定普通税.市町村民税.個人均等割" },
+        { "name": "所得割", "choka": "普通税.法定普通税.市町村民税.所得割" },
+        { "name": "法人均等割", "choka": "普通税.法定普通税.市町村民税.法人均等割" },
+        { "name": "法人税割", "choka": "普通税.法定普通税.市町村民税.法人税割" },
+        { "name": "固定資産税", "choka": "普通税.法定普通税.固定資産税" },
+        { "name": "うち純固定資産税", "choka": "普通税.法定普通税.固定資産税.うち純固定資産税" },
+        { "name": "軽自動車税", "choka": "普通税.法定普通税.軽自動車税" },
+        { "name": "鉱産税", "choka": "普通税.法定普通税.鉱産税" },
+        { "name": "目的税 合計", "choka": "目的税.合計" },
+        { "name": "入湯税", "choka": "目的税.法定目的税.入湯税" },
+        { name: "事業所税", choka: "目的税.法定目的税.事業所税" },
+        { name: "都市計画税", choka: "目的税.法定目的税.都市計画税" },
+        { name: "水利地益税等", choka: "目的税.法定目的税.水利地益税等" },
       ]
 
       return {
         id: 'localTaxRevChokaStats',
-        title: '超過課税分の状況',
+        title: '一般財源に占める超過課税分の状況',
         header: [
           {
             name: '項目名',
@@ -557,7 +619,7 @@
           },
           {
             name: '超過課税分',
-            key: 'choka',
+            key: 'value',
           },
           {
             name: '構成比',
@@ -586,33 +648,17 @@
 
           Object.assign(row, { depth: countDepth() })
 
-          const chokaKey = row.choka
-          if (!row.choka) {
-            row.choka = '-'
-            row.ratio = '-'
-          } else {
-            row.rawValue = d[`市町村税の状況_千円.${chokaKey}.超過課税分`]
-            row.choka = row.rawValue ?? '-'
-            if (Number.isFinite(row.choka)) {
-              row.choka = row.choka.toLocaleString()
-            } else {
-              row.choka = '-'
-            }
-
-            row.rawRatio = d[`市町村税の状況_千円.${chokaKey}.超過課税分`] / d[`歳入の状況_千円.一般財源計.決算額`]
-            if (Number.isFinite(row.rawRatio)) {
-              row.ratio = `${row.rawRatio.toFixed(2)} %`
-            } else {
-              row.ratio = '-'
-            }
-          }
-
+          const key = row.choka
+          row.rawValue = d[`市町村税の状況_千円.${key}.超過課税分`]
+          row.value = fmt1000ennToKansuji(d[`市町村税の状況_千円.${key}.超過課税分`])
+          row.rawRatio = d[`市町村税の状況_千円.${key}.超過課税分`] / d[`歳入の状況_千円.一般財源計.決算額`] * 100
+          row.ratio = fmtPercentage(row.rawRatio)
           return row
         }),
         footerRow: {
-          name: "合計",
-          choka: (d["市町村税の状況_千円.合計.超過課税分"] ?? '').toLocaleString(),
-          ratio: Number.isFinite(d[`市町村税の状況_千円.合計.超過課税分`]) ? (d[`市町村税の状況_千円.合計.超過課税分`] / d["歳入の状況_千円.一般財源計.決算額"]).toFixed(2) + ' %' : '-'
+          name: "超過課税分 合計",
+          value: fmt1000ennToKansuji(d["市町村税の状況_千円.合計.超過課税分"]),
+          ratio: fmtPercentage(d[`市町村税の状況_千円.合計.超過課税分`] / d["歳入の状況_千円.一般財源計.決算額"])
         },
       }
     }
@@ -740,14 +786,14 @@
     // ══════════════════════════════════════════════
     // CARD BROWSER
     // ══════════════════════════════════════════════
-    function buildCardItem(d, idx) {
+    function buildCardItem(d) {
       const pop = d["人口.住民基本台帳人口.令6_1_1"];
       const density = d["人口密度_人_per_km2"];
       const area = d["面積_km2"];
       const revenue = d["歳入の状況_千円.歳入合計.決算額"];
       const localTax = d["市町村税の状況_千円.普通税.合計.収入済額"];
       return {
-        idx,
+        id: d['id'],
         name: d["団体名"] || "N/A",
         badge: d["市町村類型"] || "N/A",
         pref: d["都道府県名"] || "N/A",
@@ -755,8 +801,8 @@
           { label: "人口", value: pop ? Number(pop).toLocaleString() + " 人" : "-" },
           { label: "人口密度", value: density ? density + " 人/km²" : "-" },
           { label: "面積", value: area ? area + " km²" : "-" },
-          { label: "歳入合計", value: revenue ? fmtOku(Number(revenue)) : "-" },
-          { label: "市町村税合計", value: localTax ? fmtOku(Number(localTax)) : "-" },
+          { label: "歳入合計", value: revenue ? fmt1000ennToKansuji(Number(revenue)) : "-" },
+          { label: "市町村税合計", value: localTax ? fmt1000ennToKansuji(Number(localTax)) : "-" },
         ],
       };
     }
@@ -764,8 +810,8 @@
 
     function renderCards() {
       const cardHtml = d => `
-        <div id="card-${d.idx}" class="entity-card" onclick="selectEntity(${d.idx})">
-          <div id="card-${d.idx}-title" class="ec-header">
+        <div id="card-${d.id}" class="entity-card" onclick="selectEntity('${d.id}')">
+          <div id="card-${d.id}-title" class="ec-header">
             <h2>${d.name}</h2>
             <div class="ec-badge">
               ${d.badge}
@@ -783,7 +829,7 @@
 
       const grid = document.getElementById("entity-grid");
       grid.innerHTML = "";
-      const keys = prefArray
+      const keys = prefNameArray
       let i = 0;
 
       function renderChunk() {
@@ -854,8 +900,7 @@
     function showCardBrowser() {
       switchTab('search'); // URL は下の pushState にまとめる
       const url = new URL(window.location);
-      url.searchParams.delete("code");
-      url.searchParams.set("tab", "search");
+      url.searchParams = new URLSearchParams({ tab: "search" })
       history.pushState(null, "", url);
     }
 
@@ -886,7 +931,7 @@
 
       // URL を更新
       const url = new URL(window.location);
-      url.searchParams.set('search', searchValue);
+      url.searchParams = new URLSearchParams({ 'search': searchValue })
       history.pushState(null, '', url);
 
       updateVisibleCount();
@@ -928,9 +973,8 @@
     }
 
     function deactivateDetail() {
-      Object.values(chartInstances).forEach(c => c.destroy());
+      Object.values(chartInstances).forEach(c => c.dispose());
       chartInstances = {};
-      activeIndex = null;
       document.getElementById("detail").innerHTML = "";
       const btn = document.getElementById("tab-btn-detail");
       btn.disabled = true;
@@ -955,43 +999,22 @@
     // ══════════════════════════════════════════════
     // SELECT ENTITY
     // ══════════════════════════════════════════════
-    function selectEntity(idx) {
-      activeIndex = idx;
+    function selectEntity(id) {
+      const record = allData.find((a) => String(a['id']) === String(id))
+      if (!record) {
+        return false
+      }
 
       activateDetail();
+
       const detail = document.getElementById("detail");
-      const d = allData[idx];
-      renderDetail(d, detail);
+      renderDetail(record, detail);
 
       switchTab('detail');
 
-      // URL に団体コードと tab= を反映（1回の pushState）
-      const code = d["団体コード"];
-
-      if (code != null) {
-        const url = new URL(window.location);
-        url.searchParams.set("code", code);
-        url.searchParams.set("tab", "detail");
-        history.pushState(null, "", url);
-      }
-    }
-
-    // ══════════════════════════════════════════════
-    // UTILITIES
-    // ══════════════════════════════════════════════
-    function fmt(v) {
-      if (v === "-" || v === null || v === undefined) return "-";
-      if (typeof v === "number") return v.toLocaleString();
-      return v;
-    }
-    function fmtOku(v) {
-      if (v === "-" || v === null || v === undefined) return "-";
-      if (typeof v === "number") return (v / 100000).toFixed(1) + "億円";
-      return v;
-    }
-    function numVal(v) {
-      if (typeof v === "number") return v;
-      return null;
+      const url = new URL(window.location);
+      url.search = new URLSearchParams({ "id": id }).toString()
+      history.pushState(null, "", url);
     }
 
     /**
@@ -1044,7 +1067,7 @@
     }
 
     function renderTableData({ id, title, unit, header, rows, footerRow }) {
-      if (rows.length === 0) {
+      if (footerRow['value'] === '-') {
         return `
             <div id="card-table-${id}" class="card">
               <div class="card-header">${title}</div>
@@ -1061,7 +1084,7 @@
       const footerHtml = footerRow
         ? `<tfoot><tr class="total-row">${header.map((h) => `<td>${footerRow[h.key]}</td>`).join("")}</tr></tfoot>`
         : "";
-      const bodyRows = rows.slice(0, rows.length - 1).map((row) => {
+      const bodyRows = rows.map((row) => {
         const emPerDepth = [
           0.8,
           1.8,
@@ -1084,19 +1107,18 @@
         return `<tr${trClass}>${tdCells}</tr>`;
       }).join("\n");
 
-      const dataColWidth = `${Math.floor(60 / (header.length - 1))}%`;
       const colgroup = `<colgroup>
-                  <col style="width:auto">
-                  <col style="width:10em">
-                  <col style="width:5em">
-                </colgroup>`;
+        <col style="max-width:60%">
+        <col style="width:12em">
+        <col style="width:5em">
+      </colgroup>`;
 
       return `
           <div id="card-table-${id}" class="card">
             <div class="card-header">
               ${title}
             </div>
-            <div class="card-body" style="overflow-y:auto;max-height:400px;">
+            <div class="card-body">
               <table class="data-table">
                 ${colgroup}
                 <thead>
@@ -1118,7 +1140,7 @@
     // RENDER
     // ══════════════════════════════════════════════
     function renderDetail(d, container) {
-      Object.values(chartInstances).forEach((c) => c.destroy());
+      Object.values(chartInstances).forEach((c) => c.dispose());
       chartInstances = {};
 
       const pop = d["人口.住民基本台帳人口.令6_1_1"];
@@ -1130,9 +1152,9 @@
         id: "kpi-grid", items: [
           { label: "市町村類型", value: d["市町村類型"] },
           { label: "地方交付税種地", value: d["地方交付税種地"] },
-          { label: '住民基本台帳人口 <span style="opacity:0.6;font-size:9px">令6.1.1</span>', value: fmt(pop), suffix: "人" },
-          { label: "面積", value: fmt(area), suffix: "km²" },
-          { label: "人口密度", value: fmt(density), suffix: "人/km²" },
+          { label: '住民基本台帳人口 <span style="opacity:0.6;font-size:9px">令6.1.1</span>', value: fmtNumber(pop), suffix: "人" },
+          { label: "面積", value: fmtNumber(area), suffix: "km²" },
+          { label: "人口密度", value: fmtNumber(density), suffix: "人/km²" },
         ]
       }
       let html = `
@@ -1151,40 +1173,60 @@
   `;
 
       html += `
-    <div id="row-charts" class="charts-row">
-      <div id="card-chart-sainyuu" class="card">
-        <div class="card-header">歳入の状況・円グラフ</div>
-        <div class="card-body chart-card-body">
-          <div class="chart-wrap"><canvas id="chart-sainyuu" class="chart-piechart"></canvas></div>
-          <div id="chart-sainyuu-legend" class="chart-legend"></div>
+      <div class="charts-row">
+        <div id="card-chart-sainyuu" class="card">
+          <div class="card-header">歳入の状況・円グラフ</div>
+          <div class="card-body chart-card-body">
+            <div class="chart-wrap"><div id="chart-sainyuu" class="chart-piechart"></div></div>
+            <div id="chart-sainyuu-legend" class="chart-legend"></div>
+          </div>
+        </div>
+        <div id="card-chart-zei" class="card">
+          <div class="card-header">市町村税の状況・円グラフ</div>
+          <div class="card-body chart-card-body">
+            <div class="chart-wrap">
+              <div id="chart-zei" class="chart-piechart"></div>
+            </div>
+            <div id="chart-zei-legend" class="chart-legend"></div>
+          </div>
         </div>
       </div>
-      <div id="card-chart-zei" class="card">
-        <div class="card-header">市町村税の状況・円グラフ</div>
-        <div class="card-body chart-card-body">
-          <div class="chart-wrap"><canvas id="chart-zei" class="chart-piechart"></canvas></div>
-          <div id="chart-zei-legend" class="chart-legend"></div>
-        </div>
-      </div>
-    </div>
   `;
 
       const revStatData = revStats(d)
       const localTaxRev = localTaxRevStats(d)
+      html += '<div class="charts-row">'
+      html += renderTableData(revStatData)
+      html += renderTableData(localTaxRev)
+      html += '</div>'
+
+      const localTaxRevIppan = localTaxRevenueInIppanZaigen(d)
+      html += '<div class="charts-row">'
+      html += renderTableData(localTaxRevIppan)
       html += `
-    <div id="row-tables-rev-stat" class="charts-row">
-        ${renderTableData(revStatData)}
-        ${renderTableData(localTaxRev)}
-    </div>
-  `;
-      const localTaxRevChoka = localTaxRevChokaStats(d)
+      <div id="card-chart-${localTaxRevIppan.id}" class="card">
+        <div class="card-header">${localTaxRevIppan.title}・円グラフ</div>
+        <div class="card-body chart-card-body">
+          <div class="chart-wrap">
+            <div id="chart-${localTaxRevIppan.id}" class="chart-piechart"></div>
+          </div>
+          <div id="chart-${localTaxRevIppan.id}-legend" class="chart-legend"></div>
+        </div>
+      </div>
+      `
+      html += '</div>'
+
+      const localTaxRevChoka = localTaxRevChokaInIppanZaigen(d)
+
       html += `
     <div id="row-tables-choka" class="charts-row">
         ${renderTableData(localTaxRevChoka)}
       <div id="card-chart-choka-in-keijyo" class="card">
-        <div class="card-header">一般財源に占める超過課税分の状況</div>
+        <div class="card-header">一般財源に占める超過課税分の状況・円グラフ</div>
         <div class="card-body chart-card-body">
-          <div class="chart-wrap"><canvas id="chart-choka-in-keijyo" class="chart-piechart"></canvas></div>
+          <div class="chart-wrap">
+            <div id="chart-choka-in-keijyo" class="chart-piechart"></div>
+          </div>
           <div id="chart-choka-in-keijyo-legend" class="chart-legend"></div>
         </div>
       </div>
@@ -1237,8 +1279,30 @@
       }
       renderPieChart('chart-zei', chartLocalTax())
 
+      function localTaxRevIppanTax() {
+        const itemList = localTaxRevIppan.rows
+          .filter(e => !e.name.includes('合計') || e.name == "固定資産税")
+          .map(e => {
+            let name = e.name
+            if (e.name.startsWith("うち純固定資産税")) {
+              name = "純固定資産税"
+            }
+            return {
+              name,
+              value: e.rawValue,
+              ratio: parseFloat(e.ratio)
+            }
+          })
+        return {
+          itemList,
+          total: d["歳入の状況_千円.一般財源計.決算額"]
+        }
+      }
+      renderPieChart(`chart-${localTaxRevIppan.id}`, localTaxRevIppanTax())
+
+
       function chartChokaInKeiJyo() {
-        const itemList = localTaxRevChokaStats(d).rows
+        const itemList = localTaxRevChokaInIppanZaigen(d).rows
           .filter(e => !e.name.includes('合計'))
           .filter(e => !e.name.startsWith("固定資産税"))
           .map(e => {
@@ -1290,7 +1354,7 @@
         remainder -= item.value
       }
 
-      const itemList = [{ value: remainder, ratio: (remainder / dataset.total) * 100, name: 'その他', isLast: true, color: '#696969' }]
+      const itemList = [{ value: remainder, ratio: (remainder / dataset.total) * 100, name: dataset.remainderName ?? 'その他', isLast: true, color: '#696969' }]
       dataset.itemList.forEach(e => itemList.push(e))
       itemList.sort((a, b) => a.isLast)
 
@@ -1303,19 +1367,9 @@
       const legendEl = document.getElementById(`${canvasId}-legend`);
       if (legendEl) {
         const createText = (item) => `
-          <span>
-          ${Number.isFinite(item.value)
-            ? item.value.toLocaleString()
-            : item.value
-          }
-          </span>
+          <span>${fmt1000ennToKansuji(item.value)}</span>
           <span>/</span>
-          <span style="width: 2rem">
-          ${Number.isFinite(item.ratio)
-            ? item.ratio.toFixed(1)
-            : item.ratio
-          } %
-          </span>
+          <span>${fmtPercentage(item.ratio)}</span>
         `
         const emptyValue = "-"
         legendEl.innerHTML = itemList.map((item, idx) => `
@@ -1325,58 +1379,41 @@
               ${item.name}
             </span>
             <span class="chart-legend-value">
-              ${item.value === '-' ? emptyValue : createText(item)}
+              ${Number.isFinite(item.value) ? createText(item) : emptyValue}
             </span>
           </div>`).join("");
       }
 
-      const ctx = document.getElementById(canvasId).getContext("2d");
-
-      const finiteItemList = itemList.filter(e => e.value !== '-')
-      chartInstances[canvasId] = new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels: finiteItemList.map(e => e.name),
-          datasets: [{
-            data: finiteItemList.map(e => e.value),
-            backgroundColor: finiteItemList.map(e => e.color),
-            borderColor: "#0a0a0a",
-            borderWidth: 0.5,
-            hoverBorderWidth: 3,
-            hoverBorderColor: "#ffffff",
-          }],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          legend: {
-            position: "right",
-            labels: {
-              color: "#888",
-              font: { size: 10, family: "'Noto Sans JP'" },
-              padding: 8,
-              boxWidth: 12,
-            },
+      const el = document.getElementById(canvasId);
+      const finiteItemList = itemList.filter(e => e.value !== '-');
+      const chart = echarts.init(el);
+      chartInstances[canvasId] = chart;
+      chart.setOption({
+        textStyle: { fontFamily: '"Noto Sans JP", sans-serif' },
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: '#1a1a1a',
+          borderColor: '#ff6600',
+          borderWidth: 1,
+          textStyle: { color: '#e8e8e8', fontFamily: '"Noto Sans JP", sans-serif' },
+          appendToBody: true,
+          extraCssText: 'z-index: 9999;',
+          formatter: (params) => {
+            const pct = ((params.value / total) * 100).toFixed(2);
+            return `${params.name}<br/>${(params.value / 10000).toFixed(1)}億円 (${pct}%)`;
           },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => {
-                  const val = ctx.raw;
-                  const pct = ((val / total) * 100).toFixed(2);
-                  return `${(val / 10000).toFixed(1)}億円 (${pct}%)`;
-                },
-              },
-              backgroundColor: "#1a1a1a",
-              borderColor: "#ff6600",
-              borderWidth: 1,
-              titleColor: "#ff8833",
-              bodyColor: "#e8e8e8",
-            },
-          },
-          cutout: "55%",
         },
+        series: [{
+          type: 'pie',
+          radius: ['55%', '80%'],
+          data: finiteItemList.map(e => ({
+            value: e.value,
+            name: e.name,
+            itemStyle: { color: e.color, borderColor: '#0a0a0a', borderWidth: 0.5 },
+            emphasis: { itemStyle: { borderColor: '#ffffff', borderWidth: 1 } },
+          })),
+          label: { show: false },
+        }],
       });
 
     }
@@ -1386,38 +1423,7 @@
     // ══════════════════════════════════════════════
     loadData();
 
-    // ブラウザの戻る/進むに対応
-    // ※ popstate 内では pushState/replaceState を呼ばない（ループ防止）
-    window.addEventListener("popstate", (e) => {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
-      const code = params.get("code");
 
-      document.getElementById("cb-search").value = searchParam.searchText || "";
-
-      if (tab === 'search') {
-        switchTab('search')
-        return;
-      }
-
-      if (code) {
-        const idx = allData.findIndex((d) => String(d["団体コード"]) === code);
-        if (idx !== -1) {
-          // selectEntity は pushState を含むため直接 UI 復元する
-          activeIndex = idx;
-          switchTab('detail');
-          activateDetail();
-          renderDetail(allData[idx], document.getElementById("detail"));
-
-        } else {
-          switchTab('search');
-        }
-      } else {
-        activeIndex = null;
-        const tabId = TAB_ID[params.get("tab")] ?? 'search';
-        switchTab(tabId);
-      }
-    });
     const palette = [
       {
         "id": "red",
@@ -1451,9 +1457,19 @@
       }
     ]
 
-    setTimeout(() => {
+    function handleRouteChange() {
+      const currentURL = window.location
+      const searchParams = new URLSearchParams(currentURL.search)
+      selectEntity(searchParams.get("id"))
+    }
 
+    // pushState をラップしてカスタムイベントを発火
+    // popstate（ブラウザの戻る/進む）も同じイベントに統一
+    window.addEventListener('popstate', () => {
+      window.dispatchEvent(new Event('routechange'))
     })
+
+    window.addEventListener('routechange', handleRouteChange)
   </script>
 </body>
 
