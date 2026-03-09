@@ -166,6 +166,36 @@
   gap: 10px;
 }
 
+.search-terminal-line {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--orange-dim);
+  padding: 0 10px;
+  gap: 8px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.search-terminal-line:focus-within {
+  border-color: var(--orange);
+  box-shadow:
+    0 0 0 1px var(--orange-dim),
+    0 0 8px #ff660033;
+}
+
+.search-prompt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--orange);
+  text-shadow: 0 0 6px #ff660099;
+  user-select: none;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+
 .search-filters {
   display: flex;
   align-items: center;
@@ -257,18 +287,20 @@
 }
 
 .search-input {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: none;
   color: var(--white);
   font-family: var(--font-mono);
   font-size: 12px;
-  padding: 7px 12px;
+  padding: 7px 0;
   flex: 1;
   outline: none;
+  caret-color: var(--orange);
 }
 
-.search-input:focus {
-  border-color: var(--orange);
+.search-input::placeholder {
+  color: var(--gray-dim);
+  font-style: italic;
 }
 
 .search-count {
@@ -276,6 +308,25 @@
   font-size: 11px;
   color: var(--gray);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 48px;
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+.search-count-label {
+  color: var(--gray-dim);
+  font-size: 9px;
+  letter-spacing: 2px;
+  border: 1px solid var(--gray-dim);
+  padding: 1px 4px;
+}
+
+.search-count-num {
+  color: var(--cyan);
+  font-size: 13px;
 }
 
 /* ── PICKS TAB ── */

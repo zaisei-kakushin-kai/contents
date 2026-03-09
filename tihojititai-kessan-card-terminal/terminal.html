@@ -9,11 +9,25 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/msgpack-lite/0.1.26/msgpack.min.js"
     integrity="sha512-harMiusNxs02ryf3eqc3iQalz2RSd0z38vzOyuFwvQyW046h2m+/47WiDmPW9soh/p71WQMRSkhSynEww3/bOA=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="renderQuadCardGrid.js"></script>
+  <script src="renderTreeSidebarNav.js"></script>
   <link rel="stylesheet" href="terminal.css" />
   <link rel="stylesheet" href="terminal-tabs.css" />
+  <link rel="stylesheet" href="terminal-main.css" />
 </head>
 
 <body>
+  <!-- LOADING OVERLAY -->
+  <div id="loading-overlay">
+    <div class="ld-badge">
+      <span class="ld-label">LOADING</span>
+      <div class="ld-bar">
+        <div class="ld-bar-inner"></div>
+      </div>
+      <span class="ld-sub">データを読み込んでいます...</span>
+    </div>
+  </div>
+
   <!-- TOP BAR -->
   <div id="topbar">
     <span class="logo" style="font-size: 12px; color: var(--yellow)">令和５年度　地方自治体決算</span>
@@ -27,19 +41,29 @@
   <div id="tab-search" class="tab-panel active">
     <div class="search-toolbar">
       <nav id="tab-search-bar">
-        <button id="topic-search" class="search-btn active" onclick="switchTab('search')">すべて</button>
-        <button id="topic-akaji" class="search-btn" onclick="switchTab('akaji')">赤字税</button>
-        <button id="topic-hakuri" class="search-btn" onclick="switchTab('hakuri')">薄利税</button>
-        <button id="topic-choka" class="search-btn" onclick="switchTab('choka')">超過課税</button>
-        <button id="topic-hakuri-choka" class="search-btn" onclick="switchTab('hakuri-choka')">薄利超過課税</button>
+        <button id="topic-tab-btn-search" class="search-btn active"
+          onclick="applySearchVisibility('search')">すべて</button>
+        <button id="topic-tab-btn-akaji" class="search-btn" onclick="applySearchVisibility('akaji')">赤字税</button>
+        <button id="topic-tab-btn-husaisan" class="search-btn" onclick="applySearchVisibility('husaisan')">不採算税</button>
+        <button id="topic-tab-btn-choka" class="search-btn" onclick="applySearchVisibility('choka')">超過課税</button>
+        <button id="topic-tab-btn-husaisanchoka" class="search-btn"
+          onclick="applySearchVisibility('husaisanchoka')">不採算・超過課税</button>
       </nav>
-      <div class="search-row">
-        <input id="cb-search" class="search-input" type="text" placeholder="自治体名・都道府県名で検索..."
-          oninput="onFilterChange()" />
-        <span id="cb-count" class="search-count"></span>
+      <div class="search-row" id="search-toolbar-input">
+        <div class="search-terminal-line">
+          <span class="search-prompt">&gt;_</span>
+          <input id="cb-search" class="search-input" type="text" placeholder="自治体名・都道府県名で検索..."
+            oninput="onFilterChange()" />
+        </div>
+        <span id="cb-count" class="search-count">
+          <span class="search-count-num">—</span> 件</span>
       </div>
     </div>
     <div id="entity-grid"></div>
+    <div id="entity-grid-akaji"></div>
+    <div id="entity-grid-husaisan"></div>
+    <div id="entity-grid-choka"></div>
+    <div id="entity-grid-husaisanchoka"></div>
   </div>
 
   <!-- TAB: データ -->
@@ -58,9 +82,11 @@
       </span>
     </div>
   </footer>
+
   <script>
+    let isDataLoadingFinished = false
     const searchType = [
-      "all", "akaji", "hakuri", "choka", "hakuri-choka"
+      "all", "akaji", "husaisan", "choka", "husaisanchoka"
     ]
     const searchParam = {
       searchText: '',
@@ -68,6 +94,17 @@
     }
     function updatesearchParam(newSearchType) {
       searchParam.searchType = newSearchType
+    }
+
+    function moveTabBySearchVariant(searchVariant) {
+      history.pushState(null, '', new URL(window.location, {
+        searchParams: { search: searchVariant }
+      }))
+    }
+    function moveTabToCode(code) {
+      history.pushState(null, '', new URL(window.location, {
+        searchParams: { code }
+      }))
     }
 
     // ══════════════════════════════════════════════
@@ -81,6 +118,7 @@
     let prefArray = []
     // Fetch both JSON files
     async function loadData() {
+      isDataLoadingFinished = false
       const [_prefArray, response] = await Promise.all([
         fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/pref2num.json").then(e => e.json()),
         fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/r5_kessan_data.msgpack").then(e => e.blob())
@@ -98,13 +136,13 @@
         }
 
         Object.assign(m, { "都道府県名": prefArray[m['都道府県コード'] - 1] })
-
-        const cardItem = buildCardItem(m, allData.length)
-        Object.assign(m, { cardItem })
-
         // build all data
         allData.push(m)
 
+
+        // setup per pref data
+        const cardItem = buildCardItem(m, allData.length)
+        Object.assign(m, { cardItem })
         if (!itemByPerf[cardItem.pref]) {
           itemByPerf[cardItem.pref] = []
         }
@@ -116,13 +154,13 @@
       }
 
       allData.sort((a, b) => {
-        a['都道府県コード'] > b['都道府県コード'] &&
-          a['団体コード'] > b['団体コード']
+        a['都道府県コード'] > b['都道府県コード']
       })
 
       const params = new URLSearchParams(window.location.search)
       const code = params.get("code");
       const tab = params.get("tab");
+      const search = params.get("search");
 
       if (!code) {
         const idx = allData.findIndex((a) => String(a['団体コード']) === String(code))
@@ -130,13 +168,23 @@
           selectEntity(idx);
         } else {
           showCardBrowser();
+          applySearchVisibility(search || 'search');
         }
       } else {
-        switchTab('search');
+        applySearchVisibility(search || 'search');
       }
 
-      console.log(header)
+      renderCards()
+
+      let _handle;
+      _handle = setInterval(() => {
+        if (isDataLoadingFinished) {
+          document.getElementById('loading-overlay').style.display = 'none'
+          clearInterval(_handle)
+        }
+      })
     }
+
 
     // メタデータ
     function metaOverview(d) {
@@ -354,7 +402,7 @@
           { name: "普通交付税", key: "地方交付税.内訳.普通交付税" },
           { name: "特別交付税", key: "地方交付税.内訳.特別交付税" },
           { name: "震災復興特別交付税", key: "地方交付税.内訳.震災復興特別交付税" },
-          { name: "一般財源計", key: "一般財源計" },
+          //{ name: "一般財源計", key: "一般財源計" },
           { name: "交通安全対策特別交付金", key: "交通安全対策特別交付金" },
           { name: "分担金負担金", key: "分担金負担金" },
           { name: "使用料", key: "使用料" },
@@ -373,8 +421,10 @@
           const ratioKey = `歳入の状況_千円.${e.key}.構成比`
           const depth = countDotsForDepth(key) - 2
 
+
           let value = d[key]
           let ratio = d[ratioKey]
+          const rawValue = value
           if (!value) {
             value = '-'
             ratio = '-'
@@ -394,10 +444,11 @@
             ...e,
             ratio,
             value,
-            depth
+            depth,
+            rawValue
           }
         }),
-        footerRow: { name: "歳入合計", value: d[`歳入の状況_千円.歳入合計.決算額`].toLocaleString(), ratio: "100.0 %" }
+        footerRow: { name: "歳入合計", value: d['歳入の状況_千円.歳入合計.決算額'].toLocaleString(), ratio: "100.0 %" }
       }
     }
 
@@ -449,6 +500,7 @@
           const depth = countDotsForDepth(row.key)
           Object.assign(row, { depth })
 
+
           const cellKey = row.key
           if (!row.key) {
             row.key = '-'
@@ -456,6 +508,7 @@
           } else {
 
             row.value = d[`市町村税の状況_千円.${cellKey}.収入済額`] ?? '-'
+            row.rawValue = row.value
 
             if (Number.isFinite(row.value)) {
               row.value = row.value.toLocaleString()
@@ -555,7 +608,11 @@
 
           return row
         }),
-        footerRow: { "name": "合計", "choka": d["市町村税の状況_千円.合計.超過課税分"].toLocaleString(), ratio: d[`市町村税の状況_千円.合計.超過課税分.歳入合計構成比`].toFixed(2) + ' %' },
+        footerRow: {
+          name: "合計",
+          choka: (d["市町村税の状況_千円.合計.超過課税分"] ?? '').toLocaleString(),
+          ratio: Number.isFinite(d[`市町村税の状況_千円.合計.超過課税分.歳入合計構成比`]) ? d[`市町村税の状況_千円.合計.超過課税分.歳入合計構成比`].toFixed(2) + ' %' : '-'
+        },
       }
     }
 
@@ -703,6 +760,7 @@
       };
     }
 
+
     function renderCards() {
       const cardHtml = d => `
         <div id="card-${d.idx}" class="entity-card" onclick="selectEntity(${d.idx})">
@@ -740,16 +798,38 @@
         }
         grid.appendChild(frag);
         if (i < keys.length) requestAnimationFrame(renderChunk);
+        else {
+          updateVisibleCount()
+          isDataLoadingFinished = true
+        };
       }
 
       requestAnimationFrame(renderChunk);
     }
 
+    function updateVisibleCount() {
+      const mainGrid = document.getElementById('entity-grid');
+      let count = 0;
+      if (mainGrid && mainGrid.style.display !== 'none') {
+        mainGrid.querySelectorAll('.entity-card').forEach(el => {
+          if (el.style.display !== 'none') count++;
+        });
+      } else {
+        ['akaji', 'husaisan', 'choka', 'husaisanchoka'].forEach(id => {
+          const g = document.getElementById(`entity-grid-${id}`);
+          if (g && g.style.display !== 'none') {
+            count += g.querySelectorAll('.quad-card').length;
+          }
+        });
+      }
+      const countNum = document.querySelector('#cb-count .search-count-num');
+      if (countNum) countNum.textContent = count.toLocaleString();
+    }
+
     let _filterTimer
     function onFilterChange() {
       searchParam.searchText = document.getElementById("cb-search").value.trim();
-
-      clearTimeout(_filterTimer);
+      const q = searchParam.searchText
 
       _filterTimer = setTimeout(() => {
         // カード表示/非表示
@@ -766,8 +846,8 @@
           if (g) g.style.display = groupVisible ? "" : "none";
         }
 
-        document.getElementById("cb-count").textContent = q ? `${count} 件` : "";
-      }, 50)
+        updateVisibleCount();
+      }, 1)
     }
 
     function showCardBrowser() {
@@ -779,25 +859,54 @@
     }
 
     // ══════════════════════════════════════════════
+    // SEARCH FILTER VISIBILITY
+    // ══════════════════════════════════════════════
+    // searchValue: 'search' | 'akaji' | 'husaisan' | 'choka' | 'husaisanchoka'
+    function applySearchVisibility(searchValue) {
+      const variants = ['search', 'akaji', 'husaisan', 'choka', 'husaisanchoka'];
+
+      // topic-tab-content-* の表示切り替え
+      variants.forEach(id => {
+        const el = document.getElementById(`topic-tab-content-${id}`);
+        if (el) el.style.display = (searchValue === id) ? '' : 'none';
+      });
+
+      // entity-grid-* の表示切り替え（'search' のときはメインgridを表示）
+      document.getElementById('entity-grid').style.display = (searchValue === 'search') ? '' : 'none';
+      variants.filter(id => id !== 'search').forEach(id => {
+        const el = document.getElementById(`entity-grid-${id}`);
+        if (el) el.style.display = (searchValue === id) ? '' : 'none';
+      });
+
+      // ボタンのアクティブ状態を同期
+      document.querySelectorAll('.search-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`topic-tab-btn-${searchValue}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // URL を更新
+      const url = new URL(window.location);
+      url.searchParams.set('search', searchValue);
+      history.pushState(null, '', url);
+
+      updateVisibleCount();
+    }
+
+    // ══════════════════════════════════════════════
     // TABS
     // ══════════════════════════════════════════════
     function switchTab(id) {
-      ["search", "赤字税", "薄利税", "超過課税", "薄利超過課税"]
+      //["search", "赤字税", "薄利税", "超過課税", "薄利超過課税"]
       let tabId = 'tab-search'
-      if ('data' === id) {
+      if ('detail' === id) {
         tabId = `tab-detail`
       }
-      console.log(tabId)
+
       document.querySelectorAll(".tab-panel").forEach(p => p.style.display = 'none');
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       document.getElementById(tabId).style.display = 'flex';
       document.querySelectorAll(".tab-btn").forEach(b => {
         if (b.getAttribute("onclick") === `switchTab('${id}')`) b.classList.add("active");
       });
-
-      const url = new URL(window.location);
-      url.searchParams.set("tab", id);
-      history.pushState(null, "", url);
 
       if (tabId === 'tab-search') {
         // グリッドを一時的に取り外し、空のタブを即座に表示してから
@@ -834,69 +943,12 @@
       btn.classList.add("lit");
     }
 
-    // ══════════════════════════════════════════════
-    // LIST
-    // ══════════════════════════════════════════════
-    function buildList(data) {
-      const container = document.getElementById("entity-list");
-      container.innerHTML = "";
-
-      // group by pref
-      const groups = {};
-      data.forEach((d, i) => {
-        const p = d["都道府県名"];
-        if (!groups[p]) groups[p] = [];
-        groups[p].push({ data: d, idx: allData.indexOf(d) });
-      });
-
-      Object.entries(groups).forEach(([pref, items]) => {
-        const g = document.createElement("div");
-        g.className = "pref-group";
-
-        const label = document.createElement("div");
-        label.className = "pref-label";
-        label.innerHTML = `<span>◆ ${pref}</span><span class="toggle-icon">▼</span>`;
-        label.addEventListener("click", () =>
-          g.classList.toggle("collapsed"),
-        );
-        g.appendChild(label);
-
-        items.forEach(({ data: d, idx }) => {
-          const pop = d["人口"]?.["住民基本台帳人口"]?.["令6_1_1"];
-          const popStr = pop ? (pop / 10000).toFixed(1) + "万" : "-";
-
-          const item = document.createElement("div");
-          item.className = "entity-item";
-          item.dataset.idx = idx;
-          item.innerHTML = `
-        <span class="name">${d["団体名"]}</span>
-        <span class="pop">${popStr}</span>
-      `;
-          item.addEventListener("click", () => selectEntity(idx));
-          g.appendChild(item);
-        });
-
-        container.appendChild(g);
-      });
-    }
-
     function setPrefAll(collapse) {
       document.querySelectorAll(".pref-group").forEach((g) => {
         collapse
           ? g.classList.add("collapsed")
           : g.classList.remove("collapsed");
       });
-    }
-
-    function filterList() {
-      const q = document.getElementById("search-input").value.trim();
-      const filtered = q
-        ? allData.filter(
-          (d) =>
-            d["団体名"].includes(q) || (d["都道府県名"] || "").includes(q),
-        )
-        : allData;
-      buildList(filtered);
     }
 
     // ══════════════════════════════════════════════
@@ -914,11 +966,11 @@
 
       // URL に団体コードと tab= を反映（1回の pushState）
       const code = d["団体コード"];
-      2
+
       if (code != null) {
         const url = new URL(window.location);
         url.searchParams.set("code", code);
-        url.searchParams.set("tab", "data");
+        url.searchParams.set("tab", "detail");
         history.pushState(null, "", url);
       }
     }
@@ -1097,13 +1149,6 @@
     </div>
   `;
 
-      // 歳入の状況: chart-sainyu
-      // 市町村税の状況: chart-sainyu
-      function revStatsPieChart() {
-
-      }
-      const chartSainyuFunc = (d) => renderPieChart('chart-sainyuu', d)
-      const chartZeiFunc = (d) => renderPieChart('chart-zei', d)
       html += `
     <div id="row-charts" class="charts-row">
       <div id="card-chart-sainyuu" class="card">
@@ -1123,14 +1168,6 @@
     </div>
   `;
 
-
-      html += `
-        <div class="charts-row">  
-          ${renderBooleanData(shiteiDantaiCheck(d))}
-          ${renderBooleanData(ichiBuJimuCheck(d))}
-        </div>   
-      `
-
       const revStatData = revStats(d)
       const localTaxRev = localTaxRevStats(d)
       html += `
@@ -1141,23 +1178,63 @@
   `;
       const localTaxRevChoka = localTaxRevChokaStats(d)
       html += `
-    <div id="row-tables-sainyuu-zei" class="charts-row">
+    <div id="row-tables-choka" class="charts-row">
         ${renderTableData(localTaxRevChoka)}
-              <div id="card-chart-zei" class="card">
-        <div class="card-header">市町村税の状況</div>
+      <div id="card-chart-choka" class="card">
+        <div class="card-header">合計歳入に占める超過課税分の状況</div>
         <div class="card-body chart-card-body">
-          <div class="chart-wrap"><canvas id="chart-zei" class="chart-piechart"></canvas></div>
+          <div class="chart-wrap"><canvas id="chart-choka-in-keijyo" class="chart-piechart"></canvas></div>
           <div id="chart-zei-legend" class="chart-legend"></div>
         </div>
       </div>
-
     </div>
   `;
 
+
+      html += `
+        <div class="charts-row">  
+          ${renderBooleanData(shiteiDantaiCheck(d))}
+          ${renderBooleanData(ichiBuJimuCheck(d))}
+        </div>   
+      `
       container.innerHTML = html;
 
-      chartSainyuFunc(revStatData.rows)
-      chartZeiFunc(localTaxRev.rows)
+      function chartSainyu() {
+        const itemList = revStats(d).rows
+          .filter(e => !e.key.includes('.') && e.value !== '-')
+          .filter(e => parseFloat(e.ratio) > 1)
+          .map(e => ({
+            name: e.name,
+            value: e.rawValue,
+            ratio: parseFloat(e.ratio)
+          }))
+        return {
+          itemList,
+          total: d["歳入の状況_千円.歳入合計.決算額"]
+        }
+      }
+      renderPieChart('chart-sainyuu', chartSainyu())
+
+      function chartLocalTax() {
+        const itemList = localTaxRevStats(d).rows
+          .filter(e => !e.name.includes('合計') || e.name == "固定資産税")
+          .map(e => {
+            let name = e.name
+            if (e.name.startsWith("うち純固定資産税")) {
+              name = "純固定資産税"
+            }
+            return {
+              name,
+              value: e.rawValue,
+              ratio: parseFloat(e.ratio)
+            }
+          })
+        return {
+          itemList,
+          total: d["歳入の状況_千円.歳入合計.決算額"]
+        }
+      }
+      renderPieChart('chart-zei', chartLocalTax())
     }
 
     // ══════════════════════════════════════════════
@@ -1182,29 +1259,50 @@
     ];
 
 
-    // itemList: {value: number, name: string}[]
-    function renderPieChart(canvasId, itemList = []) {
-      const labels = [], values = [], colors = [];
-      itemList.forEach((item, i) => {
-        labels.push(item.name);
-        values.push(item.value);
-        colors.push(BLOOMBERG_COLORS[i % BLOOMBERG_COLORS.length]);
-      });
+    function renderPieChart(canvasId, dataset) {
+      const total = dataset.total
+      let remainder = dataset.total
+      for (const item of dataset.itemList) {
+        if (!Number.isFinite(item.value)) { continue }
+        remainder -= item.value
+      }
+      console.log({ total: dataset.total, remainder })
+      const itemList = [{ value: remainder, ratio: (remainder / dataset.total) * 100, name: 'その他', isLast: true, color: '#696969' }]
+      dataset.itemList.forEach(e => itemList.push(e))
+      itemList.sort((a, b) => a.isLast)
 
+      itemList.forEach((item, i) => {
+        if (!item['color']) {
+          item["color"] = BLOOMBERG_COLORS[i % BLOOMBERG_COLORS.length];
+        }
+      });
 
       const legendEl = document.getElementById(`${canvasId}-legend`);
       if (legendEl) {
-        const total = values.reduce((s, v) => s + v, 0);
-        legendEl.innerHTML = labels.map((label, i) => `
+        const createText = (item) => `
+          <span>
+          ${Number.isFinite(item.value)
+            ? item.value.toLocaleString()
+            : item.value
+          }
+          </span>
+          <span>/</span>
+          <span style="width: 2rem">
+          ${Number.isFinite(item.ratio)
+            ? item.ratio.toFixed(1)
+            : item.ratio
+          } %
+          </span>
+        `
+        const emptyValue = "-"
+        legendEl.innerHTML = itemList.map((item, idx) => `
           <div class="chart-legend-item">
-            <span class="chart-legend-dot" style="background:${colors[i]}"></span>
+            <span class="chart-legend-dot" style="background:${item.color}"></span>
             <span class="chart-legend-label">
-              ${label}
+              ${item.name}
             </span>
             <span class="chart-legend-value">
-              <span>${values[i] ? values[i] : '-'}</span>
-              <span>/</span>
-              <span>${total ? (values[i] / total * 100).toFixed(1) : 0}%</span>
+              ${item.value === '-' ? emptyValue : createText(item)}
             </span>
           </div>`).join("");
       }
@@ -1213,10 +1311,10 @@
       chartInstances[canvasId] = new Chart(ctx, {
         type: "doughnut",
         data: {
-          labels,
+          labels: itemList.map(e => e.name),
           datasets: [{
-            data: values,
-            backgroundColor: colors,
+            data: itemList.map(e => e.value),
+            backgroundColor: itemList.map(e => e.color),
             borderColor: "#0a0a0a",
             borderWidth: 0.5,
             hoverBorderWidth: 3,
@@ -1241,7 +1339,6 @@
               callbacks: {
                 label: (ctx) => {
                   const val = ctx.raw;
-                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                   const pct = ((val / total) * 100).toFixed(2);
                   return `${(val / 100000).toFixed(1)}億円 (${pct}%)`;
                 },
@@ -1266,15 +1363,12 @@
 
     // ブラウザの戻る/進むに対応
     // ※ popstate 内では pushState/replaceState を呼ばない（ループ防止）
-    window.addEventListener("popstate", () => {
+    window.addEventListener("popstate", (e) => {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get("tab");
       const code = params.get("code");
-      const searchText = params.get("search-text");
-      console.log(tab, code, searchText);
 
-      // 検索テキストを復元（filterCards の URL 更新は replaceState なので安全）
-      document.getElementById("cb-search").value = searchText || "";
+      document.getElementById("cb-search").value = searchParam.searchText || "";
 
       if (tab === 'search') {
         switchTab('search')
@@ -1286,9 +1380,10 @@
         if (idx !== -1) {
           // selectEntity は pushState を含むため直接 UI 復元する
           activeIndex = idx;
+          switchTab('detail');
           activateDetail();
           renderDetail(allData[idx], document.getElementById("detail"));
-          switchTab('detail');
+
         } else {
           switchTab('search');
         }
@@ -1298,6 +1393,42 @@
         switchTab(tabId);
       }
     });
+    const palette = [
+      {
+        "id": "red",
+        "label": "赤字・マイナス",
+        "highlightColor": "#1a0505",
+        "valueColor": "#ff4444"
+      },
+      {
+        "id": "orange",
+        "label": "超過課税・要注意",
+        "highlightColor": "#1a0800",
+        "valueColor": "#ff8833"
+      },
+      {
+        "id": "amber",
+        "label": "標準税率超過",
+        "highlightColor": "#1a1400",
+        "valueColor": "#ffcc00"
+      },
+      {
+        "id": "cyan",
+        "label": "データあり（中立）",
+        "highlightColor": "#001a22",
+        "valueColor": "#00ccff"
+      },
+      {
+        "id": "green",
+        "label": "良好・基準内",
+        "highlightColor": "#001a0d",
+        "valueColor": "#00cc66"
+      }
+    ]
+
+    setTimeout(() => {
+
+    })
   </script>
 </body>
 
