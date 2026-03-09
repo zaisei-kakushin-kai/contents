@@ -11,7 +11,6 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="renderQuadCardGrid.js"></script>
   <script src="renderTreeSidebarNav.js"></script>
-  <script src="terminalSchema.js"></script>
   <script src="fmt.js"></script>
   <link rel="stylesheet" href="terminal.css" />
   <link rel="stylesheet" href="terminal-tabs.css" />
@@ -87,9 +86,6 @@
 
   <script>
     let isDataLoadingFinished = false
-    const tabTypes = [
-      "all", "akaji", "husaisan", "choka", "husaisanchoka"
-    ]
     const searchParam = {
       searchText: '',
       searchType: 'all'
@@ -658,7 +654,7 @@
         footerRow: {
           name: "超過課税分 合計",
           value: fmt1000ennToKansuji(d["市町村税の状況_千円.合計.超過課税分"]),
-          ratio: fmtPercentage(d[`市町村税の状況_千円.合計.超過課税分`] / d["歳入の状況_千円.一般財源計.決算額"])
+          ratio: fmtPercentage(d[`市町村税の状況_千円.合計.超過課税分`] / d["歳入の状況_千円.一般財源計.決算額"] * 100)
         },
       }
     }
@@ -1007,10 +1003,10 @@
 
       activateDetail();
 
+      switchTab('detail');
+
       const detail = document.getElementById("detail");
       renderDetail(record, detail);
-
-      switchTab('detail');
 
       const url = new URL(window.location);
       url.search = new URLSearchParams({ "id": id }).toString()
@@ -1108,7 +1104,7 @@
       }).join("\n");
 
       const colgroup = `<colgroup>
-        <col style="max-width:60%">
+        <col style="max-width:70%">
         <col style="width:12em">
         <col style="width:5em">
       </colgroup>`;
