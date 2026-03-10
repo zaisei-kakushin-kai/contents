@@ -121,10 +121,10 @@
       isDataLoadingFinished = false
       const urlPrefix = "https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/"
       const prom = Promise.all([
-        fetch(urlPrefix + "entity-grid-akaji.json"),
-        fetch(urlPrefix + "entity-grid-husaisan.json"),
-        fetch(urlPrefix + "entity-grid-choka.json"),
-        fetch(urlPrefix + "entity-grid-husaisanchok.jsona")
+        fetch(urlPrefix + "akaji.json"),
+        fetch(urlPrefix + "husaisan.json"),
+        fetch(urlPrefix + "choka.json"),
+        fetch(urlPrefix + "husaisanchok.json")
       ]).then(async (e) => {
         const akaji = await e[0].json()
         const husaisan = await e[1].json()
@@ -458,7 +458,7 @@
         rows: LOCAL_TAX_ROWS.map(row => {
           const depth = countDotsForDepth(row.key)
           const key = `市町村税の状況_千円.${row.key}.収入済額`
-          const ratioKey = `市町村税の状況_千円.${row.key}.収入済額.歳入合計構成比`
+          const ratioKey = d[`市町村税の状況_千円.${row.key}.収入済額`]
 
           const rawValue = d[key]
           const rawRatio = d[ratioKey]
@@ -626,7 +626,7 @@
           id: 'expKetsuzan',
           title: '目的別歳出 — 決算額',
           header: [
-            { name: '費目', key: 'name' },
+            { name: '項目', key: 'name' },
             { name: '決算額', key: '決算額' },
             { name: '構成比', key: '構成比' },
           ],
@@ -646,7 +646,7 @@
           id: 'expKensetsu',
           title: '目的別歳出 — 普通建設事業費',
           header: [
-            { name: '費目', key: 'name' },
+            { name: '項目', key: 'name' },
             { name: '普通建設事業費', key: '普通建設事業費' },
           ],
           colWidths: colWidths2,
@@ -665,7 +665,7 @@
           id: 'expIppan',
           title: '目的別歳出 — 充当一般財源等',
           header: [
-            { name: '費目', key: 'name' },
+            { name: '項目', key: 'name' },
             { name: '充当一般財源等', key: '充当一般財源等' },
           ],
           colWidths: colWidths2,
@@ -972,6 +972,79 @@
       return { nhiCard, kuriGrid }
     }
 
+    function seishitsu(d) {
+      const p = '性質別歳出の状況_千円'
+
+      const ROWS = [
+        { name: '人件費', key: '人件費', depth: 0 },
+        { name: 'うち職員給', key: '人件費.うち職員給', depth: 1 },
+        { name: '扶助費', key: '扶助費', depth: 0 },
+        { name: '公債費', key: '公債費', depth: 0 },
+        { name: '元金', key: '公債費.元利償還金.元金', depth: 1 },
+        { name: '利子', key: '公債費.元利償還金.利子', depth: 1 },
+        { name: '一時借入金利子', key: '公債費.元利償還金.一時借入金利子', depth: 1 },
+        { name: '義務的経費計', key: '義務的経費計', depth: 0, isTotal: true },
+        { name: '物件費', key: '物件費', depth: 0 },
+        { name: '維持補修費', key: '維持補修費', depth: 0 },
+        { name: '補助費等', key: '補助費等', depth: 0 },
+        { name: 'うち一部事務組合負担金', key: '補助費等.うち一部事務組合負担金', depth: 1 },
+        { name: '繰出金', key: '繰出金', depth: 0 },
+        { name: '積立金', key: '積立金', depth: 0 },
+        { name: '投資出資金貸付金', key: '投資出資金貸付金', depth: 0 },
+        { name: '前年度繰上充用金', key: '前年度繰上充用金', depth: 0 },
+        { name: '投資的経費', key: '投資的経費', depth: 0 },
+        { name: 'うち人件費', key: '投資的経費.うち人件費', depth: 1 },
+        { name: '普通建設事業費', key: '投資的経費.普通建設事業費', depth: 1 },
+        { name: 'うち補助', key: '投資的経費.普通建設事業費.うち補助', depth: 2 },
+        { name: 'うち単独', key: '投資的経費.普通建設事業費.うち単独', depth: 2 },
+        { name: '災害復旧事業費', key: '投資的経費.災害復旧事業費', depth: 1 },
+        { name: '失業対策事業費', key: '投資的経費.失業対策事業費', depth: 1 },
+      ]
+
+      const ketsuzan = {
+        id: 'seishitsuKetsuzan',
+        title: '性質別歳出 — 決算額',
+        header: [
+          { name: '項目', key: 'name' },
+          { name: '決算額', key: '決算額' },
+          { name: '構成比', key: '構成比' },
+        ],
+        rows: ROWS.map(row => ({
+          ...row,
+          '決算額': fmt1000ennToKansuji(d[`${p}.${row.key}.決算額`]),
+          '構成比': fmtPercentage(d[`${p}.${row.key}.構成比`]),
+        })),
+        footerRow: {
+          name: '歳出合計',
+          '決算額': fmt1000ennToKansuji(d[`${p}.歳出合計.決算額`]),
+          '構成比': '100 %',
+        },
+      }
+
+      const keijyo = {
+        id: 'seishitsuKeijyo',
+        title: '性質別歳出 — 充当一般財源等',
+        header: [
+          { name: '項目', key: 'name' },
+          { name: '充当一般財源等', key: '充当一般財源等' },
+          { name: '構成比', key: '構成比' },
+        ],
+        rows: ROWS
+          .filter(row => d[`${p}.${row.key}.充当一般財源等`] != null)
+          .map(row => ({
+            ...row,
+            '充当一般財源等': fmt1000ennToKansuji(d[`${p}.${row.key}.充当一般財源等`]),
+            '構成比': fmtPercentage(d[`${p}.${row.key}.充当一般財源等`] / d['性質別歳出の状況_千円.歳出合計.決算額'] * 100),
+          })),
+        footerRow: {
+          name: '合計',
+          '充当一般財源等': fmt1000ennToKansuji(d[`${p}.歳出合計.充当一般財源等`]),
+          '構成比': fmtPercentage(d[`${p}.歳出合計.充当一般財源等`] / d['性質別歳出の状況_千円.歳出合計.決算額'] * 100),
+        },
+      }
+
+      return { ketsuzan, keijyo }
+    }
 
     function choSyuRitsu(d) {
       const p = '徴収率_percent'
@@ -1364,7 +1437,19 @@
         return `<tr${trClass}>${tdCells}</tr>`;
       }).join("\n");
 
-      const colgroup = `<colgroup><col style="max-width:60%"><col style="width:12em"><col style="width:5em"></colgroup>`
+      let colgroup = `<colgroup>
+            <col style="max-width:60%">
+            <col style="width:8em">
+            <col style="width:5em">
+          </colgroup>`
+      if (header.length === 4) {
+        colgroup = `<colgroup>
+            <col style="max-width:60%">
+            <col style="width:12em">
+            <col style="width:5em">
+            <col style="width:5em">
+          </colgroup>`
+      }
 
       return `
           <div id="card-table-${id}" class="card">
@@ -1496,6 +1581,32 @@
             <div class="card-body chart-card-body">
               <div class="chart-wrap"><div id="chart-exp-ketsuzan" class="chart-piechart"></div></div>
               <div id="chart-exp-ketsuzan-legend" class="chart-legend"></div>
+            </div>
+          </div>
+        </div>
+      `
+
+      const { ketsuzan: seishitsuKetsuzan, keijyo: seishitsuKeijyo } = seishitsu(d)
+      html += `
+        <div class="charts-row">
+          ${renderTableData(seishitsuKetsuzan)}
+          <div class="card">
+            <div class="card-header">性質別歳出 — 決算額・円グラフ</div>
+            <div class="card-body chart-card-body">
+              <div class="chart-wrap"><div id="chart-seishitsu-ketsuzan" class="chart-piechart"></div></div>
+              <div id="chart-seishitsu-ketsuzan-legend" class="chart-legend"></div>
+            </div>
+          </div>
+        </div>
+      `
+      html += `
+        <div class="charts-row">
+          ${renderTableData(seishitsuKeijyo)}
+          <div class="card">
+            <div class="card-header">性質別歳出 — 充当一般財源等・円グラフ</div>
+            <div class="card-body chart-card-body">
+              <div class="chart-wrap"><div id="chart-seishitsu-ippan" class="chart-piechart"></div></div>
+              <div id="chart-seishitsu-ippan-legend" class="chart-legend"></div>
             </div>
           </div>
         </div>
@@ -1661,6 +1772,64 @@
         }
       }
       renderPieChart('chart-exp-ketsuzan', chartExpKetsuzan())
+
+      function chartSeishitsuKetsuzan() {
+        const p = '性質別歳出の状況_千円'
+        const cats = [
+          { name: '人件費', color: '#fb8b1e' },
+          { name: '扶助費', color: '#a29bfe' },
+          { name: '公債費', color: '#fd79a8' },
+          { name: '物件費', color: '#fdcb6e' },
+          { name: '維持補修費', color: '#55efc4' },
+          { name: '補助費等', color: '#74b9ff' },
+          { name: '繰出金', color: '#00cec9' },
+          { name: '積立金', color: '#badc58' },
+          { name: '投資出資金貸付金', color: '#f7b731' },
+          { name: '投資的経費', color: '#e056fd' },
+          { name: '前年度繰上充用金', color: '#e17055' },
+        ]
+        const itemList = cats
+          .map(({ name, color }) => ({
+            name, color,
+            value: d[`${p}.${name}.決算額`],
+            ratio: d[`${p}.${name}.構成比`],
+          }))
+          .filter(e => Number.isFinite(e.value) && e.value > 0)
+        return {
+          itemList,
+          total: d[`${p}.歳出合計.決算額`],
+        }
+      }
+      renderPieChart('chart-seishitsu-ketsuzan', chartSeishitsuKetsuzan())
+
+      function chartSeishitsuIppan() {
+        const p = '性質別歳出の状況_千円'
+        const cats = [
+          { name: '人件費', color: '#fb8b1e' },
+          { name: '扶助費', color: '#a29bfe' },
+          { name: '公債費', color: '#fd79a8' },
+          { name: '物件費', color: '#fdcb6e' },
+          { name: '維持補修費', color: '#55efc4' },
+          { name: '補助費等', color: '#74b9ff' },
+          { name: '繰出金', color: '#00cec9' },
+          { name: '積立金', color: '#badc58' },
+          { name: '投資出資金貸付金', color: '#f7b731' },
+          { name: '投資的経費', color: '#e056fd' },
+          { name: '前年度繰上充用金', color: '#e17055' },
+        ]
+        const itemList = cats
+          .map(({ name, color }) => ({
+            name, color,
+            value: d[`${p}.${name}.充当一般財源等`],
+            ratio: d[`${p}.${name}.充当一般財源等`] / d[`${p}.歳出合計.充当一般財源等`] * 100,
+          }))
+          .filter(e => Number.isFinite(e.value) && e.value > 0)
+        return {
+          itemList,
+          total: d[`${p}.歳出合計.決算額`],
+        }
+      }
+      renderPieChart('chart-seishitsu-ippan', chartSeishitsuIppan())
     }
 
     function renderPieChart(canvasId, dataset) {
