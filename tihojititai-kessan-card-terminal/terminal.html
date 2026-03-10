@@ -1140,7 +1140,8 @@
 
       // URL を更新
       const url = new URL(window.location);
-      url.searchParams = new URLSearchParams({ 'search': searchValue })
+      url.searchParams = new URLSearchParams({ 'id': searchValue })
+      console.log(url.toString())
       history.pushState(null, '', url);
 
       updateVisibleCount();
@@ -1237,17 +1238,19 @@
     function renderDelta(cur, prev, prevFmt = "", prevLabel = "前年") {
       const diff = cur - prev;
       const dir = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
-      const arrow = diff > 0 ? "▲" : diff < 0 ? "▼" : "—";
       const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
       const absDiff = Math.abs(diff.toFixed(2));
 
       let pct = null;
       if (prev !== 0) {
-        pct = (absDiff / Math.abs(prev) * 100).toFixed(2)
+        pct = (absDiff / Math.abs(prev) * 100)
+        if (Number.isFinite(pct)) {
+          pct = pct.toFixed(2)
+        } else {
+          pct = '-'
+        }
       }
-      if (!Number.isFinite(pct)) {
-        pct = '-'
-      }
+
       const pctStr = pct !== null ? ` (${sign}${pct}%)` : "";
 
       let absDiffTxt = `${absDiff} %`;
@@ -1260,7 +1263,7 @@
         ? `<div class="kpi-delta flat">— 計算不可</div>`
         : diff !== 0
           ? `<div class="kpi-delta ${dir}">
-               ${arrow} ${sign}${absDiffTxt}
+               ${sign}${absDiffTxt}
                <span style="padding-left:4px;opacity:0.85">(${sign}${pct}%)</span>
              </div>`
           : `<div class="kpi-delta flat">— 変化なし</div>`;
@@ -1519,10 +1522,8 @@
 
       const { ratioCard } = fiscalCond(d)
       const misc = miscIndicators(d)
-      misc.items.forEach(e => ratioCard.items.push(e))
-      ratioCard.title += '・'
-      ratioCard.title += misc.title
       html += renderKpiGrid(ratioCard)
+      html += renderKpiGrid(misc)
 
       const { nhiCard, kuriGrid } = specialPurposeBudget(d)
       html += `

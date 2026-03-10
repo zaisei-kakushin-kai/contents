@@ -222,9 +222,9 @@ body {
 }
 
 .kpi-delta.up {
-  background: #0068ff22;
-  border: 1px solid #0068ff66;
-  color: #0068ff;
+  background: #0a9b1122;
+  border: 1px solid #0a9b1122;
+  color: #00cc66;
 }
 
 .kpi-delta.down {
@@ -283,9 +283,17 @@ body {
   line-height: 1;
   letter-spacing: -2px;
 }
-.laspa-value.laspa-high { color: var(--orange-bright); text-shadow: 0 0 24px #ff883355; }
-.laspa-value.laspa-low  { color: var(--green);         text-shadow: 0 0 24px #00cc6655; }
-.laspa-value.laspa-none { color: var(--gray); }
+.laspa-value.laspa-high {
+  color: var(--orange-bright);
+  text-shadow: 0 0 24px #ff883355;
+}
+.laspa-value.laspa-low {
+  color: var(--green);
+  text-shadow: 0 0 24px #00cc6655;
+}
+.laspa-value.laspa-none {
+  color: var(--gray);
+}
 
 .laspa-baseline {
   font-family: var(--font-mono);
@@ -293,7 +301,9 @@ body {
   color: var(--gray);
   letter-spacing: 0.5px;
 }
-.laspa-baseline strong { color: var(--white); }
+.laspa-baseline strong {
+  color: var(--white);
+}
 
 .laspa-hint {
   font-family: var(--font-mono);
@@ -303,8 +313,14 @@ body {
   color: var(--gray);
   letter-spacing: 0.05em;
 }
-.laspa-hint.laspa-high { border-color: var(--orange-dim); color: var(--orange-bright); }
-.laspa-hint.laspa-low  { border-color: #00994d;           color: var(--green); }
+.laspa-hint.laspa-high {
+  border-color: var(--orange-dim);
+  color: var(--orange-bright);
+}
+.laspa-hint.laspa-low {
+  border-color: #00994d;
+  color: var(--green);
+}
 
 /* ── LASPA BADGE (card-header 内) ── */
 .laspa-badge {
@@ -314,8 +330,14 @@ body {
   border: 1px solid;
   margin-left: auto;
 }
-.laspa-badge.laspa-high { border-color: var(--orange-dim); color: var(--orange-bright); }
-.laspa-badge.laspa-low  { border-color: #00994d;           color: var(--green); }
+.laspa-badge.laspa-high {
+  border-color: var(--orange-dim);
+  color: var(--orange-bright);
+}
+.laspa-badge.laspa-low {
+  border-color: #00994d;
+  color: var(--green);
+}
 
 .chart-card-body {
   display: flex;
