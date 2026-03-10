@@ -26,7 +26,7 @@ function fmtPercentage(ratio) {
 
 function fmtNumber(n) {
     if (Number.isFinite(n)) {
-        return n
+        return n.toLocaleString()
     } else {
         return "-"
     }
