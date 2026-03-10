@@ -420,7 +420,7 @@ def main(xlsx_path: Path):
     stack = []
     for i, name in enumerate(sheets, 1):
         try:
-            data = extract_sheet(wb[name])
+            data = flatten(extract_sheet(wb[name]))
             _ = json.dumps(data, ensure_ascii=False)
             stack.append(data)
             print(f"  [{i:3d}/{len(sheets)}] {name} … OK")
@@ -467,27 +467,30 @@ def add_cols(df: pl.DataFrame):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: python extract_pref_data.py <都道府県.xlsx> [output.json]")
+        print(
+            "Usage: python extract_pref_data.py <都道府県.xlsx> [output.msgpack]")
         sys.exit(1)
 
     xlsx_path = Path(sys.argv[1])
     output_path = Path(sys.argv[2]) if len(
-        sys.argv) > 2 else xlsx_path.with_suffix('.msgpack')
+        sys.argv) > 2 else xlsx_path.with_name("r5_kessan_todohuken.msgpack")
 
     all_data = main(xlsx_path)
 
     stack = []
     for i in all_data:
-        stack.append(flatten(i))
+        stack.append(i)
 
     df = pl.DataFrame(all_data, infer_schema_length=len(all_data))
     df = df.filter(pl.col("都道府県名").is_not_null()).drop('年度')
     df = add_cols(df)
     map_dict = df.to_dict()
+    newdict = {}
     for i in map_dict:
-        map_dict[i] = map_dict[i].to_list()
+        newdict[i] = map_dict[i].to_list()
 
-    with open(output_path, 'wb') as f:
-        msgpack.dump(map_dict, f)
+    with open(output_path, 'wb') as fp:
+        fp.write(msgpack.dumps(newdict))
+        fp.close()
 
     print(f"出力: {output_path}")
