@@ -261,6 +261,62 @@ body {
   column-gap: 4px;
 }
 
+.span-full {
+  grid-column: 1 / -1;
+}
+
+/* ── LASPA KPI ── */
+.laspa-kpi {
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+}
+
+.laspa-value {
+  font-family: var(--font-mono);
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+.laspa-value.laspa-high { color: var(--orange-bright); text-shadow: 0 0 24px #ff883355; }
+.laspa-value.laspa-low  { color: var(--green);         text-shadow: 0 0 24px #00cc6655; }
+.laspa-value.laspa-none { color: var(--gray); }
+
+.laspa-baseline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray);
+  letter-spacing: 0.5px;
+}
+.laspa-baseline strong { color: var(--white); }
+
+.laspa-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 10px;
+  border: 1px solid var(--gray-dim);
+  color: var(--gray);
+  letter-spacing: 0.05em;
+}
+.laspa-hint.laspa-high { border-color: var(--orange-dim); color: var(--orange-bright); }
+.laspa-hint.laspa-low  { border-color: #00994d;           color: var(--green); }
+
+/* ── LASPA BADGE (card-header 内) ── */
+.laspa-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid;
+  margin-left: auto;
+}
+.laspa-badge.laspa-high { border-color: var(--orange-dim); color: var(--orange-bright); }
+.laspa-badge.laspa-low  { border-color: #00994d;           color: var(--green); }
+
 .chart-card-body {
   display: flex;
   flex-direction: column;
@@ -522,7 +578,7 @@ body::after {
   }
 
   .kpi-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-template-columns: 1fr 1fr;
   }
 
   #entity-name {
