@@ -1,0 +1,157 @@
+/* ── L1: zeimoku セクション ── */
+.zeimoku-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.zeimoku-section + .zeimoku-section {
+  margin-top: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.zeimoku-title {
+  font-family: var(--font-jp);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.zeimoku-title-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gray-dim);
+  font-weight: 400;
+}
+
+/* ── L2: ruikei サブセクション ── */
+.ruikei-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ruikei-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--orange);
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ruikei-title::before,
+.ruikei-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.ruikei-title::before {
+  flex: 0 0 12px;
+}
+
+/* ── L3: カードグリッド ── */
+.entity-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+}
+
+/* ── カード ── */
+.zr-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--orange-dim);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+  display: flex;
+  flex-direction: column;
+}
+
+.zr-card:hover {
+  border-color: var(--orange);
+  background: var(--bg-hover);
+}
+
+.zr-card.selected {
+  border-color: var(--orange-bright);
+  border-top-color: var(--orange-bright);
+  background: var(--bg-hover);
+}
+
+.zr-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 12px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.zr-pref {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--white);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.zr-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zr-card:hover .zr-name,
+.zr-card.selected .zr-name {
+  color: var(--orange-bright);
+}
+
+.zr-section {
+  padding: 3px 0;
+}
+
+.zr-row {
+  display: flex;
+  align-items: baseline;
+  padding: 4px 12px;
+  gap: 8px;
+}
+
+.zr-row-label {
+  font-family: var(--font-jp);
+  font-size: 11px;
+  color: var(--white);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zr-gaku {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+
+.zr-gaku-unit {
+  font-size: 9px;
+  color: var(--gray);
+  margin-left: 2px;
+}
