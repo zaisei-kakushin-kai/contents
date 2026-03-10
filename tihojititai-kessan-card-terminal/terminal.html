@@ -11,6 +11,8 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="renderZeimokuRuikeiGrid.js"></script>
   <script src="renderTreeSidebarNav.js"></script>
+  <script src="renderQuadCardGrid.js"></script>
+  <script src="renderCards.js"></script>
   <script src="fmt.js"></script>
   <link rel="stylesheet" href="terminal.css" />
   <link rel="stylesheet" href="terminal-tabs.css" />
@@ -73,6 +75,10 @@
     <div id="detail"></div>
   </div>
 
+  <div id="tab-todohuken-detail" class="tab-panel">
+    <div id="todohuken-detail"></div>
+  </div>
+
   <footer>
     <div class="footer-inner">
       <span class="footer-copy">&copy; 2025 財政革新会</span>
@@ -101,13 +107,21 @@
       }))
     }
 
-    // ══════════════════════════════════════════════
+    // ═══════════════════════════════════g═══════════
     // DATA (embedded JSON)
     // ══════════════════════════════════════════════
+    let dataGroupedByTodoHuken = {}
     let allData = [];
+    let allTodohukenData = [];
+    function* iterateAllDataItem() {
+      for (const item of allData) {
+        yield item
+      }
+      for (const item of allTodohukenData) {
+        yield item
+      }
+    }
     let chartInstances = {};
-    let header = []
-    let itemByPerf = {}
     let prefNameArray = []
     let topics = {
       akaji: {},
@@ -115,7 +129,7 @@
       choka: {},
       husaisanchok: {}
     }
-
+    const selectByCard = []
     // Fetch both JSON files
     async function loadData() {
       isDataLoadingFinished = false
@@ -139,42 +153,47 @@
       })
 
 
-      const [_prefArray, response] = await Promise.all([
+      const [_prefArray, kessanData, kessanTodohukenData] = await Promise.all([
         fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/pref2num.json").then(e => e.json()),
-        fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/r5_kessan_data.msgpack").then(e => e.blob())
+        fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/r5_kessan_data.msgpack").then(e => e.blob()),
+        fetch("https://raw.githubusercontent.com/zaisei-kakushin-kai/contents/refs/heads/main/data/kessan_card/r5_kessan_todohuken.msgpack").then(e => e.blob())
       ])
       prefNameArray = _prefArray
 
-      const out = await msgpack.decode(await response.bytes())
+      const out = await kessanData.bytes().then(msgpack.decode)
+      const todohuken = await kessanTodohukenData.bytes().then(msgpack.decode)
 
-      header = Object.keys(out)
-      for (let i = 0; i < out['団体名'].length; i++) {
-        const m = {}
-        for (const key in out) {
-          Object.assign(m, { [key]: out[key][i] })
+      function createRecords(df, is_todohuken) {
+        const stack = []
+        const key = Object.keys(df)[0]
+        for (let i = 0; i < df[key].length; i++) {
+          const m = {}
+          Object.entries(df).forEach(([key, val]) => {
+            Object.assign(m, { [key]: df[key][i] })
+          })
+
+          m['都道府県名'] = prefNameArray[m["都道府県番号"]] || m['都道府県']
+          m['is_todohuken'] = is_todohuken
+
+          if (m['団体コード']) {
+            m.id = `${m['都道府県コード']}-${m['団体コード']}`
+          } else {
+            m.id = `${m['都道府県コード']}`
+          }
+          stack.push(m)
         }
-        Object.assign(m, { id: `${m['都道府県コード']}-${m['団体コード']}` })
 
-        Object.assign(m, { "都道府県名": prefNameArray[m['都道府県コード'] - 1] })
-        // build all data
-        allData.push(m)
-
-        // setup per pref data
-        const cardItem = buildCardItem(m, allData.length)
-        Object.assign(m, { cardItem })
-        if (!itemByPerf[cardItem.pref]) {
-          itemByPerf[cardItem.pref] = []
-        }
-        itemByPerf[cardItem.pref].push(cardItem)
+        return stack
       }
 
-      for (const key in itemByPerf) {
-        itemByPerf[key].sort((a, b) => a['団体コード'] > b['団体コード'])
-      }
+      console.log(todohuken)
+      allData = createRecords(out, false)
+      console.log(allData)
+      const cards = allData.map(buildCardItem)
+      allTodohukenData = createRecords(todohuken, true)
 
-      allData.sort((a, b) => {
-        return a['都道府県コード'] > b['都道府県コード'] & a['団体コード'] > b['団体コード']
-      })
+      const todohukenCards = allTodohukenData.map(buildCardItemTodoHuken)
+      renderCards(cards, todohukenCards)
 
       const params = new URLSearchParams(window.location.search)
       const id = params.get("id");
@@ -185,7 +204,7 @@
         applySearchVisibility(search || 'search');
       }
 
-      renderCards()
+
       let _handle;
       _handle = setInterval(() => {
         if (isDataLoadingFinished) {
@@ -194,9 +213,7 @@
           clearInterval(_handle)
         }
       })
-      //await prom
     }
-
 
     // メタデータ
     function metaOverview(d) {
@@ -245,73 +262,6 @@
       }
     }
 
-    // table base
-    function createTableAbsAndPct(id, title, prefix, absColName, pctColName, d) {
-      function fmt(n) {
-        if (null == n) {
-          return "-"
-        }
-
-        if (Number.isFinite(n)) {
-          return n.toLocaleString()
-        }
-
-      }
-
-      function fmtPercentage(n) {
-        if (null == n) {
-          return "-"
-        }
-
-        if (Number.isFinite(n)) {
-          return `${n.toFixed(1)} %`
-        }
-
-      }
-
-      const set = new Set()
-
-      const rows = header.map((e) => {
-        if (!e.startsWith(prefix)) {
-          return
-        }
-
-        const list = e.split(".")
-        const coreList = list.slice(1, list.length - 1)
-
-        const core = coreList.join(".")
-        if (set.has(core)) {
-          return
-        }
-
-        set.add(core)
-
-        const name = list[list.length - 2]
-        const col1key = [prefix, core, absColName].join(".")
-        const col2key = [prefix, core, pctColName].join(".")
-
-        return {
-          name,
-          value: d[col1key],
-          col1val: fmt(d[col1key]),
-          col2val: fmtPercentage(d[col2key]),
-          depth: list.length - 4,
-          isTotal: name.includes('合計'),
-        }
-      }).filter(e => e)
-      return {
-        id,
-        title,
-        header: [
-          { name: '項目', key: 'name' },
-          { name: absColName, key: 'col1val' },
-          { name: '構成比', key: 'col2val' },
-        ],
-        rows: rows.slice(0, rows.length - 2),
-        footerRow: { ...rows[rows.length - 1], name: absColName + ' 合計' }
-      }
-    }
-
     function revStatsPieChart() {
       return {
         title: '',
@@ -339,7 +289,71 @@
 
 
     // 歳入の状況
-    function revStats(d) {
+    function revStats_dohuken(d) {
+      return {
+        id: 'revStats',
+        title: '歳入の状況',
+        header: [
+          { name: '項目名', key: 'name' },
+          { name: '決算額', key: 'value' },
+          { name: '構成比', key: 'ratio' },
+          { name: '経常一般財源等', key: 'keijo' },
+        ],
+        rows: [
+          { name: "地方税", key: "地方税", color: "#fb8b1e" },
+          { name: "地方譲与税", key: "地方譲与税", color: "#fda04a" },
+          { name: "地方揮発油譲与税", key: "地方譲与税.内訳.地方揮発油譲与税", color: "#fdcb6e" },
+          { name: "特別とん譲与税", key: "地方譲与税.内訳.特別とん譲与税", color: "#f9ca24" },
+          { name: "石油ガス譲与税", key: "地方譲与税.内訳.石油ガス譲与税", color: "#badc58" },
+          { name: "自動車重量譲与税", key: "地方譲与税.内訳.自動車重量譲与税", color: "#6ab04c" },
+          { name: "航空機燃料譲与税", key: "地方譲与税.内訳.航空機燃料譲与税", color: "#2ecc71" },
+          { name: "森林環境譲与税", key: "地方譲与税.内訳.森林環境譲与税", color: "#26de81" },
+          { name: "特別法人事業譲与税", key: "地方譲与税.内訳.特別法人事業譲与税", color: "#4af6c3" },
+          { name: "市町村たばこ税都道府県交付金", key: "市町村たばこ税都道府県交付金", color: "#55efc4" },
+          { name: "地方特例交付金等", key: "地方特例交付金等", color: "#45aaf2" },
+          { name: "地方特例交付金", key: "地方特例交付金等.内訳.地方特例交付金", color: "#74b9ff" },
+          { name: "新型コロナウイルス感染症対策地方税減収補塡特別交付金", key: "地方特例交付金等.内訳.新型コロナウイルス感染症対策地方税減収補塡特別交付金", color: "#0068ff" },
+          { name: "地方交付税", key: "地方交付税", color: "#a29bfe" },
+          { name: "普通交付税", key: "地方交付税.内訳.普通交付税", color: "#6c5ce7" },
+          { name: "特別交付税", key: "地方交付税.内訳.特別交付税", color: "#9b59b6" },
+          { name: "震災復興特別交付税", key: "地方交付税.内訳.震災復興特別交付税", color: "#fd79a8" },
+          { name: "一般財源計", key: "一般財源計", color: "#e84393" },
+          { name: "交通安全対策特別交付金", key: "交通安全対策特別交付金", color: "#ff433d" },
+          { name: "分担金・負担金", key: "分担金・負担金", color: "#fc5c65" },
+          { name: "使用料", key: "使用料", color: "#e17055" },
+          { name: "手数料", key: "手数料", color: "#ff8c69" },
+          { name: "国庫支出金", key: "国庫支出金", color: "#ef5777" },
+          { name: "国有提供交付金", key: "国有提供交付金", color: "#eb3b5a" },
+          { name: "財産収入", key: "財産収入", color: "#f7b731" },
+          { name: "寄附金", key: "寄附金", color: "#1e90ff" },
+          { name: "繰入金", key: "繰入金", color: "#20bf6b" },
+          { name: "繰越金", key: "繰越金", color: "#b8e994" },
+          { name: "諸収入", key: "諸収入", color: "#d63031" },
+          { name: "地方債", key: "地方債", color: "#e056fd" },
+        ].map(e => {
+          const key = `歳入の状況_千円.${e.key}.決算額`
+          const ratioKey = `歳入の状況_千円.${e.key}.構成比`
+          const keijoKey = `歳入の状況_千円.${e.key}.経常一般財源等`
+          const depth = countDotsForDepth(key) - 2
+          const rawValue = d[key]
+          return {
+            ...e,
+            value: fmt1000ennToKansuji(rawValue),
+            ratio: fmtPercentage(d[ratioKey]),
+            keijo: fmt1000ennToKansuji(d[keijoKey]),
+            depth,
+            rawValue,
+          }
+        }),
+        footerRow: {
+          name: "歳入合計",
+          value: fmt1000ennToKansuji(d['歳入の状況_千円.歳入合計.決算額']),
+          ratio: "100.0 %",
+          keijo: fmt1000ennToKansuji(d['歳入の状況_千円.歳入合計.経常一般財源等']),
+        }
+      }
+    }
+    function revStats_sichoson(d) {
       return {
         id: 'revStats',
         title: '歳入の状況',
@@ -412,6 +426,13 @@
         footerRow: { name: "歳入合計", value: fmt1000ennToKansuji(d['歳入の状況_千円.歳入合計.決算額']), ratio: "100.0 %" }
       }
     }
+    function revStats(d) {
+      if (d['is_todohuken']) {
+        return revStats_dohuken(d)
+      } else {
+        return revStats_sichoson(d)
+      }
+    }
 
     const LOCAL_TAX_ROWS = [
       { name: "普通税 合計", key: "普通税.合計", color: "#fb8b1e" },
@@ -436,8 +457,80 @@
       { name: "法定外目的税", key: "目的税.法定外目的税", color: "#e17055" },
       { name: "旧法による税", key: "旧法による税", color: "#f7b731" }
     ]
-    // 市町村税の状況
-    function localTaxRevStats(d) {
+    // 道府県税の状況
+    const DOHUKEN_ZEI_ROWS = [
+      { name: "普通税", key: "普通税", color: "#fb8b1e" },
+      { name: "法定普通税", key: "普通税.法定普通税", color: "#fda04a" },
+      { name: "道府県民税", key: "普通税.法定普通税.道府県民税", color: "#fdcb6e" },
+      { name: "個人均等割", key: "普通税.法定普通税.道府県民税.個人均等割", color: "#f9ca24" },
+      { name: "所得割", key: "普通税.法定普通税.道府県民税.所得割", color: "#badc58" },
+      { name: "法人均等割", key: "普通税.法定普通税.道府県民税.法人均等割", color: "#6ab04c" },
+      { name: "法人税割", key: "普通税.法定普通税.道府県民税.法人税割", color: "#2ecc71" },
+      { name: "利子割", key: "普通税.法定普通税.道府県民税.利子割", color: "#26de81" },
+      { name: "配当割", key: "普通税.法定普通税.道府県民税.配当割", color: "#4af6c3" },
+      { name: "株式等譲渡所得割", key: "普通税.法定普通税.道府県民税.株式等譲渡所得割", color: "#55efc4" },
+      { name: "事業税", key: "普通税.法定普通税.事業税", color: "#00cec9" },
+      { name: "個人分", key: "普通税.法定普通税.事業税.内訳.個人分", color: "#26c6da" },
+      { name: "法人分", key: "普通税.法定普通税.事業税.内訳.法人分", color: "#00aaff" },
+      { name: "地方消費税", key: "普通税.法定普通税.地方消費税", color: "#45aaf2" },
+      { name: "不動産取得税", key: "普通税.法定普通税.不動産取得税", color: "#74b9ff" },
+      { name: "道府県たばこ税", key: "普通税.法定普通税.道府県たばこ税", color: "#0068ff" },
+      { name: "ゴルフ場利用税", key: "普通税.法定普通税.ゴルフ場利用税", color: "#a29bfe" },
+      { name: "軽油引取税", key: "普通税.法定普通税.軽油引取税", color: "#6c5ce7" },
+      { name: "自動車税", key: "普通税.法定普通税.自動車税", color: "#9b59b6" },
+      { name: "鉱区税", key: "普通税.法定普通税.鉱区税", color: "#fd79a8" },
+      { name: "固定資産税特例", key: "普通税.法定普通税.固定資産税特例", color: "#e84393" },
+      { name: "法定外普通税", key: "普通税.法定外普通税", color: "#ff433d" },
+      { name: "目的税", key: "目的税", color: "#fc5c65" },
+      { name: "法定目的税", key: "目的税.法定目的税", color: "#e17055" },
+      { name: "狩猟税", key: "目的税.法定目的税.狩猟税", color: "#ff8c69" },
+      { name: "法定外目的税", key: "目的税.法定外目的税", color: "#ef5777" },
+      { name: "旧法による税", key: "旧法による税", color: "#f7b731" },
+    ]
+    function dohukenZei(d) {
+      return {
+        id: 'localTaxRevChokaStats',
+        title: '歳入全体に占める道府県税の状況',
+        header: [
+          {
+            name: '項目名',
+            key: 'name',
+          },
+          {
+            name: '収入済額',
+            key: 'value',
+          },
+          {
+            name: '構成比',
+            key: 'ratio',
+          }
+        ],
+        rows: DOHUKEN_ZEI_ROWS.map(row => {
+          const depth = countDotsForDepth(row.key)
+          const key = `道府県税の状況_千円.${row.key}.収入済額`
+          const ratioKey = d[`道府県税の状況_千円.${row.key}.収入済額`]
+
+          const rawValue = d[key]
+          const rawRatio = d[ratioKey]
+          let value = fmt1000ennToKansuji(d[key])
+          let ratio = fmtPercentage(d[ratioKey])
+          return {
+            ...row,
+            ratio,
+            value,
+            depth,
+            rawValue
+          }
+        }),
+        footerRow: {
+          name: "道府県税 合計",
+          value: fmt1000ennToKansuji(d["道府県税の状況_千円.合計.収入済額"]),
+          ratio: fmtPercentage(d[`道府県税の状況_千円.合計.収入済額`] / d[`歳入の状況_千円.歳入合計.決算額`] * 100)
+        },
+      }
+    }
+
+    function sichosonZei(d) {
       return {
         id: 'localTaxRevChokaStats',
         title: '歳入全体に占める市町村税の状況',
@@ -477,6 +570,14 @@
           value: fmt1000ennToKansuji(d["市町村税の状況_千円.合計.収入済額"]),
           ratio: fmtPercentage(d[`市町村税の状況_千円.合計.収入済額.歳入合計構成比`])
         },
+      }
+    }
+
+    function localTaxRevStats(d) {
+      if (d['is_todohuken']) {
+        return dohukenZei(d)
+      } else {
+        return sichosonZei(d)
       }
     }
 
@@ -586,9 +687,17 @@
           const key = row.key
           const rawValue = d[`市町村税の状況_千円.${key}.超過課税分`]
           const value = fmt1000ennToKansuji(d[`市町村税の状況_千円.${key}.超過課税分`])
-          const rawRatio = d[`市町村税の状況_千円.${key}.超過課税分`] / d[`歳入の状況_千円.一般財源計.決算額`] * 100
+          const rawRatio = d[`市町村税の状況_千円.${key}.超過課税分`] / d['歳入の状況_千円.一般財源計.決算額'] * 100
+
           const ratio = fmtPercentage(row.rawRatio)
-          console.log({ row })
+          console.log({
+            ...row,
+            rawValue,
+            value,
+            rawRatio,
+            ratio,
+            rawRatioCalc: [key, d[`市町村税の状況_千円.${key}.超過課税分`], d['歳入の状況_千円.一般財源計.決算額'], 100]
+          })
           return {
             ...row,
             rawValue,
@@ -600,7 +709,7 @@
         footerRow: {
           name: "超過課税分 合計",
           value: fmt1000ennToKansuji(d["市町村税の状況_千円.合計.超過課税分"]),
-          ratio: fmtPercentage(d[`市町村税の状況_千円.合計.超過課税分`] / d["歳入の状況_千円.一般財源計.決算額"] * 100)
+          ratio: fmtPercentage(d[`市町村税の状況_千円.合計.超過課税分`] / d["歳入の状況_千円.一般財源計.決算額"])
         },
       }
     }
@@ -822,6 +931,76 @@
 
     // 職員給与の状況
     function departmentSalary(d) {
+      if (d['is_todohuken']) {
+        return departmentSalary_todohuken(d)
+      } else {
+        return departmentSalary_sichoson(d)
+      }
+    }
+    function departmentSalary_todohuken(d) {
+      const p = "職員給与の状況"
+      const fmtH = n => n == null ? '-' : Number(n).toLocaleString()
+
+      const generalRows = [
+        { name: "一般職員", key: "一般職員等.一般職員", depth: 0 },
+        { name: "うち消防職員", key: "一般職員等.うち消防職員", depth: 1 },
+        { name: "うち技能労務職員", key: "一般職員等.うち技能労務職員", depth: 1 },
+        { name: "警察官", key: "警察官", depth: 0 },
+        { name: "教育公務員", key: "教育公務員", depth: 0 },
+        { name: "臨時職員", key: "臨時職員", depth: 0 },
+      ].map(row => ({
+        ...row,
+        staff: fmtH(d[`${p}.${row.key}.職員数_人`]),
+        salary: fmt100ennToKansuji(d[`${p}.${row.key}.給料月額_百円`]),
+        average: fmt100ennToKansuji(d[`${p}.${row.key}.一人当たり平均給料月額_百円`]),
+      }))
+
+      const specialRows = [
+        "知事", "副知事", "教育長",
+        "議会議長", "議会副議長", "議会議員",
+      ].map(name => ({
+        name, depth: 0,
+        quota: d[`${p}.特別職等.${name}.定数`] ?? '-',
+        since: d[`${p}.特別職等.${name}.適用開始年月日`] ?? '-',
+        average: fmt100ennToKansuji(d[`${p}.特別職等.${name}.一人当たり平均給料報酬月額_百円`]),
+      }))
+
+      return {
+        generalTable: {
+          id: 'salaryGeneral',
+          title: '職員給与の状況 — 一般職員等',
+          header: [
+            { name: '区分', key: 'name' },
+            { name: '職員数（人）', key: 'staff' },
+            { name: '給料月額', key: 'salary' },
+            { name: '1人当り平均', key: 'average' },
+          ],
+          colWidths: ['width:40%', 'width:8em', 'width:10em', 'width:11em'],
+          rows: generalRows,
+          footerRow: {
+            name: '合計',
+            staff: fmtH(d[`${p}.合計.職員数_人`]),
+            salary: fmt100ennToKansuji(d[`${p}.合計.給料月額_百円`]),
+            average: fmt100ennToKansuji(d[`${p}.合計.一人当たり平均給料月額_百円`]),
+          },
+        },
+        specialTable: {
+          id: 'salarySpecial',
+          title: '職員給与の状況 — 特別職等',
+          header: [
+            { name: '職名', key: 'name' },
+            { name: '定数', key: 'quota' },
+            { name: '適用開始年月日', key: 'since' },
+            { name: '平均報酬月額', key: 'average' },
+          ],
+          colWidths: ['width:30%', 'width:5em', 'width:9em', 'width:12em'],
+          rows: specialRows,
+          footerRow: null,
+        },
+        laspa: d[`${p}.ラスパイレス指数`],
+      }
+    }
+    function departmentSalary_sichoson(d) {
       const p = "職員給与の状況"
       const fmtH = n => n == null ? '-' : Number(n).toLocaleString()
 
@@ -834,8 +1013,8 @@
       ].map(row => ({
         ...row,
         staff: fmtH(d[`${p}.${row.key}.職員数_人`]),
-        salary: fmtH(d[`${p}.${row.key}.給料月額_百円`]),
-        average: fmtH(d[`${p}.${row.key}.一人当たり平均給料月額_百円`]),
+        salary: fmt100ennToKansuji(d[`${p}.${row.key}.給料月額_百円`]),
+        average: fmt100ennToKansuji(d[`${p}.${row.key}.一人当たり平均給料月額_百円`]),
       }))
 
       const specialRows = [
@@ -845,7 +1024,7 @@
         name, depth: 0,
         quota: d[`${p}.特別職等.${name}.定数`] ?? '-',
         since: d[`${p}.特別職等.${name}.適用開始年月日`] ?? '-',
-        average: fmtH(d[`${p}.特別職等.${name}.一人当たり平均給料報酬月額_百円`]),
+        average: fmt100ennToKansuji(d[`${p}.特別職等.${name}.一人当たり平均給料報酬月額_百円`]),
       }))
 
       return {
@@ -855,16 +1034,16 @@
           header: [
             { name: '区分', key: 'name' },
             { name: '職員数（人）', key: 'staff' },
-            { name: '給料月額（百円）', key: 'salary' },
-            { name: '1人当り平均（百円）', key: 'average' },
+            { name: '給料月額', key: 'salary' },
+            { name: '1人当り平均', key: 'average' },
           ],
           colWidths: ['width:40%', 'width:8em', 'width:10em', 'width:11em'],
           rows: generalRows,
           footerRow: {
             name: '合計',
             staff: fmtH(d[`${p}.合計.職員数_人`]),
-            salary: fmtH(d[`${p}.合計.給料月額_百円`]),
-            average: fmtH(d[`${p}.合計.一人当たり平均給料月額_百円`]),
+            salary: fmt100ennToKansuji(d[`${p}.合計.給料月額_百円`]),
+            average: fmt100ennToKansuji(d[`${p}.合計.一人当たり平均給料月額_百円`]),
           },
         },
         specialTable: {
@@ -874,7 +1053,7 @@
             { name: '職名', key: 'name' },
             { name: '定数', key: 'quota' },
             { name: '適用開始年月日', key: 'since' },
-            { name: '平均報酬月額（百円）', key: 'average' },
+            { name: '平均報酬月額', key: 'average' },
           ],
           colWidths: ['width:30%', 'width:5em', 'width:9em', 'width:12em'],
           rows: specialRows,
@@ -1071,76 +1250,6 @@
       }
     }
 
-    // ══════════════════════════════════════════════
-    // CARD BROWSER
-    // ══════════════════════════════════════════════
-    function buildCardItem(d) {
-      const pop = d["人口.住民基本台帳人口.令6_1_1"];
-      const density = d["人口密度_人_per_km2"];
-      const area = d["面積_km2"];
-      const revenue = d["歳入の状況_千円.歳入合計.決算額"];
-      const localTax = d["市町村税の状況_千円.普通税.合計.収入済額"];
-      return {
-        id: d['id'],
-        name: d["団体名"] || "N/A",
-        badge: d["市町村類型"] || "N/A",
-        pref: d["都道府県名"] || "N/A",
-        rows: [
-          { label: "人口", value: pop ? Number(pop).toLocaleString() + " 人" : "-" },
-          { label: "人口密度", value: density ? density + " 人/km²" : "-" },
-          { label: "面積", value: area ? area + " km²" : "-" },
-          { label: "歳入合計", value: revenue ? fmt1000ennToKansuji(Number(revenue)) : "-" },
-          { label: "市町村税合計", value: localTax ? fmt1000ennToKansuji(Number(localTax)) : "-" },
-        ],
-      };
-    }
-
-
-    function renderCards() {
-      const cardHtml = d => `
-        <div id="card-${d.id}" class="entity-card" onclick="selectEntity('${d.id}')">
-          <div id="card-${d.id}-title" class="ec-header">
-            <h2>${d.name}</h2>
-            <div class="ec-badge">
-              ${d.badge}
-            </div>
-          </div>
-          <div class="ec-stats">
-            ${d.rows.map(r => `
-              <div class="ec-row">
-                <span class="ec-label">${r.label}</span>
-                <span class="ec-value">${r.value}</span>
-              </div>
-            `).join("")}
-          </div>
-        </div>`;
-
-      const grid = document.getElementById("entity-grid");
-      grid.innerHTML = "";
-      const keys = prefNameArray
-      let i = 0;
-
-      function renderChunk() {
-        const end = Math.min(i + 3, keys.length);
-        const frag = document.createDocumentFragment();
-        for (; i < end; i++) {
-          const key = keys[i];
-          const div = document.createElement("div");
-          div.id = `ec-group-${key}`;
-          div.className = "ec-group";
-          div.innerHTML = `<div class="ec-group-label">${key}</div><div class="ec-group-cards">${itemByPerf[key].map(cardHtml).join("")}</div>`;
-          frag.appendChild(div);
-        }
-        grid.appendChild(frag);
-        if (i < keys.length) requestAnimationFrame(renderChunk);
-        else {
-          updateVisibleCount()
-          isDataLoadingFinished = true
-        };
-      }
-
-      requestAnimationFrame(renderChunk);
-    }
 
     function updateVisibleCount() {
       const mainGrid = document.getElementById('entity-grid');
@@ -1165,23 +1274,53 @@
     function onFilterChange() {
       searchParam.searchText = document.getElementById("cb-search").value.trim();
       const q = searchParam.searchText
-
-
-      // カード表示/非表示
-      let count = 0;
-      for (const key in itemByPerf) {
-        let groupVisible = false;
-        itemByPerf[key].forEach(item => {
-          const match = !q || item.name.includes(q) || item.pref.includes(q);
-          const el = document.getElementById(`card-${item.id}`);
-          if (el) el.style.display = match ? "" : "none";
-          if (match) { groupVisible = true; count++; }
-        });
-
-        const g = document.getElementById(`ec-group-${key}`);
-        if (g) g.style.display = groupVisible ? "" : "none";
+      if (!q) {
+        for (const item of iterateAllDataItem()) {
+          const elm = document.getElementById(`card-${item.id}`)
+          elm.style.display = ''
+        }
+        for (let i = 0; i < 47; i++) {
+          const elm = document.getElementById(`ec-group-${prefNameArray[i]}`)
+          elm.style.display = ''
+        }
       }
 
+      let count = 0;
+      const keyWords = q.split(" ")
+      console.log(keyWords)
+      const categorySet = new Set()
+      for (const item of iterateAllDataItem()) {
+        let check = false;
+        for (const word of keyWords) {
+          check = (item['団体名'] ?? '').includes(word) ||
+            (item['都道府県名'] ?? '').includes(word) ||
+            (item['id'] ?? '').includes(word)
+
+          if (check) {
+            break;
+          }
+        }
+
+        const elm = document.getElementById(`card-${item.id}`)
+        if (check) {
+          elm.style.display = ''
+          const idx = item.id.indexOf('-')
+          const todohukenId = item.id.slice(0, idx)
+          categorySet.add(parseInt(todohukenId) - 1)
+        } else {
+          elm.style.display = 'none'
+        }
+      }
+
+      for (let i = 0; i < 47; i++) {
+        const elm = document.getElementById(`ec-group-${prefNameArray[i]}`)
+        console.log(categorySet)
+        if (categorySet.has(i)) {
+          elm.style.display = ''
+        } else {
+          elm.style.display = 'none'
+        }
+      }
       updateVisibleCount();
     }
 
@@ -1214,7 +1353,7 @@
       // URL を更新
       const url = new URL(window.location);
       url.searchParams = new URLSearchParams({ 'id': searchValue })
-      console.log(url.toString())
+
       history.pushState(null, '', url);
 
       updateVisibleCount();
@@ -1283,7 +1422,9 @@
     // SELECT ENTITY
     // ══════════════════════════════════════════════
     function selectEntity(id) {
-      const record = allData.find((a) => String(a['id']) === String(id))
+      const record = allData.find((a) => String(a['id']) === String(id)) ||
+        allTodohukenData.find((a) => String(a['id']) === String(id))
+
       if (!record) {
         return false
       }
@@ -1297,6 +1438,9 @@
 
       const url = new URL(window.location);
       url.search = new URLSearchParams({ "id": id }).toString()
+      console.log({
+        id
+      })
       history.pushState(null, "", url);
     }
 
@@ -1308,7 +1452,7 @@
      *
      *   表示例:  ▲ +1,234人 (+2.1%)  /  ▼ −567人 (−0.3%)  /  — 変化なし
      */
-    function renderDelta(cur, prev, prevFmt = "", prevLabel = "前年") {
+    function renderDelta(cur = Number.NaN, prev = Number.NaN, prevFmt = "", prevLabel = "前年") {
       const diff = cur - prev;
       const dir = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
       const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
@@ -1319,8 +1463,6 @@
         pct = (absDiff / Math.abs(prev) * 100)
         if (Number.isFinite(pct)) {
           pct = pct.toFixed(2)
-        } else {
-          pct = '-'
         }
       }
 
@@ -1347,6 +1489,11 @@
       } else if (prevFmt === '人') {
         prevTxt = `${prev.toLocaleString()} 人`
       }
+
+      if (!Number.isFinite(prev)) {
+        prevTxt = "-"
+      }
+
       return `
         <div class="kpi-prev">
           <span class="kpi-prev-label">${prevLabel}&nbsp;</span>
@@ -1379,22 +1526,6 @@
         return `<div class="bool-item"><div class="bool-dot ${s}"></div><span class="bool-label ${s}">${label}</span></div>`;
       }).join("");
       return `<div class="card"><div class="card-header">${title}</div><div class="bool-grid">${cells}</div></div>`;
-    }
-
-    function renderLaspa(laspa) {
-      const isHigh = laspa != null && laspa >= 100
-      const cls = laspa == null ? 'laspa-none' : isHigh ? 'laspa-high' : 'laspa-low'
-      const hint = laspa == null ? '' : isHigh ? '国家公務員より高い水準' : '国家公務員より低い水準'
-      const val = laspa != null ? Number(laspa).toFixed(1) : '-'
-      return `
-        <div class="card">
-          <div class="card-header">ラスパイレス指数</div>
-          <div class="laspa-kpi">
-            <div class="laspa-value ${cls}">${val}</div>
-            <div class="laspa-baseline">国家公務員の給与水準 = <strong>100</strong></div>
-            ${hint ? `<div class="laspa-hint ${cls}">${hint}</div>` : ''}
-          </div>
-        </div>`
     }
 
     function renderTableData({ id, title, unit, header, rows, footerRow, colWidths }) {
@@ -1496,17 +1627,28 @@
         ]
       }
       const { scaleCard } = fiscalCond(d)
+
+      const name = d['団体名'] || d['都道府県名']
+      const sichosonRuikei = d["市町村類型"] || '都道府県'
+      const parentName = d['団体名'] ? d['都道府県名'] : '都道府県'
+      const entityCode = d["団体コード"] ? `団体コード・${d["団体コード"]}` : `都道府県コード・${d['都道府県コード']}`
       let html = `
-    <div id="card-summary">
-      <div class="card-body">
-        <div id="entity-header">
-          <div>
-            <div id="entity-name">${d["都道府県名"]} ${d["団体名"]}</div>
-            <div id="entity-pref">団体コード ${d["団体コード"]}</div>
+      <div class="charts-row">
+        <div class="card">
+          <div id="entity-header">
+            <div>
+              <div id="entity-pref">
+                ${parentName}
+              </div>
+              <div id="entity-name">${name}</div>
+              <div id="entity-meta">
+                <span class="entity-code">${entityCode}</span>
+                ${`<span class="entity-tag">市町村類型・${sichosonRuikei}</span>` ?? ''}
+              </div>
+            </div>
           </div>
         </div>
         ${renderKpiGrid(scaleCard)}
-      </div>
     </div>
   `;
 
@@ -1653,7 +1795,7 @@
       `
       container.innerHTML = html;
 
-      function chartSainyu() {
+      function chartSainyu(d) {
         const itemList = revStats(d).rows
           .filter(e => !e.key.includes('.') && e.value !== '-')
           .filter(e => parseFloat(e.ratio) > 1)
@@ -1668,9 +1810,9 @@
           total: d["歳入の状況_千円.歳入合計.決算額"]
         }
       }
-      renderPieChart('chart-sainyuu', chartSainyu())
+      renderPieChart('chart-sainyuu', chartSainyu(d))
 
-      function chartLocalTax() {
+      function chartLocalTax(d) {
         const itemList = localTaxRevStats(d).rows
           .filter(e => !e.name.includes('合計'))
           .filter(e => !e.name.startsWith("固定資産税"))
@@ -1691,9 +1833,9 @@
           total: d["歳入の状況_千円.歳入合計.決算額"]
         }
       }
-      renderPieChart('chart-zei', chartLocalTax())
+      renderPieChart('chart-zei', chartLocalTax(d))
 
-      function localTaxRevIppanTax() {
+      function localTaxRevIppanTax(d) {
         const itemList = localTaxRevIppan.rows
           .filter(e => !e.name.includes('合計'))
           .filter(e => !e.name.startsWith("固定資産税"))
@@ -1714,10 +1856,10 @@
           total: d["歳入の状況_千円.一般財源計.決算額"]
         }
       }
-      renderPieChart(`chart-${localTaxRevIppan.id}`, localTaxRevIppanTax())
+      renderPieChart(`chart-${localTaxRevIppan.id}`, localTaxRevIppanTax(d))
 
 
-      function chartChokaInKeiJyo() {
+      function chartChokaInKeiJyo(d) {
         const itemList = localTaxRevChokaInIppanZaigen(d).rows
           .filter(e => !e.name.includes('合計'))
           .filter(e => !e.name.startsWith("固定資産税"))
@@ -1738,9 +1880,9 @@
           total: d["歳入の状況_千円.一般財源計.決算額"]
         }
       }
-      renderPieChart('chart-choka-in-keijyo', chartChokaInKeiJyo())
+      renderPieChart('chart-choka-in-keijyo', chartChokaInKeiJyo(d))
 
-      function chartExpKetsuzan() {
+      function chartExpKetsuzan(d) {
         const p = '目的別歳出の状況_千円'
         const cats = [
           { name: '議会費', color: '#a29bfe' },
@@ -1771,9 +1913,9 @@
           remainderName: 'その他',
         }
       }
-      renderPieChart('chart-exp-ketsuzan', chartExpKetsuzan())
+      renderPieChart('chart-exp-ketsuzan', chartExpKetsuzan(d))
 
-      function chartSeishitsuKetsuzan() {
+      function chartSeishitsuKetsuzan(d) {
         const p = '性質別歳出の状況_千円'
         const cats = [
           { name: '人件費', color: '#fb8b1e' },
@@ -1800,9 +1942,9 @@
           total: d[`${p}.歳出合計.決算額`],
         }
       }
-      renderPieChart('chart-seishitsu-ketsuzan', chartSeishitsuKetsuzan())
+      renderPieChart('chart-seishitsu-ketsuzan', chartSeishitsuKetsuzan(d))
 
-      function chartSeishitsuIppan() {
+      function chartSeishitsuIppan(d) {
         const p = '性質別歳出の状況_千円'
         const cats = [
           { name: '人件費', color: '#fb8b1e' },
@@ -1829,7 +1971,7 @@
           total: d[`${p}.歳出合計.決算額`],
         }
       }
-      renderPieChart('chart-seishitsu-ippan', chartSeishitsuIppan())
+      renderPieChart('chart-seishitsu-ippan', chartSeishitsuIppan(d))
     }
 
     function renderPieChart(canvasId, dataset) {
@@ -1862,7 +2004,16 @@
         }
       }
 
-      const itemList = [{ value: remainder, ratio: (remainder / dataset.total) * 100, name: dataset.remainderName ?? 'その他', isLast: true, color: '#696969' }]
+      const itemList = [
+        {
+          value: remainder,
+          ratio: (remainder / total) * 100,
+          name: dataset.remainderName ?? 'その他',
+          isLast: true,
+          color: '#696969'
+        }
+      ]
+      console.log(itemList[0])
       dataset.itemList.forEach(e => itemList.push(e))
       itemList.sort((a, b) => a.isLast)
 
@@ -1873,12 +2024,12 @@
       });
 
       const legendEl = document.getElementById(`${canvasId}-legend`);
-      if (legendEl) {
-        const createText = (item) => `
+      const createText = (item) => `
           <span>${fmt1000ennToKansuji(item.value)}</span>
           <span>/</span>
           <span>${fmtPercentage(item.ratio)}</span>
         `
+      if (legendEl) {
         const emptyValue = "-"
         legendEl.innerHTML = itemList.map((item, idx) => `
           <div class="chart-legend-item">
@@ -1907,8 +2058,9 @@
           appendToBody: true,
           extraCssText: 'z-index: 9999;',
           formatter: (params) => {
-            const pct = ((params.value / total) * 100).toFixed(2);
-            return `${params.name}<br/>${(params.value / 10000).toFixed(1)}億円 (${pct}%)`;
+            const pct = ((params.value / total) * 100);
+
+            return `${params.name}<br/><span>${fmt1000ennToKansuji(params.value)}</span><span>(${fmtPercentage(pct)})</span>`;
           },
         },
         series: [{
