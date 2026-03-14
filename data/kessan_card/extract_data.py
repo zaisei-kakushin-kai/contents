@@ -465,38 +465,14 @@ def flatten(nested: dict, sep: str = ".") -> pl.DataFrame:
     _flatten(nested)
     return out
 
-
-def add_cols(df: pl.DataFrame):
-    perfmap = {}
-    for idx, perf in enumerate(PERF_LIST):
-        perfmap[perf] = idx
-
-    df = df.with_columns(
-        pl.col('都道府県名').replace_strict(perfmap).alias('都道府県番号')).drop('都道府県名')
-
-    # 市町村税について、歳入構成比追加
-    stack1 = []
-    for c in df.columns:
-        if c.endswith('構成比'):
-            continue
-
-        check = c.startswith('市町村税の状況_千円') or c in '超過課税分' or c in '収入済額'
-        if check:
-            stack1.extend([
-                (pl.col(c) /
-                 pl.col('歳入の状況_千円.歳入合計.決算額')*100).alias(f"{c}.歳入合計構成比"),
-
-                (pl.col(c).alias(f"{c}.経常一般財源等構成比") /
-                 pl.col('歳入の状況_千円.歳入合計.経常一般財源等')*100).alias(f"{c}.経常一般財源等構成比")
-            ])
-
-    return df.with_columns(stack1)
-
 # ── メイン処理 ──────────────────────────────────────────────
 
 
 def main(xlsx_path: Path):
     print(f"読み込み中: {xlsx_path}")
+    if xlsx_path.name.endswith('xlsx') and not '都道府県' in xlsx_path.name and not xlsx_path.is_file():
+        return
+
     wb = load_workbook(xlsx_path, data_only=True)
     sheets = [s for s in wb.sheetnames if s != '目次']
     print(f"対象シート数: {len(sheets)}")
@@ -506,7 +482,6 @@ def main(xlsx_path: Path):
     for i, name in enumerate(sheets, 1):
         try:
             data = flatten(extract_sheet(wb[name]))
-            _ = json.dumps(data)
             stack.append(data)
             print(f"  [{i:3d}/{len(sheets)}] {name} … OK")
         except Exception as e:
@@ -536,12 +511,9 @@ if __name__ == '__main__':
 
     df = pl.DataFrame(all_data, infer_schema_length=len(all_data))
     df = df.filter(pl.col("団体コード").is_not_null()).drop('年度')
-    df = add_cols(df)
     map_dict = df.to_dict()
     for i in map_dict:
         map_dict[i] = map_dict[i].to_list()
 
-    df.write_csv(Path(output_path).with_name("r5_kessan_data.csv"))
-
-    Path(output_path).with_segments("r5_kessan_data.msgpack").write_bytes(
-        msgpack.dumps(map_dict))
+    df.with_columns(pl.col(pl.Utf8).cast(pl.Categorical)).write_parquet(
+        Path(output_path).with_name("r5_kessan_data.parquet"), compression="snappy")

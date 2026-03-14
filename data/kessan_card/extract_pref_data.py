@@ -456,15 +456,6 @@ def flatten(nested: dict, sep: str = ".") -> dict:
     return out
 
 
-def add_cols(df: pl.DataFrame):
-    perfmap = {}
-    for idx, perf in enumerate(PERF_LIST):
-        perfmap[perf] = idx
-
-    return df.with_columns(
-        pl.col('都道府県名').replace_strict(perfmap).alias('都道府県番号')).drop('都道府県名')
-
-
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print(
@@ -473,7 +464,7 @@ if __name__ == '__main__':
 
     xlsx_path = Path(sys.argv[1])
     output_path = Path(sys.argv[2]) if len(
-        sys.argv) > 2 else xlsx_path.with_name("r5_kessan_todohuken.msgpack")
+        sys.argv) > 2 else xlsx_path.with_name("r5_kessan_todohuken.parquet")
 
     all_data = main(xlsx_path)
 
@@ -483,14 +474,11 @@ if __name__ == '__main__':
 
     df = pl.DataFrame(all_data, infer_schema_length=len(all_data))
     df = df.filter(pl.col("都道府県名").is_not_null()).drop('年度')
-    df = add_cols(df)
     map_dict = df.to_dict()
     newdict = {}
     for i in map_dict:
         newdict[i] = map_dict[i].to_list()
 
-    with open(output_path, 'wb') as fp:
-        fp.write(msgpack.dumps(newdict))
-        fp.close()
-
+    df.with_columns(pl.col(pl.Utf8).cast(pl.Categorical)).write_parquet(Path(output_path).with_name(
+        "r5_kessan_todohuken.parquet"))
     print(f"出力: {output_path}")
