@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地方自治体決算ターミナル @ 財政革新会</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print"
+        onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="datatable.css">
+</head>
+
+<body>
+
+    <!-- TITLE BAR -->
+    <div id="topbar">
+        <div class="topbar-titles">
+            <span class="title-org-name">財政革新会</span>
+            <span class="title-app-name">R5 地方自治体決算</span>
+        </div>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div id="searchbar">
+        <div class="search-terminal-line">
+            <span class="search-prompt">&gt;_</span>
+            <input id="cb-search" class="search-input" type="text" placeholder="自治体名・都道府県名で検索..." />
+        </div>
+        <span id="cb-count" class="search-count">
+            <span class="search-count-num">—</span>
+            <span>件</span>
+        </span>
+    </div>
+
+    <!-- CONTENTS -->
+    <div id="main">
+        <div id="tab-notfound" class="tab-panel">
+            <div class="nf-code">404</div>
+            <div class="nf-msg">ページが見つかりません</div>
+            <button class="nf-btn" onclick="navigate('/')">← ホームへ戻る</button>
+        </div>
+        <div id="tab-browse" class="tab-panel entity-grid active">
+
+        </div>
+        <div id="tab-detail" class="tab-panel">
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer id="footer">
+        <div class="footer-inner">
+            <span class="footer-copy">&copy; 2025 財政革新会</span>
+            <span class="footer-sep">|</span>
+            <span class="footer-source">
+                <a href="https://www.soumu.go.jp/iken/kessan_card.html" target="_blank" rel="noopener">
+                    総務省「令和５年度　市町村別決算状況調」
+                </a>
+            </span>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { parquetRead, parquetMetadata, parquetMetadataAsync } from 'https://cdn.jsdelivr.net/npm/hyparquet/+esm'
+        // ══════════════════════════════════════════════
+        // DATA
+        // ══════════════════════════════════════════════
+        let data_kessan = []
+        let data_todohuken = []
+        let data_zeimoku = []
+        let data_named_card = []
+        let data_pref_array = []
+        const data_id2data = {}
+        const data_idx2id = {}
+        const data_pref2idx = {}
+        async function loadData() {
+            [
+                data_pref_array,
+                data_kessan,
+                data_todohuken,
+                data_zeimoku,
+                data_named_card
+            ] = await Promise.all([
+                fetch("pref-array.json").then(e => e.json()),
+                loadFile("r5_kessan_data.parquet"),
+                loadFile("r5_kessan_todohuken.parquet"),
+                loadFile("zeimoku.parquet"),
+                loadFile("r5_kessan_data_named_card.parquet")
+            ])
+            console.log(data_named_card[0])
+
+            data_pref_array.forEach((val, idx) => {
+                data_pref2idx[val] = idx
+            })
+
+            function buildId2name() {
+                setTimeout(() => {
+                    for (const item of data_kessan) {
+                        const id = item['id']
+                        Object.assign(data_id2data, { [id]: item })
+                    }
+                }, 0)
+                setTimeout(() => {
+                    for (const item of data_todohuken) {
+                        const id = item['id']
+                        Object.assign(data_id2data, { [id]: item })
+                    }
+                }, 0)
+            }
+            buildId2name()
+        }
+        async function loadFile(url2fetch) {
+            const response = await fetch(url2fetch)
+            if (response.status !== 200) {
+                console.error("error")
+            }
+            const arrayBuffer = await response.arrayBuffer()
+
+            const metadata = parquetMetadata(arrayBuffer)
+            const columns = metadata.schema.slice(1).map(s => s.name)
+
+            let records = []
+            await parquetRead({
+                file: arrayBuffer,
+                onComplete: (rows) => {
+                    records = rows.map(row =>
+                        Object.fromEntries(columns.map((col, i) => [col, row[i]]))
+                    )
+                },
+            })
+            return records
+        }
+
+        // ══════════════════════════════════════════════
+        // STATE
+        // ══════════════════════════════════════════════
+        let currentView = 'card'
+
+        // ══════════════════════════════════════════════
+        // ROUTER
+        // ══════════════════════════════════════════════
+        window.navigate = function navigate(path) {
+            window.location.hash = path
+        }
+
+
+        function parseHash() {
+            const raw = window.location.hash.slice(1)
+            const [path, qs] = raw.split('?')
+            return { path: path || '/', params: new URLSearchParams(qs ?? '') }
+        }
+
+        function showPanel(id) {
+            document.querySelectorAll('.tab-panel').forEach(p => {
+                console.log(p.id, id)
+                p.classList.remove('active')
+            })
+            document.getElementById(id)?.classList.add('active')
+        }
+
+        function renderRoute() {
+            const { path, params } = parseHash()
+            const id = params.get('id')
+            if (path === '/') {
+                showPanel('tab-browse')
+                onFilterChange()
+            } else if (path === '/detail' && data_id2data[id]) {
+                showPanel('tab-detail')
+                renderDetail(id)
+            } else {
+                showPanel('tab-notfound')
+                renderNotFound()
+            }
+        }
+        window.addEventListener('hashchange', renderRoute)
+
+        // ══════════════════════════════════════════════
+        // UTILS
+        // ══════════════════════════════════════════════
+        /**
+         * 数値を最大4桁に縮約する（Compactモード用）
+         * 例: 1023456 → "102万"  / 9999 → "9,999"
+         */
+        function fmtScore(bigint, unit) {
+            if (unit) {
+                return `${bigint.toLocaleString()} ${unit}`
+            }
+
+            const v = parseFloat(bigint) / 100
+            if (Number.isNaN(v)) {
+                return bigint
+            }
+
+            const MAN = 10
+            const OKU = 10 * 100
+            const CHO = 10 * 1000 * 1000
+            const maximumFractionDigits = 2
+            const minimumFractionDigits = 2
+            const opt = { maximumFractionDigits, minimumFractionDigits }
+            if (v < MAN) {
+                return v.toLocaleString("ja-JP", opt) + ' 千円'
+            } else if (v < OKU) {
+                return (v / MAN).toLocaleString("ja-JP", opt) + ' 万円'
+            } else if (v < CHO) {
+                return (v / OKU).toLocaleString("ja-JP", opt) + ' 億円'
+            } else {
+                return (v / CHO).toLocaleString("ja-JP", opt) + ' 兆円'
+            }
+        }
+
+        // ══════════════════════════════════════════════
+        // BROWSE — card render (H案: 縦型ヒーロー)
+        // ══════════════════════════════════════════════
+        /**
+         * ブラウズ画面用カード（H案）のHTML文字列を生成する。
+         * ヘッダーに自治体名・都道府県名、ボディに右寄せの大きな金額を表示する縦型レイアウト。
+         *
+         * @param {Object} e - カードに表示するエンティティデータ
+         * @param {string} e.id        - データ識別のためのID
+         * @param {string} e.title     - 自治体名
+         * @param {string} e.subtitle  - 都道府県名
+         * @param {string} e.badge     - 市町村類型（例: "政令指定都市"）
+         * @param {number} e.value     - スコアの数値
+         * @param {string} e.unit      - スコアの単位（例: "百万円"）
+         * @returns {string} カードの HTML 文字列
+         */
+        function renderCardCompact(e) {
+            const badge = e.badge ? `<span class="ch-badge">${e.badge}</span>` : ''
+            return `
+                <div class="card-h" data-id="${e.id}" onclick="selectCard('${e.id}')">
+                    <div class="ch-header">
+                        <div class="ch-header-left">
+                            <div class="ch-pref">${e.subtitle}</div>
+                            <div class="ch-name">${e.title}</div>
+                        </div>
+                        ${badge}
+                    </div>
+                    <div class="ch-body">
+                        <div class="ch-value-name">${e.valueName}</div>
+                        <div class="ch-amount">${fmtScore(e.value)}</div>
+                        <div class="ch-unit">${e.unit}</div>
+                    </div>
+                </div>
+            `
+        }
+
+        // ══════════════════════════════════════════════
+        // BROWSE — card render (D案: rows グリッド型)
+        // ══════════════════════════════════════════════
+        /**
+         * ブラウズ画面用カード（D案）のHTML文字列を生成する。
+         * C案より多くのデータを表示する rows グリッド型レイアウト。
+         *
+         * @param {Object}   e            - カードに表示するエンティティデータ
+         * @param {number}   e.id         - allData内の要素をはじめ、すべてのEntityを一意に定めるID
+         * @param {string}   e.title      - 自治体名
+         * @param {string}   e.subtitle   - 都道府県名
+         * @param {string}   [e.badge]    - 市町村類型（例: "政令指定都市"）
+         * @param {Array<{label: string, value: string}>} e.rows - 表示する指標の配列
+         * @returns {string} カードの HTML 文字列
+         */
+        function renderCardData(d) {
+            const id = d['id']
+            const rows = d['rows'] ?? []
+            const getUnit = (idx) => {
+                const unit = ["人", "km2"][idx]
+                return unit
+                if (unit) {
+                    return unit
+                }
+            }
+            return `
+              <div class="entity-card" data-id="${id}" onclick="selectCard('${id}')">
+                    <span class="ec-sub">${d.subtitle}</span>
+                    <div class="ec-head">
+                        <span class="ec-name">
+                            ${d.title}
+                        </span>
+                        <span class="ec-badge">${d.badge}</span>
+                    </div>
+                    <div class="ec-rows">
+                        ${rows.map((e, idx) => `
+                            <div class="ec-row">
+                                <span class="ec-label">${e.label}</span>
+                                <span class="ec-value">${fmtScore(e.value, getUnit(idx))}</span>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `
+        }
+
+        function groupBySubtitle(entities) {
+            const map = new Map()
+
+            for (const e of entities) {
+                const key = e.subtitle ?? ''
+
+                if (!map.has(key)) {
+                    map.set(key, [])
+                }
+
+                map.get(key).push(e)
+            }
+
+            const stack = []
+            for (const [key, val] of map.entries()) {
+                val.sort((a, b) => a.dantaiCode - b.dantaiCode)
+                stack.push([key, val])
+            }
+
+
+            // 都道府県 sort
+            stack.sort((a, b) => {
+                const aVal = a[0];
+                const bVal = b[0];
+                return data_pref2idx[bVal] - data_pref2idx[aVal]
+            })
+            return stack
+        }
+
+        function renderGroupHeader(subtitle) {
+            return `
+                <div class="group-header">
+                    <span class="gh-name">${subtitle}</span>
+                </div>
+                `
+        }
+
+        function renderBrowseCards(entities) {
+            const grid = document.getElementById('tab-browse')
+            grid.innerHTML = ''
+
+            const pref2itemToBeRendered = groupBySubtitle(entities)
+
+            function renderChunk() {
+                const stackItem = pref2itemToBeRendered.pop()
+                if (!stackItem) {
+                    return;
+                }
+                console.log({ stackItem })
+                const tmp = document.createElement('div')
+
+                const [key, itemArray] = stackItem
+                tmp.innerHTML += renderGroupHeader(key)
+                tmp.innerHTML += itemArray.map(renderCardData).join('')
+
+                while (tmp.firstChild) {
+                    grid.appendChild(tmp.firstChild)
+                }
+
+                requestAnimationFrame(renderChunk);
+            }
+            requestAnimationFrame(renderChunk);
+        }
+
+        window.selectCard = function selectCard(id) {
+            navigate(`/detail?id=${id}`)
+        }
+
+        function renderNotFound() {
+            document.getElementById('tab-notfound').innerHTML = `
+                <div class="not-found">
+                    <div class="nf-code">404</div>
+                    <div class="nf-msg">ページが見つかりません</div>
+                    <button class="nf-btn" onclick="navigate('/')">← ホームへ戻る</button>
+                </div>
+            `
+        }
+
+        // ══════════════════════════════════════════════
+        // DETAIL — 歳入の状況テーブル（案A）
+        // ══════════════════════════════════════════════
+
+        /**
+         * テーブル（案A）のHTML文字列を生成する。
+         *
+         * @param {{
+         *   title:   string,
+         *   rows:    Array<{ [key: string]: string, depth?: number, highlightRow?: boolean, isFooter?: boolean }>,
+         *   headers: Array<{ name: string, key: string }>
+         * }} card - formatRevStats() の戻り値に準じた構造
+         * @returns {string} HTML文字列
+         */
+        function renderDataTable({ title, rows, headers }) {
+            const thead = `<thead><tr>
+                ${headers.map(h => `<th>${h.name}</th>`).join('')}
+            </tr></thead>`
+
+            const mkCells = (row) => {
+                return headers.map((h, i) => {
+                    const val = row[h.key] ?? '—'
+                    const depthClass = (i === 0 && row.depth > 0) ? ` class="depth-${row.depth}"` : ''
+                    return `<td${depthClass}>${val}</td>`
+                }).join('')
+            }
+
+            const includeHighlightRow = (check) => {
+                if (check) {
+                    return "tr-subtotal"
+                } else {
+                    return ""
+                }
+            }
+
+            const tbody = `<tbody>
+                ${rows.filter(r => !r.isFooter).map(row =>
+                `
+                <tr class="${includeHighlightRow(row.highlightRow)}">
+                    ${mkCells(row)}
+                </tr>
+                `).join('')}
+            </tbody>`
+
+            const footerRows = rows.filter(r => r.isFooter)
+            let tfoot = ""
+            if (footerRows.length > 0) {
+                tfoot = `<tfoot>${footerRows.map(row => `<tr>${mkCells(row)}</tr>`).join('')}</tfoot>`
+            }
+
+            return `
+            <div class="datatable"> 
+                <div class="datatable-wrap">
+                    <div class="datatable-title">${title}</div>
+                    <table class="datatable">${thead}${tbody}${tfoot}</table>
+                </div>
+            </div>
+            `
+        }
+
+        /**
+        * @param {string} title
+        * @param {{ [string]: boolean }} string2bool
+        * @returns {string} HTML
+        */
+        function renderBoolInlineZ(title, string2bool) {
+            const entries = Object.entries(string2bool)
+
+            const truthy = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>`
+            const falsethy = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+            const items = Object.entries(string2bool)(([name, value]) => `
+                < div class="bool-item ${value ? 'is-true' : 'is-false'}" >
+                    <span class="bool-mark">${value ? truthy : falsethy}</span>
+                    <span class="bool-name">${name}</span>
+                </div > `).join('')
+
+            return `< div class="bool-wrap" >
+                <div class="datatable-title">${title}</div>
+                <div class="bool-inline">${items}</div>
+            </div > `
+        }
+
+        // ══════════════════════════════════════════════
+        // DETAIL — placeholder
+        // ══════════════════════════════════════════════
+        function renderDetail(id) {
+            const rows = [{ 'key': '道府県税の状況_千円.普通税.収入済額', 'depth': 0, 'name': '普通税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.収入済額', 'depth': 1, 'name': '法定普通税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通 税.道府県民税.収入済額', 'depth': 2, 'name': '道府県民税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.個人均等割.収入済額', 'depth': 3, 'name': '個人均等割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.所得割.収入済額', 'depth': 3, 'name': '所得割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.法人均等割.収入済額', 'depth': 3, 'name': '法人均等割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税. 法定普通税.道府県民税.法人税割.収入済額', 'depth': 3, 'name': '法人税割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.利子割.収入済額', 'depth': 3, 'name': '利子割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.配当割.収入済額', 'depth': 3, 'name': '配当割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.株式等譲渡所得割.収入済額', 'depth': 3, 'name': '株式等譲渡所得割', 'isFooter': false }, { 'key': '道府県税 の状況_千円.普通税.法定普通税.事業税.収入済額', 'depth': 2, 'name': '事業税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.事業税.内訳.個人分.収入済額', 'depth': 4, 'name': '個人分', 'isFooter': false }, { 'key': '道府県税の状況_千円. 普通税.法定普通税.事業税.内訳.法人分.収入済額', 'depth': 4, 'name': '法人分', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.地方消費税.収入済額', 'depth': 2, 'name': '地方消費税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通 税.法定普通税.不動産取得税.収入済額', 'depth': 2, 'name': '不動産取得税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県たばこ税.収入済額', 'depth': 2, 'name': '道府県たばこ税', 'isFooter': false }, { 'key': '道府県税の状況_千円. 普通税.法定普通税.ゴルフ場利用税.収入済額', 'depth': 2, 'name': 'ゴルフ場利用税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.軽油引取税.収入済額', 'depth': 2, 'name': '軽油引取税', 'isFooter': false }, { 'key': '道府県税の状況_千円. 普通税.法定普通税.自動車税.収入済額', 'depth': 2, 'name': '自動車税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.鉱区税.収入済額', 'depth': 2, 'name': '鉱区税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.固 定資産税特例.収入済額', 'depth': 2, 'name': '固定資産税特例', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定外普通税.収入済額', 'depth': 1, 'name': '法定外普通税', 'isFooter': false }, { 'key': '道府県税の状況_千円.目的税.収入済額', 'depth': 0, 'name': '目的税', 'isFooter': false }, { 'key': '道府県税の状況_千円.目的税.法定目的税.収入済額', 'depth': 1, 'name': '法定目的税', 'isFooter': false }, { 'key': '道府県税の状況_千円.目的税.法定目的税.狩猟税.収入済額', 'depth': 2, 'name': '狩猟税', 'isFooter': false }, { 'key': '道府県税の状況_千円.目的税.法定外目的税.収入済額', 'depth': 1, 'name': '法定外目的税', 'isFooter': false }, { 'key': '道府県税の状況_千円.旧法による税.収入済額', 'depth': 0, 'name': '旧法による税', 'isFooter': false }, { 'key': '道府県税の状況_千円.合計.収入済額', 'depth': 0, 'name': '合計', 'isFooter': true }]
+            const dataItem = data_id2data[id]
+            const out = renderDataTable({
+                title: "歳入の状況",
+                headers: [
+                    {
+                        name: "項目",
+                        key: "name"
+                    },
+                    {
+                        name: "決算額",
+                        key: "value"
+                    }
+                ],
+                rows: rows.map(e => {
+                    return {
+                        name: e.name,
+                        depth: e.depth,
+                        value: fmtScore(dataItem[e.key])
+                    }
+                })
+            })
+
+            const rows2 = [{ 'key': '道府県税の状況_千円.普通税.収入済額', 'depth': 0, 'name': '普通税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.収入済額', 'depth': 1, 'name': '法定普通税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通 税.道府県民税.収入済額', 'depth': 2, 'name': '道府県民税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.個人均等割.収入済額', 'depth': 3, 'name': '個人均等割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.所得割.収入済額', 'depth': 3, 'name': '所得割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.法人均等割.収入済額', 'depth': 3, 'name': '法人均等割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税. 法定普通税.道府県民税.法人税割.収入済額', 'depth': 3, 'name': '法人税割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.利子割.収入済額', 'depth': 3, 'name': '利子割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.配当割.収入済額', 'depth': 3, 'name': '配当割', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県民税.株式等譲渡所得割.収入済額', 'depth': 3, 'name': '株式等譲渡所得割', 'isFooter': false }, { 'key': '道府県税 の状況_千円.普通税.法定普通税.事業税.収入済額', 'depth': 2, 'name': '事業税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.事業税.内訳.個人分.収入済額', 'depth': 4, 'name': '個人分', 'isFooter': false }, { 'key': '道府県税の状況_千円. 普通税.法定普通税.事業税.内訳.法人分.収入済額', 'depth': 4, 'name': '法人分', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.地方消費税.収入済額', 'depth': 2, 'name': '地方消費税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通 税.法定普通税.不動産取得税.収入済額', 'depth': 2, 'name': '不動産取得税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.道府県たばこ税.収入済額', 'depth': 2, 'name': '道府県たばこ税', 'isFooter': false }, { 'key': '道府県税の状況_千円. 普通税.法定普通税.ゴルフ場利用税.収入済額', 'depth': 2, 'name': 'ゴルフ場利用税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.軽油引取税.収入済額', 'depth': 2, 'name': '軽油引取税', 'isFooter': false }, { 'key': '道府県税の状況_千円. 普通税.法定普通税.自動車税.収入済額', 'depth': 2, 'name': '自動車税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.鉱区税.収入済額', 'depth': 2, 'name': '鉱区税', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定普通税.固 定資産税特例.収入済額', 'depth': 2, 'name': '固定資産税特例', 'isFooter': false }, { 'key': '道府県税の状況_千円.普通税.法定外普通税.収入済額', 'depth': 1, 'name': '法定外 普通税', 'isFooter': false }, { 'key': '道府県税の状況_千円.目的税.収入済額', 'depth': 0, 'name': '目的税', 'isFooter': false }, { 'key': '道府県税の状況_千円.目的税.法定目的税.収入済額', 'depth': 1, 'name': '法定目的税', 'isFooter': false }, { 'key': '道府県税の状況_千円.目的税.法定目的税.狩猟税.収入済額', 'depth': 2, 'name': '狩猟税', 'isFooter': false }, { 'key': '道府県税の状況_千円.目的税.法定外目的税.収入済額', 'depth': 1, 'name': '法定外目的税', 'isFooter': false }, { 'key': '道府県税の状況_千円.旧法による税.収入済額', 'depth': 0, 'name': '旧法による税', 'isFooter': false }, { 'key': '道府県税の状況_千円.合計.収入済額', 'depth': 0, 'name': '合計', 'isFooter': true }]
+            const out2 = renderDataTable({
+                title: "歳入の状況",
+                headers: [
+                    {
+                        name: "項目",
+                        key: "name"
+                    },
+                    {
+                        name: "決算額",
+                        key: "value"
+                    }
+                ],
+                rows: rows2.map(e => {
+                    return {
+                        name: e.name,
+                        depth: e.depth,
+                        value: fmtScore(dataItem[e.key])
+                    }
+                })
+            })
+            document.getElementById('tab-detail').innerHTML = `
+                <div class="detail-row">
+                    ${out}
+                    ${out2}
+                </div>
+                <div class="detail-row">
+                    ${out}
+                    ${out2}
+                </div>
+            `
+        }
+
+        // ══════════════════════════════════════════════
+        // SEARCH FILTER
+        // ══════════════════════════════════════════════
+        function onFilterChange() {
+            const q = document.getElementById('cb-search').value.trim()
+            const keywords = q.split(" ").filter(e => e.length > 0)
+
+
+            const checkContains = (keywords, needle) => {
+                if (typeof needle != 'string') {
+                    return false
+                }
+                for (const word of keywords) {
+                    if (needle.includes(word)) {
+                        return true
+                    }
+                }
+                return false
+            }
+
+            let filtered = data_named_card
+            if (keywords.length > 0) {
+                filtered = filtered.filter(e =>
+                    checkContains(keywords, e.title) ||
+                    checkContains(keywords, e.subtitle)
+                )
+            }
+            console.log(data_named_card)
+            renderBrowseCards(filtered)
+            document.querySelector('.search-count-num').textContent = filtered.length.toLocaleString()
+        }
+
+        // ══════════════════════════════════════════════
+        // INIT
+        // ══════════════════════════════════════════════
+        let searchTimer
+        document.getElementById('cb-search').addEventListener('input', () => {
+            clearTimeout(searchTimer)
+            searchTimer = setTimeout(onFilterChange, 50)
+        })
+        loadData().then(() => {
+            setTimeout(() => {
+                renderRoute()
+            }, 1)
+        })
+    </script>
+</body>
+
+</html>
