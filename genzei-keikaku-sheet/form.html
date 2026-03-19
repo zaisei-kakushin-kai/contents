@@ -313,7 +313,11 @@
     color: #fff;
     border-color: #2ecc71;
   }
+
+  .btn-export {
+    background: var(--ink);
     color: #fff;
+    border-color: var(--ink);
   }
 
   .btn-export:hover {
@@ -473,10 +477,75 @@
   }
 
   @media (max-width: 600px) {
-    .container { padding: 24px 20px; }
-    .meta-row { grid-template-columns: 1fr; }
-    .field-group { grid-template-columns: 1fr; }
+    body { padding: 16px 10px; }
+
+    .container { padding: 20px 16px; }
+
+    .sheet-header h1 {
+      font-size: 18px;
+      letter-spacing: 0.1em;
+    }
+
+    .meta-row {
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .meta-row .field-group {
+      width: 100%;
+    }
+
+    .meta-row .field-group input[type="text"] {
+      width: 100% !important;
+    }
+
+    .field-group {
+      grid-template-columns: 1fr;
+    }
+
+    .computed-field {
+      min-width: unset;
+      width: 100%;
+    }
+
+    .input-wrap {
+      flex-wrap: wrap;
+    }
+
+    .subsection {
+      padding: 14px 12px;
+    }
+
+    /* プラン名入力の固定幅を上書き */
+    .subsection-title input[type="text"] {
+      width: 100% !important;
+      max-width: 100%;
+    }
+
+    /* 目的税名の固定幅を上書き */
+    .field-group label input[type="text"] {
+      width: 100% !important;
+      max-width: 100%;
+    }
+
+    .tax-indent {
+      padding-left: 8px;
+      margin-left: 4px;
+    }
+
     .summary-grid { grid-template-columns: 1fr; }
+
+    .actions {
+      flex-wrap: wrap;
+      justify-content: stretch;
+    }
+
+    .actions .btn {
+      flex: 1 1 calc(50% - 6px);
+      text-align: center;
+      padding: 10px 12px;
+    }
   }
 </style>
 </head>
