@@ -376,6 +376,13 @@ footer {
   display: block;
 }
 
+#tab-detail.active {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 6px;
+}
+
 #tab-browse.active {
   display: grid;
   padding: 0;
@@ -973,7 +980,6 @@ body::after {
   background: var(--bg-panel);
   border: 1px solid var(--border);
   border-top: 2px solid var(--orange-dim);
-  margin-bottom: 8px;
 }
 .dh-top {
   padding: 14px 20px 10px;
@@ -1062,17 +1068,16 @@ body::after {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 4px;
+  gap: 6px;
 }
 
 .detail-col {
   display: flex;
   flex-direction: column;
   align-self: flex-start;
-  flex: 1 1 0;
-  min-width: 0;
-  gap: 4px;
+  flex: 1 1 320px;
+  min-width: 320px;
+  gap: 6px;
 }
 
 /* ── Sunburst ────────────────────────────────────── */

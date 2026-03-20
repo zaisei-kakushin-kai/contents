@@ -968,12 +968,56 @@
         import { renderPieChart } from './pieChart.js'
         import { renderKpiCardGroup } from './kpiCardGroup.js'
         import { renderKokuminkenkohoken, renderKoeiJigyo } from './render-kokuhoken-koei.js'
+        import {
+            DOHUKEN_UI_Syushi,
+            DOHUKEN_UI_SainyuJyokyo,
+            DOHUKEN_UI_DohukenZeiJyokyo,
+            DOHUKEN_UI_Seishitsu,
+            DOHUKEN_UI_Mokuteki,
+            DOHUKEN_UI_ZaiseiShihyo,
+            DOHUKEN_UI_ShisanSaimu,
+            DOHUKEN_UI_Kaikei,
+            DOHUKEN_UI_SyokuinKyuyo,
+            DOHUKEN_UI_SyokuinTokubetsu,
+        } from './dohukenzei.js'
 
-        function renderDetail(id) {
+        function renderDohukenDetail(id) {
             const tabDetailElm = document.getElementById('tab-detail')
             tabDetailElm.innerHTML = ''
 
             const dataItem = data_id2data[id]
+
+            tabDetailElm.innerHTML += renderDetailHeader(id)
+            tabDetailElm.innerHTML += `<div class="detail-row">
+                ${renderDataTable(DOHUKEN_UI_Syushi(dataItem))}
+                ${renderDataTable(DOHUKEN_UI_ZaiseiShihyo(dataItem))}
+            </div>`
+            tabDetailElm.innerHTML += `<div class="detail-row">
+                ${renderDataTable(DOHUKEN_UI_ShisanSaimu(dataItem))}
+                ${renderDataTable(DOHUKEN_UI_Kaikei(dataItem))}
+            </div>`
+            tabDetailElm.innerHTML += `<div class="detail-row">${renderDataTable(DOHUKEN_UI_SainyuJyokyo(dataItem))}</div>`
+            tabDetailElm.innerHTML += `<div class="detail-row">${renderDataTable(DOHUKEN_UI_DohukenZeiJyokyo(dataItem))}</div>`
+            tabDetailElm.innerHTML += `<div class="detail-row">
+                ${renderDataTable(DOHUKEN_UI_Seishitsu(dataItem))}
+                <div class="detail-col">
+                    ${renderDataTable(DOHUKEN_UI_Mokuteki(dataItem))}
+                </div>
+            </div>`
+            tabDetailElm.innerHTML += `<div class="detail-row">
+                ${renderDataTable(DOHUKEN_UI_SyokuinKyuyo(dataItem))}
+                ${renderDataTable(DOHUKEN_UI_SyokuinTokubetsu(dataItem))}
+            </div>`
+        }
+
+        function renderDetail(id) {
+            const dataItem = data_id2data[id]
+            if (dataItem['団体名'] == null) {
+                return renderDohukenDetail(id)
+            }
+
+            const tabDetailElm = document.getElementById('tab-detail')
+            tabDetailElm.innerHTML = ''
             const tokubetuShoku = SICHOSON_UI_ShokuinTokubetsu(dataItem)
 
             const sainyuJyokyo = SICHOSON_UI_SainyuJyokyo(dataItem)
@@ -992,7 +1036,7 @@
             const shiteidantai = SICHOSON_UI_Siteidantai(dataItem)
 
             tabDetailElm.innerHTML += renderDetailHeader(id)
-            tabDetailElm.innerHTML += renderKpiCardGroup(SICHOSON_UI_Shushi(dataItem))
+            tabDetailElm.innerHTML += `<div class="detail-row">${renderKpiCardGroup(SICHOSON_UI_Shushi(dataItem))}</div>`
 
             tabDetailElm.innerHTML += `<div class="detail-row">
                 ${renderKpiCardGroup(SICHOSON_UI_Kikin(dataItem))}
@@ -1000,7 +1044,7 @@
                 ${renderKpiCardGroup(SICHOSON_UI_Choshu(dataItem))}
             </div>`
 
-            tabDetailElm.innerHTML += renderKpiCardGroup(SICHOSON_UI_ZaiseiSihyo(dataItem))
+            tabDetailElm.innerHTML += `<div class="detail-row">${renderKpiCardGroup(SICHOSON_UI_ZaiseiSihyo(dataItem))}</div>`
 
             tabDetailElm.innerHTML += `
                 <div class="detail-row">    
@@ -1076,7 +1120,7 @@
         let searchTimer
         document.getElementById('cb-search').addEventListener('input', () => {
             clearTimeout(searchTimer)
-            searchTimer = setTimeout(onFilterChange, 50)
+            searchTimer = setTimeout(onFilterChange, 100)
         })
         loadData().then(() => {
             setTimeout(() => {

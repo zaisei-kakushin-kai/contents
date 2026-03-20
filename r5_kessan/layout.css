@@ -1,0 +1,85 @@
+/* ── PAGE LAYOUT ── */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── TITLE BAR ── */
+#topbar {
+  background: var(--bg-secondary);
+  padding: 0 16px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+#topbar .logo {
+  font-family: var(--font-jp);
+  font-size: 13px;
+  color: var(--yellow);
+  white-space: nowrap;
+}
+
+#topbar .topbar-year {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--yellow);
+  border: 1px solid var(--yellow);
+  padding: 1px 7px;
+  letter-spacing: 1px;
+  margin-left: auto;
+}
+
+/* ── SEARCH BAR ── */
+#searchbar {
+  background: var(--bg-secondary);
+  padding: 0 16px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-bottom: 2px solid var(--orange);
+}
+
+#searchbar .search-terminal-line {
+  padding-top: 4px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--orange-dim);
+  padding: 0 10px;
+  gap: 8px;
+  height: 26px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+#searchbar .search-terminal-line:focus-within {
+  border-color: var(--orange);
+  box-shadow: 0 0 8px #ff660033;
+}
+
+#searchbar .search-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray);
+  white-space: nowrap;
+}
+
+#searchbar .search-count-num {
+  color: var(--cyan);
+  font-size: 13px;
+}
+
+/* ── MAIN CONTENT ── */
+#main {
+  flex: 1;
+  overflow-y: auto;
+}
