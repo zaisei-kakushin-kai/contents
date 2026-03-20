@@ -1063,16 +1063,16 @@ body::after {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .detail-col {
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  align-content: start;
-  flex: none;
   align-self: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 4px;
 }
 
 /* ── Sunburst ────────────────────────────────────── */
