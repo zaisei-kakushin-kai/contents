@@ -1,0 +1,42 @@
+/* ════ KPI カードグループ ════ */
+.kpi-group {
+  background: var(--bg-panel, #161616);
+  border: 1px solid var(--border, #2a2a2a);
+  border-top: 2px solid var(--orange-dim, #cc5200);
+  flex: 1;
+  min-width: 320px;
+  margin-bottom: 4px;
+}
+
+.kpi-group-title {
+  padding: 6px 10px;
+  background: var(--bg-2, #111111);
+  border-bottom: 1px solid var(--border, #2a2a2a);
+  color: var(--orange, #ff6600);
+  font-family: var(--mono, "Share Tech Mono", monospace);
+  font-size: 12px;
+}
+
+.kpi-group-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+}
+
+/* グループ内のカードはborderを使い切る */
+.kpi-group .kpi-card {
+  flex: 1 1 180px;
+  min-width: 180px;
+}
+
+/* delta 色 */
+.d-up {
+  color: var(--green, #00cc66);
+}
+.d-down {
+  color: var(--red, #ff3333);
+}
+.d-zero {
+  color: var(--gray, #888888);
+}

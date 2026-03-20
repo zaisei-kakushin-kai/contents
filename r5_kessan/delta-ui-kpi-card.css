@@ -1,0 +1,82 @@
+.kpi-card {
+  min-width: 250px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.kpi-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2px;
+  flex-direction: column;
+}
+
+.kpi-card-label {
+  font-family: var(--jp);
+  font-size: 16px;
+  color: aliceblue;
+  line-height: 1;
+}
+
+.kpi-card-r5-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-card-r5-year {
+  font-family: var(--jp);
+  font-size: 12px;
+  color: var(--cyan);
+  opacity: 0.6;
+  letter-spacing: 0.05em;
+}
+
+.kpi-card-r5 {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--cyan);
+  line-height: 1;
+  letter-spacing: -0.5px;
+  flex-direction: column;
+}
+
+.kpi-card-bottom {
+  display: flex;
+  align-items: baseline;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.kpi-card-r4 {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #bbb;
+}
+
+.kpi-card-delta {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 3px;
+}

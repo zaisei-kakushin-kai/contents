@@ -4,24 +4,43 @@
 
 /* Outer wrapper (div.datatable) */
 div.datatable {
-  margin: 12px 0;
+  border-top: 2px solid var(--orange-dim, #cc5200);
+  flex: 1;
+  min-width: 320px;
+  height: 100%;
 }
 
 .datatable-wrap {
   overflow-x: auto;
-  border: 1px solid var(--border, #2a2a2a);
+  background: var(--bg-panel, #161616);
   border-radius: 2px;
 }
 
 .datatable-title {
   padding: 6px 10px;
-  background: var(--bg-secondary, #111);
+  padding-bottom: 6px;
+  padding-top: 6px;
+  background: var(--bg-2, #111111);
+  border-right: 1px solid var(--border, #2a2a2a);
+  border-left: 1px solid var(--border, #2a2a2a);
   color: var(--orange, #ff6600);
-  font-family: var(--font-mono, "Share Tech Mono", monospace);
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  border-bottom: 1px solid var(--border, #2a2a2a);
-  font-weight: 100;
+  font-family: var(--mono, "Share Tech Mono", monospace);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.datatable-badge {
+  font-family: var(--mono, "Share Tech Mono", monospace);
+  font-size: 12px;
+  color: var(--font-mono, #e8e8e8);
+  white-space: nowrap;
+  font-weight: 700;
+
+  letter-spacing: 0.05em;
+  border: currentColor;
 }
 
 /* Table element (table.datatable) */
@@ -29,18 +48,19 @@ table.datatable {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-mono, "Share Tech Mono", monospace);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 100;
 }
 
 .datatable th {
-  background: var(--bg-secondary, #111);
-  color: var(--orange, #ff6600);
+  background: var(--bg-2, #111111);
+  color: var(--orange-dim, #cc5200);
   padding: 6px 10px;
   border: 1px solid var(--border, #2a2a2a);
   text-align: left;
   white-space: nowrap;
   letter-spacing: 0.05em;
+  font-size: 16px;
 }
 
 .datatable th:first-child {
@@ -48,46 +68,79 @@ table.datatable {
 }
 
 .datatable td {
-  padding: 4px 10px;
-  border: 1px solid #1e1e1e;
+  padding: 3px 10px;
+  border: 1px solid var(--border, #2a2a2a);
   text-align: left;
-  color: #ccc;
+  color: var(--text, #e8e8e8);
   white-space: nowrap;
 }
 
 .datatable td.td-name {
   text-align: left;
+  color: var(--gray, #888888);
 }
 
 /* depth classes applied directly to <td> by renderDataTable() */
 .datatable td.depth-1 {
   padding-left: 20px;
-  font-weight: 100;
+  color: var(--text, #e8e8e8);
 }
 
 .datatable td.depth-2 {
   padding-left: 34px;
-  font-weight: 100;
+  color: var(--gray, #888888);
 }
 
 .datatable td.depth-3 {
   padding-left: 48px;
-  font-weight: 100;
+  color: var(--gray, #888888);
 }
 
 .datatable td.depth-4 {
   padding-left: 62px;
-  font-weight: 100;
+  color: var(--gray, #888888);
 }
 
 .datatable tr.tr-subtotal td {
-  color: var(--white, #e8e8e8);
-  background: #1a1a2e;
+  color: var(--text, #e8e8e8);
+  background: rgba(204, 82, 0, 0.1);
+  border-color: rgba(204, 82, 0, 0.25);
+}
+
+.datatable tr.tr-subtotal td:first-child {
+  border-left: 2px solid var(--orange-dim, #cc5200);
 }
 
 .datatable tfoot td {
-  color: var(--white, #e8e8e8);
-  background: #1a1a1a;
-  font-weight: bold;
+  color: var(--orange, #ff6600);
+  background: var(--bg-2, #111111);
+  font-weight: 100;
   border-top: 2px solid var(--orange, #ff6600);
+}
+
+.datatable td.tr-right {
+  text-align: right;
+}
+.datatable th.tr-right {
+  text-align: right;
+}
+
+.datatable tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.datatable tbody tr.tr-subtotal:hover td {
+  background: rgba(204, 82, 0, 0.2);
+}
+
+.datatable-category-header {
+  padding: 5px 10px;
+  background: var(--bg-2, #111111);
+  color: var(--gray, #888888);
+  font-family: var(--font-mono, "Share Tech Mono", monospace);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-top: 0.5px solid var(--border, #2a2a2a);
+  border-bottom: 0.5px solid var(--border, #2a2a2a);
 }

@@ -1,0 +1,11 @@
+/* ════ 2年比較テーブル ════ */
+
+/* 2023列を cyan でハイライト */
+.two-year-td-current {
+  color: var(--cyan, #00ccff) !important;
+}
+
+/* 変化列の色 */
+.two-year-td-delta.is-up   { color: var(--green, #00cc66) !important; }
+.two-year-td-delta.is-down { color: var(--red,   #ff3333) !important; }
+.two-year-td-delta.is-flat { color: var(--gray,  #888888) !important; }
