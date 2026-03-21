@@ -337,7 +337,7 @@
 
         let _latestSeachQuery = ''
         function renderBrowseCards(entities, searchQuery) {
-            if (_latestSeachQuery === searchQuery) {
+            if ('' !== searchQuery.trim() && _latestSeachQuery === searchQuery) {
                 return
             }
             _latestSeachQuery = searchQuery
@@ -347,9 +347,10 @@
             const pref2itemToBeRendered = groupBySubtitle(entities)
 
             function renderChunk() {
-                if (_latestSeachQuery !== searchQuery) {
+                if ('' === searchQuery.trim() || _latestSeachQuery !== searchQuery) {
                     return
                 }
+
                 const stackItem = pref2itemToBeRendered.pop()
                 if (!stackItem) {
                     return;
