@@ -201,7 +201,7 @@
 
             document.getElementById('searchbar').style.display = path === '/' ? '' : 'none'
             document.getElementById('backbar').style.display = path === '/detail' ? '' : 'none'
-            console.log(data_id2data[id], data_id2data)
+
             if (path === '/') {
                 showPanel('tab-browse')
                 onFilterChange()
@@ -337,9 +337,6 @@
 
         let _latestSeachQuery = ''
         function renderBrowseCards(entities, searchQuery) {
-            if ('' !== searchQuery.trim() && _latestSeachQuery === searchQuery) {
-                return
-            }
             _latestSeachQuery = searchQuery
             const grid = document.getElementById('tab-browse')
             grid.innerHTML = ''
@@ -347,7 +344,7 @@
             const pref2itemToBeRendered = groupBySubtitle(entities)
 
             function renderChunk() {
-                if ('' === searchQuery.trim() || _latestSeachQuery !== searchQuery) {
+                if (_latestSeachQuery !== searchQuery) {
                     return
                 }
 
