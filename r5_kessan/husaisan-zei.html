@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不採算税問題 @ 財政革新会</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print"
+        onload="this.media='all'">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-2: #111111;
+            --bg-panel: #161616;
+            --orange: #ff6600;
+            --orange-dim: #cc5200;
+            --orange-glow: #ff660033;
+            --yellow: #ffcc00;
+            --red: #ff3333;
+            --text: #e8e8e8;
+            --gray: #888888;
+            --gray-dim: #444444;
+            --border: #2a2a2a;
+            --mono: "Share Tech Mono", monospace;
+            --jp: "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--jp);
+            font-size: 13px;
+            min-height: 100vh;
+        }
+
+        /* ── topbar ── */
+        #topbar {
+            height: 56px;
+            background: var(--bg-2);
+            border-bottom: 2px solid var(--orange);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .topbar-titles .title-org-name {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .topbar-titles .title-app-name {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff660044;
+        }
+
+        .topbar-back {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            text-decoration: none;
+            padding: 4px 10px;
+            border: 1px solid var(--gray-dim);
+        }
+
+        .topbar-back:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        /* ── page ── */
+        #page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 16px 64px;
+        }
+
+        /* ── hero ── */
+        .hero-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--orange-dim);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .hero-title {
+            font-family: var(--mono);
+            font-size: 28px;
+            color: var(--orange);
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px #ff660055;
+            margin-bottom: 24px;
+        }
+
+        /* ── sections ── */
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--orange);
+            padding: 4px 12px;
+            background: var(--orange-glow);
+            margin-bottom: 12px;
+        }
+
+        .section-body {
+            line-height: 1.9;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .section-body p {
+            margin-bottom: 10px;
+        }
+
+        .section-body .example {
+            display: inline-block;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--yellow);
+            padding: 8px 14px;
+            margin: 8px 0;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--yellow);
+        }
+
+        /* ── list control ── */
+        .list-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .list-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--orange);
+            padding: 4px 12px;
+            background: var(--orange-glow);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .control-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        select,
+        input[type=number] {
+            background: var(--bg-2);
+            color: var(--text);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 4px 8px;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: var(--orange);
+        }
+
+        /* ── threshold tabs ── */
+        .threshold-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        .threshold-tab {
+            background: var(--bg-2);
+            color: var(--gray);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 4px 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #tax-item-tabs .threshold-tab {
+            width: 120px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 5px 10px;
+        }
+
+        .tax-item-cat-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 2px 2px;
+        }
+
+        .tax-item-cat-header:first-child {
+            padding-top: 0;
+        }
+
+        .cat-header-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 0.15em;
+            color: var(--gray);
+            text-transform: uppercase;
+        }
+
+        .cat-btn {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            background: var(--bg-2);
+            border: 1px solid var(--gray-dim);
+            padding: 3px 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cat-btn:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        #tax-item-tabs .threshold-tab .tab-cat {
+            font-size: 9px;
+            letter-spacing: 0.05em;
+            color: var(--gray-dim);
+            line-height: 1;
+        }
+
+        #tax-item-tabs .threshold-tab.active .tab-cat {
+            color: var(--orange-dim);
+        }
+
+        .threshold-tab:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        .threshold-tab.active {
+            background: var(--orange-glow);
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+
+        .threshold-tab.no-data {
+            position: relative;
+            color: var(--gray-dim);
+            border-color: #222;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .threshold-tab.no-data::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom right,
+                    transparent calc(50% - 0.5px),
+                    var(--gray-dim) calc(50% - 0.5px),
+                    var(--gray-dim) calc(50% + 0.5px),
+                    transparent calc(50% + 0.5px));
+        }
+
+        /* ── amount slider ── */
+        #amount-slider-wrap {
+            width: 100%;
+            min-width: 280px;
+            max-width: 600px;
+            position: relative;
+            padding-bottom: 38px;
+        }
+
+        #slider-track-container {
+            position: relative;
+            height: 20px;
+        }
+
+        #slider-track-base {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--gray-dim);
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #slider-range-fill {
+            position: absolute;
+            height: 2px;
+            background: var(--orange-dim);
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        #slider-track-container input[type=range] {
+            position: absolute;
+            width: 100%;
+            pointer-events: none;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 2px;
+            background: transparent;
+            top: 50%;
+            transform: translateY(-50%);
+            outline: none;
+        }
+
+        #slider-track-container input[type=range]::-webkit-slider-thumb {
+            pointer-events: all;
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--orange);
+            cursor: pointer;
+            box-shadow: 0 0 8px #ff660066;
+        }
+
+        #slider-track-container input[type=range]::-moz-range-thumb {
+            pointer-events: all;
+            width: 14px;
+            height: 14px;
+            background: var(--orange);
+            cursor: pointer;
+            border: none;
+        }
+
+        #slider-markers-row {
+            position: relative;
+            height: 36px;
+            margin-top: 4px;
+        }
+
+        .slider-marker {
+            position: absolute;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+        }
+
+        .slider-marker-tick {
+            width: 1px;
+            height: 6px;
+            background: var(--gray-dim);
+        }
+
+        .slider-marker-name {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--gray);
+            white-space: nowrap;
+        }
+
+        .slider-marker-val {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--gray-dim);
+            white-space: nowrap;
+        }
+
+        #slider-current-label {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+        }
+
+        /* ── result count ── */
+        .result-count {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .result-count span {
+            color: var(--orange);
+        }
+
+        /* ── result table ── */
+        #result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        #result-table thead th {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            letter-spacing: 0.08em;
+            text-align: left;
+            padding: 6px 10px;
+            border-bottom: 2px solid var(--orange-dim);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #result-table thead th:hover {
+            color: var(--text);
+        }
+
+        #result-table thead th.sort-active {
+            color: var(--orange);
+        }
+
+        #result-table thead th .sort-arrow {
+            margin-left: 4px;
+            font-size: 9px;
+            opacity: 0.6;
+        }
+
+        #result-table tbody tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        #result-table tbody tr:hover {
+            background: var(--bg-panel);
+        }
+
+        #result-table tbody td {
+            padding: 6px 10px;
+            vertical-align: middle;
+        }
+
+        .td-name {
+            font-family: var(--jp);
+            color: var(--text);
+        }
+
+        .td-pref {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            white-space: nowrap;
+        }
+
+        .td-cat {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray-dim);
+            white-space: nowrap;
+        }
+
+        .td-tax {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--orange-dim);
+            white-space: nowrap;
+        }
+
+        .td-val {
+            font-family: var(--mono);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .td-val.danger {
+            color: var(--red);
+        }
+
+        .td-val.warn {
+            color: var(--yellow);
+        }
+
+        .td-ratio {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        /* ── loading ── */
+        #loading {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            padding: 40px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="topbar">
+        <div class="topbar-titles">
+            <span class="title-org-name">財政革新会</span>
+            <span class="title-app-name">不採算税問題</span>
+        </div>
+        <a class="topbar-back" href="index.html">← 決算ターミナルへ</a>
+    </div>
+
+    <div id="page">
+
+        <!-- hero -->
+        <div class="hero-title">不採算税問題</div>
+
+        <!-- section 1 -->
+        <div class="section">
+            <div class="section-title">不採算税とは？</div>
+            <div class="section-body">
+                <p>あまりにも歳入が小さく、徴税費で赤字になってしまっている恐れが大きい税目が存在します。</p>
+                <div class="example">例：三鷹市の入湯税の歳入は2千円<br>1時間残業すると時給2千円ほどかかるため、維持しても採算が合わない「赤字税」です。</div>
+                <p>また、赤字でないにしても維持する経済的合理性が乏しい税目が存在します。</p>
+                <div class="example">
+                    例：一宮市の入湯税の歳入は26万円<br>赤字ではないかもしれませんが、廃止した場合の行政サービスへの影響が極めて軽微であり、<br>民間企業に納税のための対応を強いてまで徴税するほどの意義があるとは言えません。
+                </div>
+            </div>
+        </div>
+
+        <!-- section 2 -->
+        <div class="section">
+            <div class="section-title">不採算超過課税とは？</div>
+            <div class="section-body">
+                <p>超過課税は通常よりも高い税率を導入している税目のことです。例えば、本来10万円払えばいいところを、超過課税があると11万円になってしまうことがあります。</p>
+                <p>超過課税分の歳入が極めて小さい場合があり、この場合は税率を維持することに合理的な理由が無いため、すみやかに標準税率に戻すべきです。</p>
+            </div>
+        </div>
+
+        <!-- section 3 -->
+        <div class="section">
+            <div class="section-title">不採算税の問題点とは？</div>
+            <div class="section-body">
+                <p>
+                    不採算税には、経済的合理性がありません。
+                </p>
+                <p>
+                    当該税目が存在するために、せっかくお店を開く計画があっても
+                    近隣の自治体に企業が逃げてしまう恐れがあります。
+                </p>
+                <p>
+                    加えて、人手不足が問題となっているのに、
+                    維持する意味のない税の徴税のために貴重な人的資源を投下するような、
+                    いたずらに人手不足を悪化させるようなことは控えるべきです。
+                </p>
+            </div>
+        </div>
+
+        <!-- section 4: list -->
+        <div>
+            <div class="list-title">不採算税一覧</div>
+
+            <div id="loading"><span>&gt;_</span><span>データを読み込んでいます</span><span class="blink">█</span></div>
+
+            <div id="controls" style="display:none; margin-top:14px;">
+                <div class="control-group">
+                    <span class="control-label">絞り込み：</span>
+                    <button class="threshold-tab active" id="mode-amount" data-mode="amount">歳入額</button>
+                    <button class="threshold-tab" id="mode-ratio" data-mode="ratio">構成比</button>
+                </div>
+                <div class="control-group" id="row-amount"
+                    style="flex-direction:column; align-items:flex-start; gap:6px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="control-label">歳入額上限：</span>
+                        <span id="slider-current-label">—</span>
+                    </div>
+                    <div id="amount-slider-wrap">
+                        <div id="slider-track-container">
+                            <div id="slider-track-base"></div>
+                            <div id="slider-range-fill"></div>
+                            <input type="range" id="amount-slider-min" min="0" max="1000" step="1">
+                            <input type="range" id="amount-slider-max" min="0" max="1000" step="1">
+                        </div>
+                        <div id="slider-markers-row"></div>
+                    </div>
+                </div>
+                <div class="control-group" id="row-ratio" style="display:none">
+                    <span class="control-label">構成比：</span>
+                    <div class="threshold-tabs" id="ratio-tabs"></div>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">税目：</span>
+                    <button id="btn-deselect-all" class="threshold-tab">全て解除</button>
+                    <button id="btn-select-all" class="threshold-tab">全て選択</button>
+                    <div class="threshold-tabs" id="tax-item-tabs"></div>
+                </div>
+                <div class="result-count" id="result-count"></div>
+                <table id="result-table">
+                    <thead>
+                        <tr>
+                            <th data-col="name">団体名<span class="sort-arrow"></span></th>
+                            <th data-col="pref">都道府県<span class="sort-arrow"></span></th>
+                            <th data-col="cat">カテゴリ<span class="sort-arrow"></span></th>
+                            <th data-col="tax">税目<span class="sort-arrow"></span></th>
+                            <th data-col="val">歳入額<span class="sort-arrow"></span></th>
+                            <th data-col="ratio">構成比<span class="sort-arrow"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="result-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="zeimoku-list.js"></script>
+    <script type="module">
+        import { parquetRead, parquetMetadata } from 'https://cdn.jsdelivr.net/npm/hyparquet/+esm'
+
+        const AMOUNT_MARKERS = [
+            { val: 3, name: '時給の壁' },
+            { val: 13, name: '日給の壁' },
+            { val: 300, name: '月給の壁' },
+            { val: 4000, name: '年収の壁' },
+        ]
+
+        const SLIDER_STEPS = 1000
+        const SLIDER_LOG_MIN = Math.log10(1)
+        const SLIDER_LOG_MAX = Math.log10(3_000_000_000)  // 3兆円（千円単位）
+
+        function posToVal(pos) {
+            return Math.pow(10, SLIDER_LOG_MIN + (pos / SLIDER_STEPS) * (SLIDER_LOG_MAX - SLIDER_LOG_MIN))
+        }
+
+        function valToPos(val) {
+            return Math.round((Math.log10(val) - SLIDER_LOG_MIN) / (SLIDER_LOG_MAX - SLIDER_LOG_MIN) * SLIDER_STEPS)
+        }
+
+        function fmtSliderVal(v) {
+            if (v < 1000) return v.toLocaleString('ja-JP', { maximumFractionDigits: 0 }) + ' 千円'
+            if (v < 100_000) return (v / 1_000).toLocaleString('ja-JP', { maximumFractionDigits: 1 }) + ' 百万円'
+            if (v < 100_000_000) return (v / 100_000).toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 億円'
+            return (v / 100_000_000).toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 兆円'
+        }
+
+        const RANGE_BY_RATIO_DEFS = [
+            {
+                min: Number.NEGATIVE_INFINITY,
+                max: 0.01,
+                label: '0.01%以下'
+            },
+            {
+                min: 0.01,
+                max: 0.05,
+                label: '0.05%以下'
+            },
+            {
+                min: 0.05,
+                max: 0.1,
+                label: '0.1%以下'
+            }
+        ]
+
+        // ── 税目定義 ──────────────────────────────────────────
+        const TAX_DEFS = zeimoku.map(d => ({
+            cat: d.cat,
+            label: d.name,
+            key: d.key,
+            chokaMode: d.cat === "超過課税分",
+            ratioKey: d.key.endsWith('.収入済額') ? d.key.replace('.収入済額', '.構成比') : null,
+        }))
+
+        // ── データ読み込み ───────────────────────────────────
+        async function loadFile(url) {
+            const res = await fetch(url)
+            const ab = await res.arrayBuffer()
+            const meta = parquetMetadata(ab)
+            const cols = meta.schema.slice(1).map(s => s.name)
+            let records = []
+            await parquetRead({
+                file: ab,
+                onComplete: rows => {
+                    records = rows.map(row => Object.fromEntries(cols.map((c, i) => [c, row[i]])))
+                }
+            })
+            return records
+        }
+
+        // ── フォーマット ─────────────────────────────────────
+        function fmtVal(v) {
+            const n = parseFloat(v)
+            if (!Number.isFinite(n) || n === 0) return null
+            if (n < 10) return { text: n.toLocaleString('ja-JP') + ' 千円', level: 'danger' }
+            if (n < 1000) return { text: n.toLocaleString('ja-JP') + ' 千円', level: 'warn' }
+            const oku = n / 10_0000
+            if (oku < 1) return { text: (n / 10).toLocaleString('ja-JP', { maximumFractionDigits: 1 }) + ' 万円', level: '' }
+            return { text: oku.toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 億円', level: '' }
+        }
+
+        // ── ソート状態 ───────────────────────────────────────
+        let sortCol = 'val'
+        let sortDir = 1  // 1=昇順
+
+        // ── レンダリング ─────────────────────────────────────
+        let allData = []
+        let valCache = []    // valCache[taxIdx][dataIdx]
+        let ratioCache = []  // ratioCache[taxIdx][dataIdx] | null配列
+        let nameArr = []
+        let prefArr = []
+
+        function buildCache() {
+            nameArr = allData.map(d => d['団体名'] ?? d['都道府県名'] ?? '—')
+            prefArr = allData.map(d => d['都道府県名'] ?? '—')
+            valCache = TAX_DEFS.map(def => new Float64Array(allData.map(d => {
+                const v = parseFloat(d[def.key]); return Number.isFinite(v) ? v : NaN
+            })))
+            ratioCache = TAX_DEFS.map(def => def.ratioKey
+                ? new Float64Array(allData.map(d => {
+                    const v = parseFloat(d[def.ratioKey]); return Number.isFinite(v) ? v : NaN
+                }))
+                : null
+            )
+        }
+
+        // RAFデバウンス
+        let renderRaf = null
+        function scheduleRender() {
+            if (renderRaf) cancelAnimationFrame(renderRaf)
+            renderRaf = requestAnimationFrame(() => { renderRaf = null; render() })
+        }
+
+        function getActiveTaxIndices() {
+            return [...document.querySelectorAll('#tax-item-tabs .threshold-tab.active')]
+                .map(b => parseInt(b.dataset.idx))
+        }
+
+        function getMode() {
+            return document.querySelector('[data-mode].active')?.dataset.mode ?? 'amount'
+        }
+
+        function getActiveRanges() {
+            if (getMode() === 'ratio') {
+                const tabs = [...document.querySelectorAll('#ratio-tabs .threshold-tab.active')]
+                return tabs.map(t => RANGE_BY_RATIO_DEFS[parseInt(t.dataset.rangeIdx)]).filter(Boolean)
+            }
+            const min = posToVal(parseInt(document.getElementById('amount-slider-min').value))
+            const max = posToVal(parseInt(document.getElementById('amount-slider-max').value))
+            return [{ min, max }]
+        }
+
+        function inRanges(val, ranges) {
+            if (ranges.length === 0) return false
+            return ranges.some(r => val > r.min && val <= r.max)
+        }
+
+        const CHUNK_SIZE = 80
+        let renderToken = 0
+
+        function render() {
+            const token = ++renderToken
+
+            const activeIndices = getActiveTaxIndices()
+            const ranges = getActiveRanges()
+            const mode = getMode()
+            const n = allData.length
+
+            // 選択された全税目からrow生成（キャッシュ利用）
+            const rows = []
+            for (const taxIdx of activeIndices) {
+                const def = TAX_DEFS[taxIdx]
+                if (mode === 'ratio' && !def.ratioKey) continue
+                const vals = valCache[taxIdx]
+                const ratios = ratioCache[taxIdx]
+                for (let i = 0; i < n; i++) {
+                    const val = vals[i]
+                    if (!(val > 0)) continue
+                    const filterVal = mode === 'ratio' ? ratios[i] : val
+                    if (!inRanges(filterVal, ranges)) continue
+                    rows.push({ name: nameArr[i], pref: prefArr[i], cat: def.cat, tax: def.label, val, ratio: ratios ? ratios[i] : NaN })
+                }
+            }
+
+            // ソート
+            rows.sort((a, b) => {
+                if (sortCol === 'name') return sortDir * a.name.localeCompare(b.name, 'ja')
+                if (sortCol === 'pref') return sortDir * a.pref.localeCompare(b.pref, 'ja')
+                if (sortCol === 'cat') return sortDir * a.cat.localeCompare(b.cat, 'ja')
+                if (sortCol === 'tax') return sortDir * a.tax.localeCompare(b.tax, 'ja')
+                if (sortCol === 'ratio') return sortDir * ((a.ratio || 0) - (b.ratio || 0))
+                return sortDir * (a.val - b.val)
+            })
+
+            // ソートアイコン・件数を即時更新
+            document.querySelectorAll('#result-table thead th').forEach(th => {
+                const col = th.dataset.col
+                th.classList.toggle('sort-active', col === sortCol)
+                th.querySelector('.sort-arrow').textContent =
+                    col === sortCol ? (sortDir === 1 ? ' ▲' : ' ▼') : ''
+            })
+            document.getElementById('result-count').innerHTML =
+                `<span>${rows.length.toLocaleString()}</span> 件`
+
+            // tbody をクリアして逐次挿入
+            const tbody = document.getElementById('result-tbody')
+            tbody.innerHTML = ''
+            let offset = 0
+
+            function renderChunk() {
+                if (token !== renderToken) return  // 新しいrenderが来たら中断
+                const frag = document.createDocumentFragment()
+                const end = Math.min(offset + CHUNK_SIZE, rows.length)
+                for (let i = offset; i < end; i++) {
+                    const r = rows[i]
+                    const fmt = fmtVal(r.val)
+                    const cls = fmt ? fmt.level : ''
+                    const txt = fmt ? fmt.text : r.val.toLocaleString() + ' 千円'
+                    const tr = document.createElement('tr')
+                    tr.innerHTML = `<td class="td-name">${r.name}</td>
+                        <td class="td-pref">${r.pref}</td>
+                        <td class="td-cat">${r.cat}</td>
+                        <td class="td-tax">${r.tax}</td>
+                        <td class="td-val ${cls}">${txt}</td>
+                        <td class="td-ratio">${Number.isFinite(r.ratio) ? r.ratio + ' %' : '—'}</td>`
+                    frag.appendChild(tr)
+                }
+                tbody.appendChild(frag)
+                offset = end
+                if (offset < rows.length) setTimeout(renderChunk, 0)
+            }
+
+            renderChunk()
+        }
+
+        // ── 初期化 ───────────────────────────────────────────
+        const data = await loadFile('r5_kessan_data.parquet')
+        allData = data
+        buildCache()
+
+        document.getElementById('loading').style.display = 'none'
+        document.getElementById('controls').style.display = 'block'
+
+        // ── タブ構築 ─────────────────────────────────────────
+        const itemTabsEl = document.getElementById('tax-item-tabs')
+        const params = new URLSearchParams(location.search)
+        const initSet = params.get('tax')
+            ? new Set(params.get('tax').split(','))
+            : new Set(TAX_DEFS.map((_, i) => String(i)))  // 初期：全選択
+
+        // テーブルヘッダーのソートクリック
+        document.querySelectorAll('#result-table thead th').forEach(th => {
+            th.addEventListener('click', () => {
+                const col = th.dataset.col
+                if (sortCol === col) sortDir *= -1
+                else { sortCol = col; sortDir = 1 }
+                render()
+            })
+        })
+
+        function syncUrlParams() {
+            const active = getActiveTaxIndices().map(String)
+            const p = new URLSearchParams(location.search)
+            p.set('tax', active.join(','))
+            history.replaceState(null, '', '?' + p.toString())
+        }
+
+        function setCatActive(cat, active) {
+            itemTabsEl.querySelectorAll(`.threshold-tab[data-cat="${cat}"]`)
+                .forEach(b => b.classList.toggle('active', active))
+            syncUrlParams()
+            render()
+        }
+
+        let lastCat = null
+        TAX_DEFS.forEach((def, i) => {
+            if (def.cat !== lastCat) {
+                const hdr = document.createElement('div')
+                hdr.className = 'tax-item-cat-header'
+                hdr.innerHTML = `<span class="cat-header-label">${def.cat}</span>`
+
+                const selBtn = document.createElement('button')
+                selBtn.className = 'cat-btn'
+                selBtn.textContent = '全選択'
+                selBtn.addEventListener('click', () => setCatActive(def.cat, true))
+
+                const deselBtn = document.createElement('button')
+                deselBtn.className = 'cat-btn'
+                deselBtn.textContent = '全解除'
+                deselBtn.addEventListener('click', () => setCatActive(def.cat, false))
+
+                hdr.appendChild(selBtn)
+                hdr.appendChild(deselBtn)
+                itemTabsEl.appendChild(hdr)
+                lastCat = def.cat
+            }
+            const btn = document.createElement('button')
+            btn.className = 'threshold-tab' + (initSet.has(String(i)) ? ' active' : '')
+            btn.dataset.idx = i
+            btn.dataset.cat = def.cat
+            btn.textContent = def.label
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active')
+                syncUrlParams()
+                render()
+            })
+            itemTabsEl.appendChild(btn)
+        })
+
+        document.getElementById('btn-deselect-all').addEventListener('click', () => {
+            itemTabsEl.querySelectorAll('.threshold-tab').forEach(b => b.classList.remove('active'))
+            syncUrlParams()
+            render()
+        })
+
+        document.getElementById('btn-select-all').addEventListener('click', () => {
+            itemTabsEl.querySelectorAll('.threshold-tab').forEach(b => b.classList.add('active'))
+            syncUrlParams()
+            render()
+        })
+
+        function applyRangeToTaxTabs(ranges, mode) {
+            const n = allData.length
+            itemTabsEl.querySelectorAll('.threshold-tab').forEach(btn => {
+                const taxIdx = parseInt(btn.dataset.idx)
+                const def = TAX_DEFS[taxIdx]
+                if (mode === 'ratio' && !def.ratioKey) {
+                    btn.classList.remove('active')
+                    btn.classList.add('no-data')
+                    return
+                }
+                const vals = valCache[taxIdx]
+                const ratios = ratioCache[taxIdx]
+                let hasData = false
+                for (let i = 0; i < n; i++) {
+                    const val = vals[i]
+                    if (!(val > 0)) continue
+                    const filterVal = mode === 'ratio' ? ratios[i] : val
+                    if (inRanges(filterVal, ranges)) { hasData = true; break }
+                }
+                btn.classList.toggle('active', hasData)
+                btn.classList.toggle('no-data', !hasData)
+            })
+            syncUrlParams()
+        }
+
+        // モード切替
+        document.querySelectorAll('[data-mode]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'))
+                btn.classList.add('active')
+                const mode = btn.dataset.mode
+                document.getElementById('row-amount').style.display = mode === 'amount' ? '' : 'none'
+                document.getElementById('row-ratio').style.display = mode === 'ratio' ? '' : 'none'
+                applyRangeToTaxTabs(getActiveRanges(), mode)
+                render()
+            })
+        })
+
+        // 歳入額スライダー初期化
+        const sliderMinEl = document.getElementById('amount-slider-min')
+        const sliderMaxEl = document.getElementById('amount-slider-max')
+        const sliderLabelEl = document.getElementById('slider-current-label')
+        const markersRowEl = document.getElementById('slider-markers-row')
+        const rangeFillEl = document.getElementById('slider-range-fill')
+
+        function updateSliderFill() {
+            const minPos = parseInt(sliderMinEl.value)
+            const maxPos = parseInt(sliderMaxEl.value)
+            rangeFillEl.style.left = (minPos / SLIDER_STEPS * 100) + '%'
+            rangeFillEl.style.width = ((maxPos - minPos) / SLIDER_STEPS * 100) + '%'
+        }
+
+        function updateSliderLabel() {
+            const minVal = posToVal(parseInt(sliderMinEl.value))
+            const maxVal = posToVal(parseInt(sliderMaxEl.value))
+            sliderLabelEl.textContent = fmtSliderVal(minVal) + ' 〜 ' + fmtSliderVal(maxVal)
+        }
+
+        AMOUNT_MARKERS.forEach(m => {
+            const pct = (valToPos(m.val) / SLIDER_STEPS) * 100
+            const el = document.createElement('div')
+            el.className = 'slider-marker'
+            el.style.left = pct + '%'
+            el.innerHTML = `
+                <div class="slider-marker-tick"></div>
+                <div class="slider-marker-name">${m.name}</div>
+                <div class="slider-marker-val">${fmtSliderVal(m.val)}</div>
+            `
+            markersRowEl.appendChild(el)
+        })
+
+        sliderMinEl.value = valToPos(1)
+        sliderMaxEl.value = valToPos(300)
+        updateSliderFill()
+        updateSliderLabel()
+
+        // ドラッグ中：ラベル・フィル更新＋カード再描画（RAFで間引き）
+        sliderMinEl.addEventListener('input', () => {
+            if (parseInt(sliderMinEl.value) >= parseInt(sliderMaxEl.value))
+                sliderMinEl.value = parseInt(sliderMaxEl.value) - 1
+            updateSliderFill()
+            updateSliderLabel()
+            scheduleRender()
+        })
+        sliderMaxEl.addEventListener('input', () => {
+            if (parseInt(sliderMaxEl.value) <= parseInt(sliderMinEl.value))
+                sliderMaxEl.value = parseInt(sliderMinEl.value) + 1
+            updateSliderFill()
+            updateSliderLabel()
+            scheduleRender()
+        })
+
+        // 離した時だけ：税目タブの有無判定（重い処理）
+        sliderMinEl.addEventListener('change', () => applyRangeToTaxTabs(getActiveRanges(), 'amount'))
+        sliderMaxEl.addEventListener('change', () => applyRangeToTaxTabs(getActiveRanges(), 'amount'))
+
+        // 構成比タブを RANGE_BY_RATIO_DEFS から構築
+        const ratioTabsEl = document.getElementById('ratio-tabs')
+        RANGE_BY_RATIO_DEFS.forEach((range, i) => {
+            const btn = document.createElement('button')
+            btn.className = 'threshold-tab' + (i === 0 ? ' active' : '')
+            btn.dataset.rangeIdx = i
+            btn.textContent = range.label
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active')
+                applyRangeToTaxTabs(getActiveRanges(), 'ratio')
+                render()
+            })
+            ratioTabsEl.appendChild(btn)
+        })
+
+        render()
+    </script>
+
+</body>
+
+</html>

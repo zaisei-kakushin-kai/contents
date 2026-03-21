@@ -8,10 +8,11 @@
   border: 1px solid var(--border);
   border-top: 2px solid var(--orange-dim);
   margin-bottom: 4px;
+  max-width: 30%;
 }
 
 .kokuhoken-title {
-  padding: 6px 10px;
+  padding: 7px 10px;
   background: var(--bg-2);
   border-bottom: 1px solid var(--border);
   color: var(--orange);
@@ -125,7 +126,7 @@
 .koei-bar-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .koei-bar-name {

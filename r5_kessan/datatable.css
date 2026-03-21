@@ -7,7 +7,6 @@ div.datatable {
   border-top: 2px solid var(--orange-dim, #cc5200);
   flex: 1;
   min-width: 320px;
-  height: 100%;
 }
 
 .datatable-wrap {
@@ -121,6 +120,7 @@ table.datatable {
 .datatable td.tr-right {
   text-align: right;
 }
+
 .datatable th.tr-right {
   text-align: right;
 }

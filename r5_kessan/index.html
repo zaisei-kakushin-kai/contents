@@ -335,13 +335,21 @@
                 `
         }
 
-        function renderBrowseCards(entities) {
+        let _latestSeachQuery = ''
+        function renderBrowseCards(entities, searchQuery) {
+            if (_latestSeachQuery === searchQuery) {
+                return
+            }
+            _latestSeachQuery = searchQuery
             const grid = document.getElementById('tab-browse')
             grid.innerHTML = ''
 
             const pref2itemToBeRendered = groupBySubtitle(entities)
 
             function renderChunk() {
+                if (_latestSeachQuery !== searchQuery) {
+                    return
+                }
                 const stackItem = pref2itemToBeRendered.pop()
                 if (!stackItem) {
                     return;
@@ -414,7 +422,9 @@
                     const depthClass = (i === 0 && row.depth > 0) ? ` depth-${row.depth}` : ''
                     classList.push(depthClass)
 
-                    return `<td class="${classList.join("")}">${val}</td>`
+                    return `<td class="${classList.join("")}">
+                        ${val}
+                    </td>`
                 }).join('')
             }
 
@@ -979,6 +989,8 @@
             DOHUKEN_UI_Kaikei,
             DOHUKEN_UI_SyokuinKyuyo,
             DOHUKEN_UI_SyokuinTokubetsu,
+            DOHUKEN_UI_SaimuHutanKoui,
+            DOHUKEN_UI_ZaiseiKenzenka,
         } from './dohukenzei.js'
 
         function renderDohukenDetail(id) {
@@ -988,13 +1000,12 @@
             const dataItem = data_id2data[id]
 
             tabDetailElm.innerHTML += renderDetailHeader(id)
+            tabDetailElm.innerHTML += renderKpiCardGroup(DOHUKEN_UI_Syushi(dataItem))
+            tabDetailElm.innerHTML += renderKpiCardGroup(DOHUKEN_UI_ZaiseiShihyo(dataItem))
+            tabDetailElm.innerHTML += renderKpiCardGroup(DOHUKEN_UI_ShisanSaimu(dataItem))
             tabDetailElm.innerHTML += `<div class="detail-row">
-                ${renderDataTable(DOHUKEN_UI_Syushi(dataItem))}
-                ${renderDataTable(DOHUKEN_UI_ZaiseiShihyo(dataItem))}
-            </div>`
-            tabDetailElm.innerHTML += `<div class="detail-row">
-                ${renderDataTable(DOHUKEN_UI_ShisanSaimu(dataItem))}
-                ${renderDataTable(DOHUKEN_UI_Kaikei(dataItem))}
+                ${renderKpiCardGroup(DOHUKEN_UI_SaimuHutanKoui(dataItem))}
+                ${renderKpiCardGroup(DOHUKEN_UI_Kaikei(dataItem))}
             </div>`
             tabDetailElm.innerHTML += `<div class="detail-row">${renderDataTable(DOHUKEN_UI_SainyuJyokyo(dataItem))}</div>`
             tabDetailElm.innerHTML += `<div class="detail-row">${renderDataTable(DOHUKEN_UI_DohukenZeiJyokyo(dataItem))}</div>`
@@ -1044,14 +1055,14 @@
                 ${renderKpiCardGroup(SICHOSON_UI_Choshu(dataItem))}
             </div>`
 
-            tabDetailElm.innerHTML += `<div class="detail-row">${renderKpiCardGroup(SICHOSON_UI_ZaiseiSihyo(dataItem))}</div>`
-
             tabDetailElm.innerHTML += `
-                <div class="detail-row">    
-                    ${renderKpiCardGroup(SICHOSON_UI_Kenzenka(dataItem))}
+                <div class="detail-row">
+                    ${renderKpiCardGroup(SICHOSON_UI_ZaiseiSihyo(dataItem))}
                     ${renderKokuminkenkohoken(dataItem)}
                 </div>
+            `
 
+            tabDetailElm.innerHTML += `
                 <div class="detail-row">
                     ${renderKpiCardGroup(SICHOSON_UI_SangyoKouzou(dataItem))}
                     ${renderKpiCardGroup(SICHOSON_UI_Jinkou(dataItem))}
@@ -1110,7 +1121,7 @@
                 )
             }
 
-            renderBrowseCards(filtered)
+            renderBrowseCards(filtered, q)
             document.querySelector('.search-count-num').textContent = filtered.length.toLocaleString()
         }
 

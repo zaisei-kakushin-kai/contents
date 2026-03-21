@@ -33,33 +33,31 @@ export function fmtScore(bigint, unit) {
 }
 
 export function DOHUKEN_UI_Syushi(dataItem) {
-    const schema = {
-        "title": "収支状況",
-        "headers": [
-            { "label": "項目", "key": "title" },
-            { "label": "令和5年度", "key": "r5", "right": true },
-            { "label": "令和4年度", "key": "r4", "right": true },
-        ],
-        "rows": [
-            { "title": "歳入総額", "r5": "収支状況_千円.歳入総額.令和5年度", "r4": "収支状況_千円.歳入総額.令和4年度" },
-            { "title": "歳出総額", "r5": "収支状況_千円.歳出総額.令和5年度", "r4": "収支状況_千円.歳出総額.令和4年度" },
-            { "title": "歳入歳出差引", "r5": "収支状況_千円.歳入歳出差引.令和5年度", "r4": "収支状況_千円.歳入歳出差引.令和4年度" },
-            { "title": "翌年度に繰越すべき財源", "r5": "収支状況_千円.翌年度に繰越すべき財源.令和5年度", "r4": "収支状況_千円.翌年度に繰越すべき財源.令和4年度" },
-            { "title": "実質収支", "r5": "収支状況_千円.実質収支.令和5年度", "r4": "収支状況_千円.実質収支.令和4年度" },
-            { "title": "単年度収支", "r5": "収支状況_千円.単年度収支.令和5年度", "r4": "収支状況_千円.単年度収支.令和4年度" },
-            { "title": "積立金", "r5": "収支状況_千円.積立金.令和5年度", "r4": "収支状況_千円.積立金.令和4年度" },
-            { "title": "繰上償還金", "r5": "収支状況_千円.繰上償還金.令和5年度", "r4": "収支状況_千円.繰上償還金.令和4年度" },
-            { "title": "積立金取崩し額", "r5": "収支状況_千円.積立金取崩し額.令和5年度", "r4": "収支状況_千円.積立金取崩し額.令和4年度" },
-            { "title": "実質単年度収支", "r5": "収支状況_千円.実質単年度収支.令和5年度", "r4": "収支状況_千円.実質単年度収支.令和4年度", "isFooter": true },
-        ]
+    const rows = [
+        { label: "歳入総額", r5: "収支状況_千円.歳入総額.令和5年度", r4: "収支状況_千円.歳入総額.令和4年度" },
+        { label: "歳出総額", r5: "収支状況_千円.歳出総額.令和5年度", r4: "収支状況_千円.歳出総額.令和4年度" },
+        { label: "歳入歳出差引", r5: "収支状況_千円.歳入歳出差引.令和5年度", r4: "収支状況_千円.歳入歳出差引.令和4年度" },
+        { label: "翌年度繰越財源", r5: "収支状況_千円.翌年度に繰越すべき財源.令和5年度", r4: "収支状況_千円.翌年度に繰越すべき財源.令和4年度" },
+        { label: "実質収支", r5: "収支状況_千円.実質収支.令和5年度", r4: "収支状況_千円.実質収支.令和4年度" },
+        { label: "単年度収支", r5: "収支状況_千円.単年度収支.令和5年度", r4: "収支状況_千円.単年度収支.令和4年度" },
+        { label: "積立金", r5: "収支状況_千円.積立金.令和5年度", r4: "収支状況_千円.積立金.令和4年度" },
+        { label: "繰上償還金", r5: "収支状況_千円.繰上償還金.令和5年度", r4: "収支状況_千円.繰上償還金.令和4年度" },
+        { label: "積立金取崩し額", r5: "収支状況_千円.積立金取崩し額.令和5年度", r4: "収支状況_千円.積立金取崩し額.令和4年度" },
+        { label: "実質単年度収支", r5: "収支状況_千円.実質単年度収支.令和5年度", r4: "収支状況_千円.実質単年度収支.令和4年度" },
+        { label: "収益事業収入", r5: "収益事業収入_千円.令和5年度", r4: "収益事業収入_千円.令和4年度" },
+    ]
+    return {
+        title: "収支状況",
+        fmt: fmtScore,
+        items: rows.map(e => ({
+            label: e.label,
+            currentYear: dataItem[e.r5],
+            currentYearLabel: '令和5年度',
+            prevYear: dataItem[e.r4],
+            prevYearLabel: '令和4年度',
+            delta: parseFloat(dataItem[e.r5]) - parseFloat(dataItem[e.r4]),
+        }))
     }
-
-    schema.rows = schema.rows.map(e => ({
-        ...e,
-        r5: fmtScore(dataItem[e.r5]),
-        r4: fmtScore(dataItem[e.r4]),
-    }))
-    return schema
 }
 
 export function DOHUKEN_UI_SainyuJyokyo(dataItem) {
@@ -262,88 +260,126 @@ export function DOHUKEN_UI_Mokuteki(dataItem) {
 }
 
 export function DOHUKEN_UI_ZaiseiShihyo(dataItem) {
-    const schema = {
-        "title": "財政指標",
-        "headers": [
-            { "label": "項目", "key": "title" },
-            { "label": "令和5年度", "key": "r5", "right": true },
-            { "label": "令和4年度", "key": "r4", "right": true },
-        ],
-        "rows": [
-            { "title": "基準財政収入額", "r5": "財政指標.基準財政収入額_千円.令和5年度", "r4": "財政指標.基準財政収入額_千円.令和4年度", "fmt": fmtScore },
-            { "title": "基準財政需要額", "r5": "財政指標.基準財政需要額_千円.令和5年度", "r4": "財政指標.基準財政需要額_千円.令和4年度", "fmt": fmtScore },
-            { "title": "標準税収入額等", "r5": "財政指標.標準税収入額等_千円.令和5年度", "r4": "財政指標.標準税収入額等_千円.令和4年度", "fmt": fmtScore },
-            { "title": "標準財政規模", "r5": "財政指標.標準財政規模_千円.令和5年度", "r4": "財政指標.標準財政規模_千円.令和4年度", "fmt": fmtScore },
-            { "title": "財政力指数", "r5": "財政指標.財政力指数.令和5年度", "r4": "財政指標.財政力指数.令和4年度" },
-            { "title": "実質収支比率", "r5": "財政指標.実質収支比率_percent.令和5年度", "r4": "財政指標.実質収支比率_percent.令和4年度", "unit": "%" },
-            { "title": "公債費負担比率", "r5": "財政指標.公債費負担比率_percent.令和5年度", "r4": "財政指標.公債費負担比率_percent.令和4年度", "unit": "%" },
-            { "title": "実質赤字比率", "r5": "財政指標.健全化判断比率.実質赤字比率_percent.令和5年度", "r4": "財政指標.健全化判断比率.実質赤字比率_percent.令和4年度", "unit": "%" },
-            { "title": "連結実質赤字比率", "r5": "財政指標.健全化判断比率.連結実質赤字比率_percent.令和5年度", "r4": "財政指標.健全化判断比率.連結実質赤字比率_percent.令和4年度", "unit": "%" },
-            { "title": "実質公債費比率", "r5": "財政指標.健全化判断比率.実質公債費比率_percent.令和5年度", "r4": "財政指標.健全化判断比率.実質公債費比率_percent.令和4年度", "unit": "%" },
-            { "title": "将来負担比率", "r5": "財政指標.健全化判断比率.将来負担比率_percent.令和5年度", "r4": "財政指標.健全化判断比率.将来負担比率_percent.令和4年度", "unit": "%" },
-        ]
+    const rows = [
+        { label: "基準財政収入額", r5: "財政指標.基準財政収入額_千円.令和5年度", r4: "財政指標.基準財政収入額_千円.令和4年度", fmt: fmtScore },
+        { label: "基準財政需要額", r5: "財政指標.基準財政需要額_千円.令和5年度", r4: "財政指標.基準財政需要額_千円.令和4年度", fmt: fmtScore },
+        { label: "標準税収入額等", r5: "財政指標.標準税収入額等_千円.令和5年度", r4: "財政指標.標準税収入額等_千円.令和4年度", fmt: fmtScore },
+        { label: "標準財政規模", r5: "財政指標.標準財政規模_千円.令和5年度", r4: "財政指標.標準財政規模_千円.令和4年度", fmt: fmtScore },
+        { label: "財政力指数", r5: "財政指標.財政力指数.令和5年度", r4: "財政指標.財政力指数.令和4年度", fmt: v => v },
+        { label: "実質収支比率", r5: "財政指標.実質収支比率_percent.令和5年度", r4: "財政指標.実質収支比率_percent.令和4年度", fmt: v => fmtScore(v, '%') },
+        { label: "公債費負担比率", r5: "財政指標.公債費負担比率_percent.令和5年度", r4: "財政指標.公債費負担比率_percent.令和4年度", fmt: v => fmtScore(v, '%') },
+    ]
+    return {
+        title: "財政指標",
+        items: rows.map(e => {
+            if ("財政力指数" == e.label) {
+                return {
+                    label: e.label,
+                    currentYear: dataItem[e.r5].toFixed(3),
+                    currentYearLabel: '令和5年度',
+                    prevYear: dataItem[e.r4].toFixed(3),
+                    prevYearLabel: '令和4年度',
+                    delta: (parseFloat(dataItem[e.r5]) - parseFloat(dataItem[e.r4])).toFixed(2),
+                    fmt: e.fmt,
+                }
+            }
+            return {
+                label: e.label,
+                currentYear: dataItem[e.r5],
+                currentYearLabel: '令和5年度',
+                prevYear: dataItem[e.r4],
+                prevYearLabel: '令和4年度',
+                delta: parseFloat(dataItem[e.r5]) - parseFloat(dataItem[e.r4]),
+                fmt: e.fmt,
+            }
+        })
     }
-
-    schema.rows = schema.rows.map(e => ({
-        ...e,
-        r5: e.fmt ? e.fmt(dataItem[e.r5]) : fmtScore(dataItem[e.r5], e.unit),
-        r4: e.fmt ? e.fmt(dataItem[e.r4]) : fmtScore(dataItem[e.r4], e.unit),
-    }))
-    return schema
 }
 
 export function DOHUKEN_UI_ShisanSaimu(dataItem) {
-    const schema = {
-        "title": "積立金・負債等",
-        "headers": [
-            { "label": "項目", "key": "title" },
-            { "label": "令和5年度", "key": "r5", "right": true },
-            { "label": "令和4年度", "key": "r4", "right": true },
-        ],
-        "rows": [
-            { "title": "積立金現在高 財政調整基金", "r5": "積立金現在高_千円.財政調整基金.令和5年度", "r4": "積立金現在高_千円.財政調整基金.令和4年度" },
-            { "title": "積立金現在高 減債基金", "r5": "積立金現在高_千円.減債基金.令和5年度", "r4": "積立金現在高_千円.減債基金.令和4年度" },
-            { "title": "積立金現在高 その他特定目的基金", "r5": "積立金現在高_千円.その他特定目的基金.令和5年度", "r4": "積立金現在高_千円.その他特定目的基金.令和4年度" },
-            { "title": "積立金現在高 定額運用基金", "r5": "積立金現在高_千円.定額運用基金.令和5年度", "r4": "積立金現在高_千円.定額運用基金.令和4年度" },
-            { "title": "土地開発基金現在高", "r5": "土地開発基金現在高_千円.令和5年度", "r4": "土地開発基金現在高_千円.令和4年度" },
-            { "title": "地方債現在高", "r5": "地方債現在高_千円.令和5年度", "r4": "地方債現在高_千円.令和4年度" },
-            { "title": "債務負担行為額 合計", "r5": "債務負担行為額支出予定額_千円.合計.令和5年度", "r4": "債務負担行為額支出予定額_千円.合計.令和4年度" },
-            { "title": "債務負担行為額 物件等購入", "r5": "債務負担行為額支出予定額_千円.物件等購入.令和5年度", "r4": "債務負担行為額支出予定額_千円.物件等購入.令和4年度" },
-            { "title": "債務負担行為額 保証・補償", "r5": "債務負担行為額支出予定額_千円.保証・補償.令和5年度", "r4": "債務負担行為額支出予定額_千円.保証・補償.令和4年度" },
-            { "title": "債務負担行為額 その他", "r5": "債務負担行為額支出予定額_千円.その他.令和5年度", "r4": "債務負担行為額支出予定額_千円.その他.令和4年度" },
-            { "title": "債務負担行為額 実質的なもの", "r5": "債務負担行為額支出予定額_千円.実質的なもの.令和5年度", "r4": "債務負担行為額支出予定額_千円.実質的なもの.令和4年度" },
-        ]
+    const rows = [
+        { label: "財政調整基金", r5: "積立金現在高_千円.財政調整基金.令和5年度", r4: "積立金現在高_千円.財政調整基金.令和4年度" },
+        { label: "減債基金", r5: "積立金現在高_千円.減債基金.令和5年度", r4: "積立金現在高_千円.減債基金.令和4年度" },
+        { label: "その他特定目的基金", r5: "積立金現在高_千円.その他特定目的基金.令和5年度", r4: "積立金現在高_千円.その他特定目的基金.令和4年度" },
+        { label: "定額運用基金", r5: "積立金現在高_千円.定額運用基金.令和5年度", r4: "積立金現在高_千円.定額運用基金.令和4年度" },
+        { label: "土地開発基金", r5: "土地開発基金現在高_千円.令和5年度", r4: "土地開発基金現在高_千円.令和4年度" },
+        { label: "地方債現在高", r5: "地方債現在高_千円.令和5年度", r4: "地方債現在高_千円.令和4年度" },
+    ]
+    return {
+        title: "積立金・基金・地方債　現在高",
+        fmt: fmtScore,
+        items: rows.map(e => ({
+            label: e.label,
+            currentYear: dataItem[e.r5],
+            currentYearLabel: '令和5年度',
+            prevYear: dataItem[e.r4],
+            prevYearLabel: '令和4年度',
+            delta: parseFloat(dataItem[e.r5]) - parseFloat(dataItem[e.r4]),
+        }))
     }
+}
 
-    schema.rows = schema.rows.map(e => ({
-        ...e,
-        r5: fmtScore(dataItem[e.r5]),
-        r4: fmtScore(dataItem[e.r4]),
-    }))
-    return schema
+
+export function DOHUKEN_UI_SaimuHutanKoui(dataItem) {
+    const rows = [
+        { label: "合計", r5: "債務負担行為額支出予定額_千円.合計.令和5年度", r4: "債務負担行為額支出予定額_千円.合計.令和4年度" },
+        { label: "物件等購入", r5: "債務負担行為額支出予定額_千円.物件等購入.令和5年度", r4: "債務負担行為額支出予定額_千円.物件等購入.令和4年度" },
+        { label: "保証・補償", r5: "債務負担行為額支出予定額_千円.保証・補償.令和5年度", r4: "債務負担行為額支出予定額_千円.保証・補償.令和4年度" },
+        { label: "その他", r5: "債務負担行為額支出予定額_千円.その他.令和5年度", r4: "債務負担行為額支出予定額_千円.その他.令和4年度" },
+        { label: "実質的なもの", r5: "債務負担行為額支出予定額_千円.実質的なもの.令和5年度", r4: "債務負担行為額支出予定額_千円.実質的なもの.令和4年度" },
+    ]
+    return {
+        title: "債務負担行為",
+        fmt: fmtScore,
+        items: rows.map(e => ({
+            label: e.label,
+            currentYear: dataItem[e.r5],
+            currentYearLabel: '令和5年度',
+            prevYear: dataItem[e.r4],
+            prevYearLabel: '令和4年度',
+            delta: parseFloat(dataItem[e.r5]) - parseFloat(dataItem[e.r4]),
+        }))
+    }
 }
 
 export function DOHUKEN_UI_Kaikei(dataItem) {
-    const schema = {
-        "title": "会計の状況",
-        "headers": [
-            { "label": "項目", "key": "title" },
-            { "label": "令和5年度", "key": "r5", "right": true },
-            { "label": "令和4年度", "key": "r4", "right": true },
-        ],
-        "rows": [
-            { "title": "収益事業収入", "r5": "収益事業収入_千円.令和5年度", "r4": "収益事業収入_千円.令和4年度" },
-            { "title": "国民健康保険事業会計 実質収支", "r5": "国民健康保険事業会計の状況.実質収支_千円.令和5年度", "r4": "国民健康保険事業会計の状況.実質収支_千円.令和4年度" },
-            { "title": "国民健康保険事業会計 再差引収支", "r5": "国民健康保険事業会計の状況.再差引収支_千円.令和5年度", "r4": "国民健康保険事業会計の状況.再差引収支_千円.令和4年度" },
-        ]
+    const rows = [
+        { label: "実質収支", r5: "国民健康保険事業会計の状況.実質収支_千円.令和5年度", r4: "国民健康保険事業会計の状況.実質収支_千円.令和4年度" },
+        { label: "再差引収支", r5: "国民健康保険事業会計の状況.再差引収支_千円.令和5年度", r4: "国民健康保険事業会計の状況.再差引収支_千円.令和4年度" },
+    ]
+    return {
+        title: "国民健康保険の状況",
+        fmt: fmtScore,
+        items: rows.map(e => ({
+            label: e.label,
+            currentYear: dataItem[e.r5],
+            currentYearLabel: '令和5年度',
+            prevYear: dataItem[e.r4],
+            prevYearLabel: '令和4年度',
+            delta: parseFloat(dataItem[e.r5]) - parseFloat(dataItem[e.r4]),
+        }))
     }
+}
 
-    schema.rows = schema.rows.map(e => ({
-        ...e,
-        r5: fmtScore(dataItem[e.r5]),
-        r4: fmtScore(dataItem[e.r4]),
-    }))
-    return schema
+export function DOHUKEN_UI_ZaiseiKenzenka(dataItem) {
+    const rows = [
+        { label: "実質赤字比率", r5: "財政指標.健全化判断比率.実質赤字比率_percent.令和5年度", r4: "財政指標.健全化判断比率.実質赤字比率_percent.令和4年度", fmt: v => fmtScore(v, '%') },
+        { label: "連結実質赤字比率", r5: "財政指標.健全化判断比率.連結実質赤字比率_percent.令和5年度", r4: "財政指標.健全化判断比率.連結実質赤字比率_percent.令和4年度", fmt: v => fmtScore(v, '%') },
+        { label: "実質公債費比率", r5: "財政指標.健全化判断比率.実質公債費比率_percent.令和5年度", r4: "財政指標.健全化判断比率.実質公債費比率_percent.令和4年度", fmt: v => fmtScore(v, '%') },
+        { label: "将来負担比率", r5: "財政指標.健全化判断比率.将来負担比率_percent.令和5年度", r4: "財政指標.健全化判断比率.将来負担比率_percent.令和4年度", fmt: v => fmtScore(v, '%') },
+    ]
+    return {
+        title: "財政健全化比率",
+        items: rows.map(e => ({
+            label: e.label,
+            currentYear: dataItem[e.r5],
+            currentYearLabel: '令和5年度',
+            prevYear: dataItem[e.r4],
+            prevYearLabel: '令和4年度',
+            delta: parseFloat(dataItem[e.r5]) - parseFloat(dataItem[e.r4]),
+            fmt: e.fmt,
+        }))
+    }
 }
 
 export function DOHUKEN_UI_SyokuinKyuyo(dataItem) {

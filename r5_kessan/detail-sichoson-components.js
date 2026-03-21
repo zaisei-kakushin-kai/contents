@@ -2152,48 +2152,68 @@ export function SICHOSON_UI_ZaiseiSihyo(dataItem) {
         "title": "財政指標",
         "items": [
             {
-                "title": "基準財政収入額",
+                "label": "基準財政収入額",
                 "current": '財政指標.基準財政収入額_千円.令和5年度',
                 "prev": '財政指標.基準財政収入額_千円.令和4年度',
             },
             {
-                "title": "基準財政需要額",
+                "label": "基準財政需要額",
                 "current": "財政指標.基準財政需要額_千円.令和5年度",
                 "prev": "財政指標.基準財政需要額_千円.令和4年度"
             },
             {
-                "title": "標準税収入額等",
+                "label": "標準税収入額等",
                 "current": '財政指標.標準税収入額等_千円.令和5年度',
                 "prev": '財政指標.標準税収入額等_千円.令和4年度'
             },
             {
-                "title": "標準財政規模",
+                "label": "標準財政規模",
                 "current": '財政指標.標準財政規模_千円.令和5年度',
                 "prev": '財政指標.標準財政規模_千円.令和4年度',
             },
             {
-                "title": "財政力指数",
+                "label": "財政力指数",
                 "current": '財政指標.財政力指数.令和5年度',
                 "prev": '財政指標.財政力指数.令和4年度'
             },
             {
-                "title": "実質収支比率",
+                "label": "実質収支比率",
                 "current": '財政指標.実質収支比率_percent.令和5年度',
                 "prev": '財政指標.実質収支比率_percent.令和4年度'
             },
             {
-                "title": "公債費負担比率",
+                "label": "公債費負担比率",
                 "current": '財政指標.公債費負担比率_percent.令和5年度',
                 "prev": '財政指標.公債費負担比率_percent.令和4年度'
+            },
+            {
+                label: '実質赤字比率',
+                current: '財政指標.健全化判断比率.実質赤字比率_percent.令和5年度',
+                prev: '財政指標.健全化判断比率.実質赤字比率_percent.令和4年度',
+            },
+            {
+                label: '連結実質赤字比率',
+                current: '財政指標.健全化判断比率.連結実質赤字比率_percent.令和5年度',
+                prev: '財政指標.健全化判断比率.連結実質赤字比率_percent.令和4年度',
+            },
+            {
+                label: '実質公債費比率',
+                current: '財政指標.健全化判断比率.実質公債費比率_percent.令和5年度',
+                prev: '財政指標.健全化判断比率.実質公債費比率_percent.令和4年度',
+            },
+            {
+                label: '将来負担比率',
+                current: '財政指標.健全化判断比率.将来負担比率_percent.令和5年度',
+                prev: '財政指標.健全化判断比率.将来負担比率_percent.令和4年度',
             }
         ].map(e => {
             let fmt = fmtScore;
 
             if (e.current.includes('_percent')) {
                 fmt = (v) => fmtScore(v, '%')
-            } else if (e.title === "財政力指数") {
+            } else if (e.label === "財政力指数") {
                 return {
-                    label: e.title,
+                    label: e.label,
                     currentYear: (dataItem[e.current]),
                     currentYearLabel: e.currentYearLabel ?? '令和5年度',
                     prevYear: (dataItem[e.prev]),
@@ -2204,10 +2224,10 @@ export function SICHOSON_UI_ZaiseiSihyo(dataItem) {
             }
 
             return {
-                label: e.title,
-                currentYear: parseFloat(dataItem[e.current]),
+                label: e.label,
+                currentYear: dataItem[e.current],
                 currentYearLabel: e.currentYearLabel ?? '令和5年度',
-                prevYear: parseFloat(dataItem[e.prev]),
+                prevYear: dataItem[e.prev],
                 prevYearLabel: e.prevYearLabel ?? '令和4年度',
                 delta: parseFloat(dataItem[e.current]) - parseFloat(dataItem[e.prev]),
                 fmt
