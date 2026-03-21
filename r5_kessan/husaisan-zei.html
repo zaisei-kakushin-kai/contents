@@ -308,21 +308,25 @@
                     transparent calc(50% + 0.5px));
         }
 
-        /* ── amount slider ── */
-        #amount-slider-wrap {
+        /* ── amount / ratio / ratio-ippan slider shared ── */
+        #amount-slider-wrap,
+        #ratio-slider-wrap,
+        #ratio-ippan-slider-wrap {
             width: 100%;
-            min-width: 280px;
-            max-width: 600px;
             position: relative;
             padding-bottom: 38px;
         }
 
-        #slider-track-container {
+        #slider-track-container,
+        #ratio-slider-track-container,
+        #ratio-ippan-slider-track-container {
             position: relative;
             height: 20px;
         }
 
-        #slider-track-base {
+        #slider-track-base,
+        #ratio-slider-track-base,
+        #ratio-ippan-slider-track-base {
             position: absolute;
             width: 100%;
             height: 2px;
@@ -331,7 +335,9 @@
             transform: translateY(-50%);
         }
 
-        #slider-range-fill {
+        #slider-range-fill,
+        #ratio-slider-range-fill,
+        #ratio-ippan-slider-range-fill {
             position: absolute;
             height: 2px;
             background: var(--orange-dim);
@@ -340,7 +346,9 @@
             pointer-events: none;
         }
 
-        #slider-track-container input[type=range] {
+        #slider-track-container input[type=range],
+        #ratio-slider-track-container input[type=range],
+        #ratio-ippan-slider-track-container input[type=range] {
             position: absolute;
             width: 100%;
             pointer-events: none;
@@ -353,7 +361,9 @@
             outline: none;
         }
 
-        #slider-track-container input[type=range]::-webkit-slider-thumb {
+        #slider-track-container input[type=range]::-webkit-slider-thumb,
+        #ratio-slider-track-container input[type=range]::-webkit-slider-thumb,
+        #ratio-ippan-slider-track-container input[type=range]::-webkit-slider-thumb {
             pointer-events: all;
             -webkit-appearance: none;
             width: 14px;
@@ -363,7 +373,9 @@
             box-shadow: 0 0 8px #ff660066;
         }
 
-        #slider-track-container input[type=range]::-moz-range-thumb {
+        #slider-track-container input[type=range]::-moz-range-thumb,
+        #ratio-slider-track-container input[type=range]::-moz-range-thumb,
+        #ratio-ippan-slider-track-container input[type=range]::-moz-range-thumb {
             pointer-events: all;
             width: 14px;
             height: 14px;
@@ -372,7 +384,9 @@
             border: none;
         }
 
-        #slider-markers-row {
+        #slider-markers-row,
+        #ratio-slider-markers-row,
+        #ratio-ippan-slider-markers-row {
             position: relative;
             height: 36px;
             margin-top: 4px;
@@ -390,27 +404,68 @@
         .slider-marker-tick {
             width: 1px;
             height: 6px;
-            background: var(--gray-dim);
+            background: var(--gray);
         }
 
         .slider-marker-name {
             font-family: var(--mono);
             font-size: 9px;
-            color: var(--gray);
+            color: var(--text);
             white-space: nowrap;
         }
 
         .slider-marker-val {
             font-family: var(--mono);
             font-size: 9px;
-            color: var(--gray-dim);
+            color: var(--gray);
             white-space: nowrap;
         }
 
-        #slider-current-label {
-            font-family: var(--mono);
-            font-size: 13px;
+        .slider-num-input {
+            width: 90px;
+            background: var(--bg-2);
             color: var(--orange);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 3px 6px;
+            outline: none;
+            text-align: right;
+        }
+
+        .slider-num-input:focus {
+            border-color: var(--orange);
+        }
+
+        /* Chrome: スピナー非表示 */
+        .slider-num-input::-webkit-outer-spin-button,
+        .slider-num-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        .slider-num-input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .slider-fmt-hint {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--orange);
+        }
+
+        /* ── pref filter ── */
+        #pref-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 2px;
+            row-gap: 2px;
+        }
+
+        #pref-tabs .threshold-tab {
+            width: 72px;
+            text-align: center;
         }
 
         /* ── result count ── */
@@ -429,6 +484,7 @@
         #result-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
             font-size: 12px;
         }
 
@@ -475,19 +531,22 @@
         .td-name {
             font-family: var(--jp);
             color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .td-pref {
             font-family: var(--mono);
             font-size: 11px;
-            color: var(--gray);
+            color: var(--text);
             white-space: nowrap;
         }
 
         .td-cat {
             font-family: var(--mono);
             font-size: 11px;
-            color: var(--gray-dim);
+            color: var(--gray);
             white-space: nowrap;
         }
 
@@ -495,6 +554,8 @@
             font-family: var(--mono);
             font-size: 11px;
             color: var(--orange-dim);
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
         }
 
@@ -566,7 +627,9 @@
                 <div class="example">例：三鷹市の入湯税の歳入は2千円<br>1時間残業すると時給2千円ほどかかるため、維持しても採算が合わない「赤字税」です。</div>
                 <p>また、赤字でないにしても維持する経済的合理性が乏しい税目が存在します。</p>
                 <div class="example">
-                    例：一宮市の入湯税の歳入は26万円<br>赤字ではないかもしれませんが、廃止した場合の行政サービスへの影響が極めて軽微であり、<br>民間企業に納税のための対応を強いてまで徴税するほどの意義があるとは言えません。
+                    例：一宮市の入湯税の歳入は26万円<br>赤字ではない可能性もありますが、廃止した場合の行政サービスへの影響が極めて軽微であり、<br>
+                    公費を財源として徴税費を負担したうえで、
+                    民間企業に納税のための対応を強いてまで徴税するほどの意味があるとは言えません。
                 </div>
             </div>
         </div>
@@ -592,16 +655,24 @@
                     近隣の自治体に企業が逃げてしまう恐れがあります。
                 </p>
                 <p>
-                    加えて、人手不足が問題となっているのに、
-                    維持する意味のない税の徴税のために貴重な人的資源を投下するような、
-                    いたずらに人手不足を悪化させるようなことは控えるべきです。
+                    また、維持する意味の無い税目のために、
+                    行政の徴税業務を増やし、民間の税対応コストを増やすことで
+                    人手不足を悪化させることは避けるべきです。
                 </p>
             </div>
         </div>
 
         <!-- section 4: list -->
         <div>
-            <div class="list-title">不採算税一覧</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <div class="list-title">不採算税一覧</div>
+                <button id="btn-share" class="threshold-tab"><svg xmlns="http://www.w3.org/2000/svg" width="12"
+                        height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                    </svg>共有リンク</button>
+            </div>
 
             <div id="loading"><span>&gt;_</span><span>データを読み込んでいます</span><span class="blink">█</span></div>
 
@@ -610,12 +681,19 @@
                     <span class="control-label">絞り込み：</span>
                     <button class="threshold-tab active" id="mode-amount" data-mode="amount">歳入額</button>
                     <button class="threshold-tab" id="mode-ratio" data-mode="ratio">構成比</button>
+                    <button class="threshold-tab" id="mode-ratio-ippan" data-mode="ratioIppan">一般財源構成比</button>
                 </div>
                 <div class="control-group" id="row-amount"
                     style="flex-direction:column; align-items:flex-start; gap:6px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="control-label">歳入額上限：</span>
-                        <span id="slider-current-label">—</span>
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span class="control-label">歳入額：</span>
+                        <input type="number" id="amount-input-min" class="slider-num-input" min="1" step="1">
+                        <span class="control-label">千円</span>
+                        <span id="amount-fmt-min" class="slider-fmt-hint"></span>
+                        <span class="control-label">〜</span>
+                        <input type="number" id="amount-input-max" class="slider-num-input" min="1" step="1">
+                        <span class="control-label">千円</span>
+                        <span id="amount-fmt-max" class="slider-fmt-hint"></span>
                     </div>
                     <div id="amount-slider-wrap">
                         <div id="slider-track-container">
@@ -627,9 +705,57 @@
                         <div id="slider-markers-row"></div>
                     </div>
                 </div>
-                <div class="control-group" id="row-ratio" style="display:none">
-                    <span class="control-label">構成比：</span>
-                    <div class="threshold-tabs" id="ratio-tabs"></div>
+                <div class="control-group" id="row-ratio"
+                    style="display:none; flex-direction:column; align-items:flex-start; gap:6px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span class="control-label">構成比：</span>
+                        <input type="number" id="ratio-input-min" class="slider-num-input" min="0" max="100"
+                            step="0.01">
+                        <span class="control-label">%</span>
+                        <span class="control-label">〜</span>
+                        <input type="number" id="ratio-input-max" class="slider-num-input" min="0" max="100"
+                            step="0.01">
+                        <span class="control-label">%</span>
+                    </div>
+                    <div id="ratio-slider-wrap">
+                        <div id="ratio-slider-track-container">
+                            <div id="ratio-slider-track-base"></div>
+                            <div id="ratio-slider-range-fill"></div>
+                            <input type="range" id="ratio-slider-min" min="0" max="125" step="1">
+                            <input type="range" id="ratio-slider-max" min="0" max="125" step="1">
+                        </div>
+                        <div id="ratio-slider-markers-row"></div>
+                    </div>
+                </div>
+                <div class="control-group" id="row-ratio-ippan"
+                    style="display:none; flex-direction:column; align-items:flex-start; gap:6px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span class="control-label">一般財源構成比：</span>
+                        <input type="number" id="ratio-ippan-input-min" class="slider-num-input" min="0" max="100"
+                            step="0.01">
+                        <span class="control-label">%</span>
+                        <span class="control-label">〜</span>
+                        <input type="number" id="ratio-ippan-input-max" class="slider-num-input" min="0" max="100"
+                            step="0.01">
+                        <span class="control-label">%</span>
+                    </div>
+                    <div id="ratio-ippan-slider-wrap">
+                        <div id="ratio-ippan-slider-track-container">
+                            <div id="ratio-ippan-slider-track-base"></div>
+                            <div id="ratio-ippan-slider-range-fill"></div>
+                            <input type="range" id="ratio-ippan-slider-min" min="0" max="125" step="1">
+                            <input type="range" id="ratio-ippan-slider-max" min="0" max="125" step="1">
+                        </div>
+                        <div id="ratio-ippan-slider-markers-row"></div>
+                    </div>
+                </div>
+                <div class="control-group" style="align-items:flex-start; flex-direction:column; gap:6px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span class="control-label">都道府県：</span>
+                        <button id="btn-pref-all" class="threshold-tab">全て選択</button>
+                        <button id="btn-pref-clear" class="threshold-tab">全て解除</button>
+                    </div>
+                    <div id="pref-tabs"></div>
                 </div>
                 <div class="control-group">
                     <span class="control-label">税目：</span>
@@ -639,6 +765,15 @@
                 </div>
                 <div class="result-count" id="result-count"></div>
                 <table id="result-table">
+                    <colgroup>
+                        <col style="width:15%"><!-- 団体名 -->
+                        <col style="width:12%"><!-- 都道府県 -->
+                        <col style="width:12%"><!-- カテゴリ -->
+                        <col style="width:20%"><!-- 税目 -->
+                        <col style="width:14%"><!-- 歳入額 -->
+                        <col style="width:13%"><!-- 構成比 -->
+                        <col style="width:14%"><!-- 一般財源構成比 -->
+                    </colgroup>
                     <thead>
                         <tr>
                             <th data-col="name">団体名<span class="sort-arrow"></span></th>
@@ -647,6 +782,7 @@
                             <th data-col="tax">税目<span class="sort-arrow"></span></th>
                             <th data-col="val">歳入額<span class="sort-arrow"></span></th>
                             <th data-col="ratio">構成比<span class="sort-arrow"></span></th>
+                            <th data-col="ratioIppan">一般財源構成比<span class="sort-arrow"></span></th>
                         </tr>
                     </thead>
                     <tbody id="result-tbody"></tbody>
@@ -683,26 +819,8 @@
             if (v < 1000) return v.toLocaleString('ja-JP', { maximumFractionDigits: 0 }) + ' 千円'
             if (v < 100_000) return (v / 1_000).toLocaleString('ja-JP', { maximumFractionDigits: 1 }) + ' 百万円'
             if (v < 100_000_000) return (v / 100_000).toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 億円'
-            return (v / 100_000_000).toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 兆円'
+            return (v / 1_000_000_000).toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 兆円'
         }
-
-        const RANGE_BY_RATIO_DEFS = [
-            {
-                min: Number.NEGATIVE_INFINITY,
-                max: 0.01,
-                label: '0.01%以下'
-            },
-            {
-                min: 0.01,
-                max: 0.05,
-                label: '0.05%以下'
-            },
-            {
-                min: 0.05,
-                max: 0.1,
-                label: '0.1%以下'
-            }
-        ]
 
         // ── 税目定義 ──────────────────────────────────────────
         const TAX_DEFS = zeimoku.map(d => ({
@@ -710,7 +828,7 @@
             label: d.name,
             key: d.key,
             chokaMode: d.cat === "超過課税分",
-            ratioKey: d.key.endsWith('.収入済額') ? d.key.replace('.収入済額', '.構成比') : null,
+            ratioKey: true,
         }))
 
         // ── データ読み込み ───────────────────────────────────
@@ -734,7 +852,7 @@
             const n = parseFloat(v)
             if (!Number.isFinite(n) || n === 0) return null
             if (n < 10) return { text: n.toLocaleString('ja-JP') + ' 千円', level: 'danger' }
-            if (n < 1000) return { text: n.toLocaleString('ja-JP') + ' 千円', level: 'warn' }
+            if (n < 1000) return { text: (n / 10).toLocaleString('ja-JP') + ' 万円', level: 'warn' }
             const oku = n / 10_0000
             if (oku < 1) return { text: (n / 10).toLocaleString('ja-JP', { maximumFractionDigits: 1 }) + ' 万円', level: '' }
             return { text: oku.toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 億円', level: '' }
@@ -745,24 +863,65 @@
         let sortDir = 1  // 1=昇順
 
         // ── レンダリング ─────────────────────────────────────
-        let allData = []
-        let valCache = []    // valCache[taxIdx][dataIdx]
-        let ratioCache = []  // ratioCache[taxIdx][dataIdx] | null配列
+        let valCache = []         // valCache[taxIdx][entityIdx]
+        let ratioCache = []       // ratioCache[taxIdx][entityIdx] | null配列
+        let ratioIppanCache = []  // ratioIppanCache[taxIdx][entityIdx] | null配列
         let nameArr = []
         let prefArr = []
+        const prefArray = await fetch("pref-array.json").then(e => e.json())
 
-        function buildCache() {
-            nameArr = allData.map(d => d['団体名'] ?? d['都道府県名'] ?? '—')
-            prefArr = allData.map(d => d['都道府県名'] ?? '—')
-            valCache = TAX_DEFS.map(def => new Float64Array(allData.map(d => {
-                const v = parseFloat(d[def.key]); return Number.isFinite(v) ? v : NaN
-            })))
-            ratioCache = TAX_DEFS.map(def => def.ratioKey
-                ? new Float64Array(allData.map(d => {
-                    const v = parseFloat(d[def.ratioKey]); return Number.isFinite(v) ? v : NaN
-                }))
-                : null
-            )
+        async function buildCache(zeimokuRows, nameData, todohukenNameData) {
+            const idToNameMap = new Map(nameData.map(d => [d.id, {
+                name: d['団体名'] ?? d['都道府県名'] ?? '—',
+                pref: d['都道府県名'] ?? '—'
+            }]))
+
+            todohukenNameData.forEach(d => {
+                const key = d['id']
+                const val = {
+                    name: d['都道府県名'],
+                    pref: '都道府県'
+                }
+                idToNameMap.set(key, val)
+            })
+
+            const idSet = new Set()
+            const idOrder = []
+            for (const row of zeimokuRows) {
+                if (!idSet.has(row.id)) { idSet.add(row.id); idOrder.push(row.id) }
+            }
+            const idToEntityIdx = new Map(idOrder.map((id, i) => [id, i]))
+
+            function nameFromId(id) {
+                const parts = id.slice(1).split('-')
+                const prefCode = parseInt(parts[0])
+                const prefName = prefArray[prefCode - 1] ?? id
+                if (parts.length === 1) {
+                    // 都道府県エンティティ: c{N}
+                    return { name: prefName, pref: prefName }
+                } else {
+                    // 市区町村エンティティ: c{P}-{M}
+                    return { name: id, pref: prefName }
+                }
+            }
+
+            nameArr = idOrder.map(id => idToNameMap.get(id)?.name ?? nameFromId(id).name)
+            prefArr = idOrder.map(id => nameFromId(id).pref)
+
+            const zeimokuKeyToTaxIdx = new Map(TAX_DEFS.map((def, i) => [def.key, i]))
+            valCache = TAX_DEFS.map(() => new Float64Array(idOrder.length).fill(NaN))
+            ratioCache = TAX_DEFS.map(() => new Float64Array(idOrder.length).fill(NaN))
+            ratioIppanCache = TAX_DEFS.map(() => new Float64Array(idOrder.length).fill(NaN))
+
+            for (const row of zeimokuRows) {
+                const taxIdx = zeimokuKeyToTaxIdx.get(row.zeimoku)
+                if (taxIdx === undefined) continue
+                const entityIdx = idToEntityIdx.get(row.id)
+                if (entityIdx === undefined) continue
+                if (row.gaku != null) valCache[taxIdx][entityIdx] = parseFloat(row.gaku)
+                if (ratioCache[taxIdx] != null && row.ratio != null) ratioCache[taxIdx][entityIdx] = row.ratio
+                if (ratioIppanCache[taxIdx] != null && row.ratio_ippan != null) ratioIppanCache[taxIdx][entityIdx] = row.ratio_ippan
+            }
         }
 
         // RAFデバウンス
@@ -781,10 +940,23 @@
             return document.querySelector('[data-mode].active')?.dataset.mode ?? 'amount'
         }
 
+        function getActivePrefectures() {
+            const tabs = document.querySelectorAll('#pref-tabs .threshold-tab.active')
+            if (tabs.length === 0) return null
+            return new Set([...tabs].map(b => b.dataset.pref))
+        }
+
         function getActiveRanges() {
-            if (getMode() === 'ratio') {
-                const tabs = [...document.querySelectorAll('#ratio-tabs .threshold-tab.active')]
-                return tabs.map(t => RANGE_BY_RATIO_DEFS[parseInt(t.dataset.rangeIdx)]).filter(Boolean)
+            const mode = getMode()
+            if (mode === 'ratio') {
+                const min = posToRatioVal(parseInt(document.getElementById('ratio-slider-min').value))
+                const max = posToRatioVal(parseInt(document.getElementById('ratio-slider-max').value))
+                return [{ min, max }]
+            }
+            if (mode === 'ratioIppan') {
+                const min = posToRatioVal(parseInt(document.getElementById('ratio-ippan-slider-min').value))
+                const max = posToRatioVal(parseInt(document.getElementById('ratio-ippan-slider-max').value))
+                return [{ min, max }]
             }
             const min = posToVal(parseInt(document.getElementById('amount-slider-min').value))
             const max = posToVal(parseInt(document.getElementById('amount-slider-max').value))
@@ -805,21 +977,29 @@
             const activeIndices = getActiveTaxIndices()
             const ranges = getActiveRanges()
             const mode = getMode()
-            const n = allData.length
+            const activePref = getActivePrefectures()
+
 
             // 選択された全税目からrow生成（キャッシュ利用）
             const rows = []
             for (const taxIdx of activeIndices) {
                 const def = TAX_DEFS[taxIdx]
                 if (mode === 'ratio' && !def.ratioKey) continue
+                if (mode === 'ratioIppan' && !def.ratioKey) continue
                 const vals = valCache[taxIdx]
                 const ratios = ratioCache[taxIdx]
-                for (let i = 0; i < n; i++) {
+                const ratiosIppan = ratioIppanCache[taxIdx]
+                for (let i = 0; i < nameArr.length; i++) {
                     const val = vals[i]
+
                     if (!(val > 0)) continue
-                    const filterVal = mode === 'ratio' ? ratios[i] : val
+                    if (activePref && !activePref.has(prefArr[i])) continue
+
+                    const filterVal = mode === 'ratio' ? ratios[i] : mode === 'ratioIppan' ? ratiosIppan[i] : val
+
                     if (!inRanges(filterVal, ranges)) continue
-                    rows.push({ name: nameArr[i], pref: prefArr[i], cat: def.cat, tax: def.label, val, ratio: ratios ? ratios[i] : NaN })
+
+                    rows.push({ name: nameArr[i], pref: prefArr[i], cat: def.cat, tax: def.label, val, ratio: ratios ? ratios[i] : NaN, ratioIppan: ratiosIppan ? ratiosIppan[i] : NaN })
                 }
             }
 
@@ -830,6 +1010,7 @@
                 if (sortCol === 'cat') return sortDir * a.cat.localeCompare(b.cat, 'ja')
                 if (sortCol === 'tax') return sortDir * a.tax.localeCompare(b.tax, 'ja')
                 if (sortCol === 'ratio') return sortDir * ((a.ratio || 0) - (b.ratio || 0))
+                if (sortCol === 'ratioIppan') return sortDir * ((a.ratioIppan || 0) - (b.ratioIppan || 0))
                 return sortDir * (a.val - b.val)
             })
 
@@ -863,7 +1044,8 @@
                         <td class="td-cat">${r.cat}</td>
                         <td class="td-tax">${r.tax}</td>
                         <td class="td-val ${cls}">${txt}</td>
-                        <td class="td-ratio">${Number.isFinite(r.ratio) ? r.ratio + ' %' : '—'}</td>`
+                        <td class="td-ratio">${Number.isFinite(r.ratio) ? r.ratio.toLocaleString("ja-JP", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) + ' %' : '—'}</td>
+                        <td class="td-ratio">${Number.isFinite(r.ratioIppan) ? r.ratioIppan.toLocaleString("ja-JP", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) + ' %' : '—'}</td>`
                     frag.appendChild(tr)
                 }
                 tbody.appendChild(frag)
@@ -875,9 +1057,12 @@
         }
 
         // ── 初期化 ───────────────────────────────────────────
-        const data = await loadFile('r5_kessan_data.parquet')
-        allData = data
-        buildCache()
+        const [zeimokuRows, nameData, todohukenNameData] = await Promise.all([
+            loadFile('zeimoku.parquet'),
+            loadFile('r5_kessan_data.parquet'),
+            loadFile('r5_kessan_todohuken.parquet')
+        ])
+        await buildCache(zeimokuRows, nameData, todohukenNameData)
 
         document.getElementById('loading').style.display = 'none'
         document.getElementById('controls').style.display = 'block'
@@ -899,10 +1084,44 @@
             })
         })
 
+        // ── 都道府県フィルタ構築 ──────────────────────────────
+        const prefTabsEl = document.getElementById('pref-tabs')
+        const prefList = ['都道府県', ...new Set(prefArray)].filter(Boolean)
+        prefList.forEach(pref => {
+            const btn = document.createElement('button')
+            btn.className = 'threshold-tab'
+            btn.dataset.pref = pref
+            btn.textContent = pref
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active')
+                syncUrlParams(); render()
+            })
+            prefTabsEl.appendChild(btn)
+        })
+
+
+        document.getElementById('btn-pref-all').addEventListener('click', () => {
+            prefTabsEl.querySelectorAll('.threshold-tab:not([style*="none"])').forEach(b => b.classList.add('active'))
+            syncUrlParams(); render()
+        })
+        document.getElementById('btn-pref-clear').addEventListener('click', () => {
+            prefTabsEl.querySelectorAll('.threshold-tab').forEach(b => b.classList.remove('active'))
+            syncUrlParams(); render()
+        })
+
         function syncUrlParams() {
             const active = getActiveTaxIndices().map(String)
-            const p = new URLSearchParams(location.search)
+            const selectedPref = [...prefTabsEl.querySelectorAll('.threshold-tab.active')].map(b => b.dataset.pref)
+            const p = new URLSearchParams()
+            p.set('mode', getMode())
+            p.set('amin', sliderMinEl.value)
+            p.set('amax', sliderMaxEl.value)
+            p.set('rmin', ratioSliderMinEl.value)
+            p.set('rmax', ratioSliderMaxEl.value)
+            p.set('riimin', ratioIppanSliderMinEl.value)
+            p.set('riimax', ratioIppanSliderMaxEl.value)
             p.set('tax', active.join(','))
+            if (selectedPref.length) p.set('pref', selectedPref.join(','))
             history.replaceState(null, '', '?' + p.toString())
         }
 
@@ -961,22 +1180,23 @@
         })
 
         function applyRangeToTaxTabs(ranges, mode) {
-            const n = allData.length
+            const n = nameArr.length
             itemTabsEl.querySelectorAll('.threshold-tab').forEach(btn => {
                 const taxIdx = parseInt(btn.dataset.idx)
                 const def = TAX_DEFS[taxIdx]
-                if (mode === 'ratio' && !def.ratioKey) {
+                if ((mode === 'ratio' || mode === 'ratioIppan') && !def.ratioKey) {
                     btn.classList.remove('active')
                     btn.classList.add('no-data')
                     return
                 }
                 const vals = valCache[taxIdx]
                 const ratios = ratioCache[taxIdx]
+                const ratiosIppan = ratioIppanCache[taxIdx]
                 let hasData = false
                 for (let i = 0; i < n; i++) {
                     const val = vals[i]
                     if (!(val > 0)) continue
-                    const filterVal = mode === 'ratio' ? ratios[i] : val
+                    const filterVal = mode === 'ratio' ? ratios[i] : mode === 'ratioIppan' ? ratiosIppan[i] : val
                     if (inRanges(filterVal, ranges)) { hasData = true; break }
                 }
                 btn.classList.toggle('active', hasData)
@@ -993,6 +1213,7 @@
                 const mode = btn.dataset.mode
                 document.getElementById('row-amount').style.display = mode === 'amount' ? '' : 'none'
                 document.getElementById('row-ratio').style.display = mode === 'ratio' ? '' : 'none'
+                document.getElementById('row-ratio-ippan').style.display = mode === 'ratioIppan' ? '' : 'none'
                 applyRangeToTaxTabs(getActiveRanges(), mode)
                 render()
             })
@@ -1001,7 +1222,8 @@
         // 歳入額スライダー初期化
         const sliderMinEl = document.getElementById('amount-slider-min')
         const sliderMaxEl = document.getElementById('amount-slider-max')
-        const sliderLabelEl = document.getElementById('slider-current-label')
+        const amountInputMin = document.getElementById('amount-input-min')
+        const amountInputMax = document.getElementById('amount-input-max')
         const markersRowEl = document.getElementById('slider-markers-row')
         const rangeFillEl = document.getElementById('slider-range-fill')
 
@@ -1012,10 +1234,16 @@
             rangeFillEl.style.width = ((maxPos - minPos) / SLIDER_STEPS * 100) + '%'
         }
 
+        const amountFmtMin = document.getElementById('amount-fmt-min')
+        const amountFmtMax = document.getElementById('amount-fmt-max')
+
         function updateSliderLabel() {
             const minVal = posToVal(parseInt(sliderMinEl.value))
             const maxVal = posToVal(parseInt(sliderMaxEl.value))
-            sliderLabelEl.textContent = fmtSliderVal(minVal) + ' 〜 ' + fmtSliderVal(maxVal)
+            amountInputMin.value = Math.round(minVal)
+            amountInputMax.value = Math.round(maxVal)
+            amountFmtMin.textContent = '= ' + fmtSliderVal(minVal)
+            amountFmtMax.textContent = '= ' + fmtSliderVal(maxVal)
         }
 
         AMOUNT_MARKERS.forEach(m => {
@@ -1032,10 +1260,9 @@
         })
 
         sliderMinEl.value = valToPos(1)
-        sliderMaxEl.value = valToPos(300)
+        sliderMaxEl.value = SLIDER_STEPS
         updateSliderFill()
         updateSliderLabel()
-
         // ドラッグ中：ラベル・フィル更新＋カード再描画（RAFで間引き）
         sliderMinEl.addEventListener('input', () => {
             if (parseInt(sliderMinEl.value) >= parseInt(sliderMaxEl.value))
@@ -1056,20 +1283,241 @@
         sliderMinEl.addEventListener('change', () => applyRangeToTaxTabs(getActiveRanges(), 'amount'))
         sliderMaxEl.addEventListener('change', () => applyRangeToTaxTabs(getActiveRanges(), 'amount'))
 
-        // 構成比タブを RANGE_BY_RATIO_DEFS から構築
-        const ratioTabsEl = document.getElementById('ratio-tabs')
-        RANGE_BY_RATIO_DEFS.forEach((range, i) => {
-            const btn = document.createElement('button')
-            btn.className = 'threshold-tab' + (i === 0 ? ' active' : '')
-            btn.dataset.rangeIdx = i
-            btn.textContent = range.label
-            btn.addEventListener('click', () => {
-                btn.classList.toggle('active')
-                applyRangeToTaxTabs(getActiveRanges(), 'ratio')
-                render()
-            })
-            ratioTabsEl.appendChild(btn)
+        // 数値入力 → スライダー同期（歳入額）
+        function applyAmountInput(inputEl, sliderEl, otherSliderEl, isMin) {
+            const v = parseFloat(inputEl.value)
+            if (!isFinite(v) || v < 1) return
+            let pos = valToPos(v)
+            pos = Math.max(0, Math.min(SLIDER_STEPS, pos))
+            if (isMin && pos >= parseInt(otherSliderEl.value)) pos = parseInt(otherSliderEl.value) - 1
+            if (!isMin && pos <= parseInt(otherSliderEl.value)) pos = parseInt(otherSliderEl.value) + 1
+            sliderEl.value = pos
+            updateSliderFill()
+            updateSliderLabel()
+            applyRangeToTaxTabs(getActiveRanges(), 'amount')
+            render()
+        }
+        amountInputMin.addEventListener('change', () => applyAmountInput(amountInputMin, sliderMinEl, sliderMaxEl, true))
+        amountInputMax.addEventListener('change', () => applyAmountInput(amountInputMax, sliderMaxEl, sliderMinEl, false))
+
+        // 構成比スライダー初期化
+        // スナップ値：0→0.1は0.01刻み、0.1→0.5は0.05刻み、0.5→3.0は0.25刻み、3→100は1刻み
+        const RATIO_SNAP_VALS = (() => {
+            const r = v => Math.round(v * 10000) / 10000
+            const vals = []
+            for (let v = 0; v <= 0.10 + 1e-9; v += 0.01) vals.push(r(v))
+            for (let v = 0.15; v <= 0.50 + 1e-9; v += 0.05) vals.push(r(v))
+            for (let v = 0.75; v <= 3.00 + 1e-9; v += 0.25) vals.push(r(v))
+            for (let v = 4; v <= 100; v += 1) vals.push(v)
+            return vals
+        })()
+        const RATIO_STEPS = RATIO_SNAP_VALS.length - 1
+
+        function posToRatioVal(pos) {
+            return RATIO_SNAP_VALS[Math.max(0, Math.min(pos, RATIO_STEPS))]
+        }
+        function ratioValToPos(val) {
+            let best = 0, bestDist = Infinity
+            RATIO_SNAP_VALS.forEach((v, i) => { const d = Math.abs(v - val); if (d < bestDist) { bestDist = d; best = i } })
+            return best
+        }
+        function fmtRatioVal(v) {
+            if (v <= 3) return v.toFixed(2) + ' %'
+            return v + ' %'
+        }
+
+        const ratioSliderMinEl = document.getElementById('ratio-slider-min')
+        const ratioSliderMaxEl = document.getElementById('ratio-slider-max')
+        const ratioInputMin = document.getElementById('ratio-input-min')
+        const ratioInputMax = document.getElementById('ratio-input-max')
+        const ratioMarkersRowEl = document.getElementById('ratio-slider-markers-row')
+        const ratioRangeFillEl = document.getElementById('ratio-slider-range-fill')
+
+        ratioSliderMinEl.max = RATIO_STEPS
+        ratioSliderMaxEl.max = RATIO_STEPS
+
+        function updateRatioSliderFill() {
+            const minPos = parseInt(ratioSliderMinEl.value)
+            const maxPos = parseInt(ratioSliderMaxEl.value)
+            ratioRangeFillEl.style.left = (minPos / RATIO_STEPS * 100) + '%'
+            ratioRangeFillEl.style.width = ((maxPos - minPos) / RATIO_STEPS * 100) + '%'
+        }
+
+        function updateRatioSliderLabel() {
+            ratioInputMin.value = posToRatioVal(parseInt(ratioSliderMinEl.value))
+            ratioInputMax.value = posToRatioVal(parseInt(ratioSliderMaxEl.value))
+        }
+
+        ;[0, 0.1, 0.5, 3, 10, 100].forEach(v => {
+            const pos = ratioValToPos(v)
+            const el = document.createElement('div')
+            el.className = 'slider-marker'
+            el.style.left = (pos / RATIO_STEPS * 100) + '%'
+            el.innerHTML = `
+                <div class="slider-marker-tick"></div>
+                <div class="slider-marker-val">${fmtRatioVal(v)}</div>
+            `
+            ratioMarkersRowEl.appendChild(el)
         })
+
+        ratioSliderMinEl.value = ratioValToPos(0)
+        ratioSliderMaxEl.value = ratioValToPos(100)
+        updateRatioSliderFill()
+        updateRatioSliderLabel()
+
+        ratioSliderMinEl.addEventListener('input', () => {
+            if (parseInt(ratioSliderMinEl.value) >= parseInt(ratioSliderMaxEl.value))
+                ratioSliderMinEl.value = parseInt(ratioSliderMaxEl.value) - 1
+            updateRatioSliderFill()
+            updateRatioSliderLabel()
+            scheduleRender()
+        })
+        ratioSliderMaxEl.addEventListener('input', () => {
+            if (parseInt(ratioSliderMaxEl.value) <= parseInt(ratioSliderMinEl.value))
+                ratioSliderMaxEl.value = parseInt(ratioSliderMinEl.value) + 1
+            updateRatioSliderFill()
+            updateRatioSliderLabel()
+            scheduleRender()
+        })
+
+        ratioSliderMinEl.addEventListener('change', () => applyRangeToTaxTabs(getActiveRanges(), 'ratio'))
+        ratioSliderMaxEl.addEventListener('change', () => applyRangeToTaxTabs(getActiveRanges(), 'ratio'))
+
+        // 数値入力 → スライダー同期（構成比）
+        function applyRatioInput(inputEl, sliderEl, otherSliderEl, isMin) {
+            const v = parseFloat(inputEl.value)
+            if (!isFinite(v)) return
+            let pos = ratioValToPos(Math.max(0, Math.min(100, v)))
+            if (isMin && pos >= parseInt(otherSliderEl.value)) pos = parseInt(otherSliderEl.value) - 1
+            if (!isMin && pos <= parseInt(otherSliderEl.value)) pos = parseInt(otherSliderEl.value) + 1
+            pos = Math.max(0, Math.min(RATIO_STEPS, pos))
+            sliderEl.value = pos
+            updateRatioSliderFill()
+            updateRatioSliderLabel()
+            applyRangeToTaxTabs(getActiveRanges(), 'ratio')
+            render()
+        }
+        ratioInputMin.addEventListener('change', () => applyRatioInput(ratioInputMin, ratioSliderMinEl, ratioSliderMaxEl, true))
+        ratioInputMax.addEventListener('change', () => applyRatioInput(ratioInputMax, ratioSliderMaxEl, ratioSliderMinEl, false))
+
+        // ── 一般財源構成比スライダー初期化 ──────────────────
+        const ratioIppanSliderMinEl = document.getElementById('ratio-ippan-slider-min')
+        const ratioIppanSliderMaxEl = document.getElementById('ratio-ippan-slider-max')
+        const ratioIppanInputMin = document.getElementById('ratio-ippan-input-min')
+        const ratioIppanInputMax = document.getElementById('ratio-ippan-input-max')
+        const ratioIppanMarkersRowEl = document.getElementById('ratio-ippan-slider-markers-row')
+        const ratioIppanRangeFillEl = document.getElementById('ratio-ippan-slider-range-fill')
+
+        ratioIppanSliderMinEl.max = RATIO_STEPS
+        ratioIppanSliderMaxEl.max = RATIO_STEPS
+
+        function updateRatioIppanSliderFill() {
+            const minPos = parseInt(ratioIppanSliderMinEl.value)
+            const maxPos = parseInt(ratioIppanSliderMaxEl.value)
+            ratioIppanRangeFillEl.style.left = (minPos / RATIO_STEPS * 100) + '%'
+            ratioIppanRangeFillEl.style.width = ((maxPos - minPos) / RATIO_STEPS * 100) + '%'
+        }
+
+        function updateRatioIppanSliderLabel() {
+            ratioIppanInputMin.value = posToRatioVal(parseInt(ratioIppanSliderMinEl.value))
+            ratioIppanInputMax.value = posToRatioVal(parseInt(ratioIppanSliderMaxEl.value))
+        }
+
+        ;[0, 0.1, 0.5, 3, 10, 100].forEach(v => {
+            const pos = ratioValToPos(v)
+            const el = document.createElement('div')
+            el.className = 'slider-marker'
+            el.style.left = (pos / RATIO_STEPS * 100) + '%'
+            el.innerHTML = `
+                <div class="slider-marker-tick"></div>
+                <div class="slider-marker-val">${fmtRatioVal(v)}</div>
+            `
+            ratioIppanMarkersRowEl.appendChild(el)
+        })
+
+        ratioIppanSliderMinEl.value = ratioValToPos(0)
+        ratioIppanSliderMaxEl.value = ratioValToPos(100)
+        updateRatioIppanSliderFill()
+        updateRatioIppanSliderLabel()
+
+        ratioIppanSliderMinEl.addEventListener('input', () => {
+            if (parseInt(ratioIppanSliderMinEl.value) >= parseInt(ratioIppanSliderMaxEl.value))
+                ratioIppanSliderMinEl.value = parseInt(ratioIppanSliderMaxEl.value) - 1
+            updateRatioIppanSliderFill()
+            updateRatioIppanSliderLabel()
+            scheduleRender()
+        })
+        ratioIppanSliderMaxEl.addEventListener('input', () => {
+            if (parseInt(ratioIppanSliderMaxEl.value) <= parseInt(ratioIppanSliderMinEl.value))
+                ratioIppanSliderMaxEl.value = parseInt(ratioIppanSliderMinEl.value) + 1
+            updateRatioIppanSliderFill()
+            updateRatioIppanSliderLabel()
+            scheduleRender()
+        })
+
+        ratioIppanSliderMinEl.addEventListener('change', () => applyRangeToTaxTabs(getActiveRanges(), 'ratioIppan'))
+        ratioIppanSliderMaxEl.addEventListener('change', () => applyRangeToTaxTabs(getActiveRanges(), 'ratioIppan'))
+
+        function applyRatioIppanInput(inputEl, sliderEl, otherSliderEl, isMin) {
+            const v = parseFloat(inputEl.value)
+            if (!isFinite(v)) return
+            let pos = ratioValToPos(Math.max(0, Math.min(100, v)))
+            if (isMin && pos >= parseInt(otherSliderEl.value)) pos = parseInt(otherSliderEl.value) - 1
+            if (!isMin && pos <= parseInt(otherSliderEl.value)) pos = parseInt(otherSliderEl.value) + 1
+            pos = Math.max(0, Math.min(RATIO_STEPS, pos))
+            sliderEl.value = pos
+            updateRatioIppanSliderFill()
+            updateRatioIppanSliderLabel()
+            applyRangeToTaxTabs(getActiveRanges(), 'ratioIppan')
+            render()
+        }
+        ratioIppanInputMin.addEventListener('change', () => applyRatioIppanInput(ratioIppanInputMin, ratioIppanSliderMinEl, ratioIppanSliderMaxEl, true))
+        ratioIppanInputMax.addEventListener('change', () => applyRatioIppanInput(ratioIppanInputMax, ratioIppanSliderMaxEl, ratioIppanSliderMinEl, false))
+
+        // ── URL パラメータから状態を復元 ─────────────────────
+        if (params.get('amin') !== null) { sliderMinEl.value = params.get('amin'); updateSliderFill(); updateSliderLabel() }
+        if (params.get('amax') !== null) { sliderMaxEl.value = params.get('amax'); updateSliderFill(); updateSliderLabel() }
+        if (params.get('rmin') !== null) { ratioSliderMinEl.value = params.get('rmin'); updateRatioSliderFill(); updateRatioSliderLabel() }
+        if (params.get('rmax') !== null) { ratioSliderMaxEl.value = params.get('rmax'); updateRatioSliderFill(); updateRatioSliderLabel() }
+        if (params.get('riimin') !== null) { ratioIppanSliderMinEl.value = params.get('riimin'); updateRatioIppanSliderFill(); updateRatioIppanSliderLabel() }
+        if (params.get('riimax') !== null) { ratioIppanSliderMaxEl.value = params.get('riimax'); updateRatioIppanSliderFill(); updateRatioIppanSliderLabel() }
+        if (params.get('mode') === 'ratio') {
+            document.getElementById('mode-amount').classList.remove('active')
+            document.getElementById('mode-ratio').classList.add('active')
+            document.getElementById('row-amount').style.display = 'none'
+            document.getElementById('row-ratio').style.display = ''
+        } else if (params.get('mode') === 'ratioIppan') {
+            document.getElementById('mode-amount').classList.remove('active')
+            document.getElementById('mode-ratio-ippan').classList.add('active')
+            document.getElementById('row-amount').style.display = 'none'
+            document.getElementById('row-ratio-ippan').style.display = ''
+        }
+        if (params.get('pref')) {
+            const prefSet = new Set(params.get('pref').split(','))
+            prefTabsEl.querySelectorAll('.threshold-tab').forEach(b => {
+                if (prefSet.has(b.dataset.pref)) b.classList.add('active')
+            })
+        }
+
+        // ── 共有リンクボタン ──────────────────────────────────
+        document.getElementById('btn-share').addEventListener('click', () => {
+            syncUrlParams()
+            const btn = document.getElementById('btn-share')
+            const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'
+            const checkSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><polyline points="20 6 9 17 4 12"/></svg>'
+            navigator.clipboard.writeText(location.href).then(() => {
+                btn.innerHTML = checkSvg + 'コピーしました'
+                setTimeout(() => btn.innerHTML = iconSvg + '共有リンク', 2000)
+            }).catch(() => {
+                const ta = document.createElement('textarea')
+                ta.value = location.href
+                document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+                btn.innerHTML = checkSvg + 'コピーしました'
+                setTimeout(() => btn.innerHTML = iconSvg + '共有リンク', 2000)
+            })
+        })
+
+        applyRangeToTaxTabs(getActiveRanges(), 'ratio')
 
         render()
     </script>
