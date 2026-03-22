@@ -481,11 +481,29 @@
         }
 
         /* ── result table ── */
+        .table-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         #result-table {
             width: 100%;
+            min-width: 640px;
             border-collapse: collapse;
             table-layout: fixed;
             font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            #result-table {
+                font-size: 11px;
+            }
+
+            #result-table thead th,
+            #result-table tbody td {
+                padding: 5px 6px;
+            }
         }
 
         #result-table thead th {
@@ -804,6 +822,7 @@
                     <div class="threshold-tabs" id="tax-item-tabs"></div>
                 </div>
                 <div class="result-count" id="result-count"></div>
+                <div class="table-scroll-wrapper">
                 <table id="result-table">
                     <colgroup>
                         <col style="width:15%"><!-- 団体名 -->
@@ -827,6 +846,7 @@
                     </thead>
                     <tbody id="result-tbody"></tbody>
                 </table>
+                </div>
             </div>
         </div>
 
@@ -912,7 +932,7 @@
 
         async function buildCache(zeimokuRows, nameData, todohukenNameData) {
             const idToNameMap = new Map(nameData.map(d => [d.id, {
-                name: d['団体名'] ?? d['都道府県名'] ?? '—',
+                name: d['団体名'] ?? '—',
                 pref: d['都道府県名'] ?? '—'
             }]))
 
@@ -1560,9 +1580,12 @@
             })
         })
 
-        applyRangeToTaxTabs(getActiveRanges(), 'ratio')
-
-        render()
+        // スライダーの現在値で税目フィルタを更新してから描画
+        const activeMode = document.querySelector('#mode-amount.active') ? 'amount'
+            : document.querySelector('#mode-ratio.active') ? 'ratio'
+                : 'ratioIppan'
+        applyRangeToTaxTabs(getActiveRanges(), activeMode)
+        scheduleRender()
     </script>
 
 </body>
