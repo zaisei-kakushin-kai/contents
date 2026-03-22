@@ -222,7 +222,8 @@
         }
 
         #tax-item-tabs .threshold-tab {
-            width: 120px;
+            flex: 1 0 120px;
+            max-width: 180px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -254,7 +255,6 @@
         .cat-btn {
             font-family: var(--mono);
             font-size: 11px;
-            color: var(--gray);
             background: var(--bg-2);
             border: 1px solid var(--gray-dim);
             padding: 3px 10px;
@@ -262,9 +262,24 @@
             user-select: none;
         }
 
-        .cat-btn:hover {
-            color: var(--text);
-            border-color: var(--gray);
+        .cat-btn.btn-select-all {
+            color: #44bb77;
+            border-color: #2a6644;
+        }
+
+        .cat-btn.btn-select-all:hover {
+            color: #66ddaa;
+            border-color: #44bb77;
+        }
+
+        .cat-btn.btn-clear-all {
+            color: #cc4444;
+            border-color: #662222;
+        }
+
+        .cat-btn.btn-clear-all:hover {
+            color: var(--red);
+            border-color: #cc4444;
         }
 
         #tax-item-tabs .threshold-tab .tab-cat {
@@ -287,6 +302,26 @@
             background: var(--orange-glow);
             color: var(--orange);
             border-color: var(--orange-dim);
+        }
+
+        .threshold-tab.btn-select-all {
+            color: #44bb77;
+            border-color: #2a6644;
+        }
+
+        .threshold-tab.btn-select-all:hover {
+            color: #66ddaa;
+            border-color: #44bb77;
+        }
+
+        .threshold-tab.btn-clear-all {
+            color: #cc4444;
+            border-color: #662222;
+        }
+
+        .threshold-tab.btn-clear-all:hover {
+            color: var(--red);
+            border-color: #cc4444;
         }
 
         .threshold-tab.no-data {
@@ -464,7 +499,8 @@
         }
 
         #pref-tabs .threshold-tab {
-            width: 72px;
+            flex: 1 0 72px;
+            max-width: 120px;
             text-align: center;
         }
 
@@ -546,6 +582,29 @@
             vertical-align: middle;
         }
 
+        .td-link {
+            text-align: center;
+            padding: 4px 4px;
+            white-space: nowrap;
+        }
+
+        .detail-btn {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            border: 1px solid var(--gray-dim);
+            background: var(--bg-2);
+            padding: 2px 6px;
+            text-decoration: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .detail-btn:hover {
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+
         .td-name {
             font-family: var(--jp);
             color: var(--text);
@@ -594,7 +653,7 @@
         .td-ratio {
             font-family: var(--mono);
             font-size: 11px;
-            color: var(--gray);
+            color: var(--text);
             text-align: right;
             white-space: nowrap;
         }
@@ -654,10 +713,6 @@
                     例：京都府の鉱区税の歳入は51万円です。
                     <br>
                     公務員の一か月あたりの月給は30万円です。<br>
-                    鉱区税の対応に人手がかかるようなことがあれば、あっという間に赤字になってしまいます。
-                    <br>
-                    また、社会保険料の雇用者負担分やボーナス、有給を考えると一人の職員にかかる一か月あたりの人件費が50万円を超えることは珍しくないでしょう。
-                    <br>
                     この税目を維持することに経済的合理性があるとは言えないため、廃止すべきです。
                 </div>
             </div>
@@ -676,7 +731,7 @@
             <div class="section-title">不採算超過課税とは？</div>
             <div class="section-body">
                 <p>超過課税は通常よりも高い税率を導入している税目のことです。例えば、本来10万円払えばいいところを、超過課税があると11万円になってしまうことがあります。</p>
-                <p>超過課税分の歳入が極めて小さい場合があり、この場合は税率を維持することに合理的な理由が無いため、すみやかに標準税率に戻すべきです。</p>
+                <p>超過課税分の歳入が極めて小さい場合は、通常よりも高い税率を維持することに合理的な理由が無いため、すみやかに標準税率に戻すべきです。</p>
 
                 <div class="example">
                     例：北海道 留萌市の固定資産税の超過課税分の歳入は5千円です。<br>
@@ -695,8 +750,6 @@
                 <div class="example">
                     例：東京都のゴルフ場利用税の歳入は6億5500万円です。<br>
                     歳入額自体は大きいものの、歳入額全体の0.007%、一般財源全体の0.01%を占めるにすぎず、廃止した場合の財政への影響は軽微です。
-                    <br>
-                    当該税目の廃止によって生じる行政サービスへの影響は軽微であり、官民両方の負担を減らすことから、東京都のゴルフ場利用税は廃止すべき税目です。
                 </div>
             </div>
         </div>
@@ -810,42 +863,44 @@
                 <div class="control-group" style="align-items:flex-start; flex-direction:column; gap:6px;">
                     <div style="display:flex; align-items:center; gap:6px;">
                         <span class="control-label">都道府県：</span>
-                        <button id="btn-pref-all" class="threshold-tab">全て選択</button>
-                        <button id="btn-pref-clear" class="threshold-tab">全て解除</button>
+                        <button id="btn-pref-all" class="threshold-tab btn-select-all">全て選択</button>
+                        <button id="btn-pref-clear" class="threshold-tab btn-clear-all">全て解除</button>
                     </div>
                     <div id="pref-tabs"></div>
                 </div>
                 <div class="control-group">
                     <span class="control-label">税目：</span>
-                    <button id="btn-deselect-all" class="threshold-tab">全て解除</button>
-                    <button id="btn-select-all" class="threshold-tab">全て選択</button>
+                    <button id="btn-select-all" class="threshold-tab btn-select-all">全て選択</button>
+                    <button id="btn-deselect-all" class="threshold-tab btn-clear-all">全て解除</button>
                     <div class="threshold-tabs" id="tax-item-tabs"></div>
                 </div>
                 <div class="result-count" id="result-count"></div>
                 <div class="table-scroll-wrapper">
-                <table id="result-table">
-                    <colgroup>
-                        <col style="width:15%"><!-- 団体名 -->
-                        <col style="width:12%"><!-- 都道府県 -->
-                        <col style="width:12%"><!-- カテゴリ -->
-                        <col style="width:20%"><!-- 税目 -->
-                        <col style="width:14%"><!-- 歳入額 -->
-                        <col style="width:13%"><!-- 構成比 -->
-                        <col style="width:14%"><!-- 一般財源構成比 -->
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th data-col="name">団体名<span class="sort-arrow"></span></th>
-                            <th data-col="pref">都道府県<span class="sort-arrow"></span></th>
-                            <th data-col="cat">カテゴリ<span class="sort-arrow"></span></th>
-                            <th data-col="tax">税目<span class="sort-arrow"></span></th>
-                            <th data-col="val">歳入額<span class="sort-arrow"></span></th>
-                            <th data-col="ratio">構成比<span class="sort-arrow"></span></th>
-                            <th data-col="ratioIppan">一般財源構成比<span class="sort-arrow"></span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="result-tbody"></tbody>
-                </table>
+                    <table id="result-table">
+                        <colgroup>
+                            <col style="width:8%"><!-- 詳細リンク -->
+                            <col style="width:12%"><!-- 団体名 -->
+                            <col style="width:11%"><!-- 都道府県 -->
+                            <col style="width:12%"><!-- カテゴリ -->
+                            <col style="width:12%"><!-- 税目 -->
+                            <col style="width:12%"><!-- 歳入額 -->
+                            <col style="width:12%"><!-- 構成比 -->
+                            <col style="width:12%"><!-- 一般財源構成比 -->
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th data-col="name">団体名<span class="sort-arrow"></span></th>
+                                <th data-col="pref">都道府県<span class="sort-arrow"></span></th>
+                                <th data-col="cat">カテゴリ<span class="sort-arrow"></span></th>
+                                <th data-col="tax">税目<span class="sort-arrow"></span></th>
+                                <th data-col="val">歳入額<span class="sort-arrow"></span></th>
+                                <th data-col="ratio">構成比<span class="sort-arrow"></span></th>
+                                <th data-col="ratioIppan">一般財源構成比<span class="sort-arrow"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="result-tbody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -858,7 +913,7 @@
 
         const AMOUNT_MARKERS = [
             { val: 3, name: '時給の壁' },
-            { val: 13, name: '日給の壁' },
+            { val: 15, name: '日給の壁' },
             { val: 300, name: '月給の壁' },
             { val: 4000, name: '年収の壁' },
         ]
@@ -918,6 +973,7 @@
             return { text: oku.toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 億円', level: '' }
         }
 
+
         // ── ソート状態 ───────────────────────────────────────
         let sortCol = 'val'
         let sortDir = 1  // 1=昇順
@@ -928,6 +984,7 @@
         let ratioIppanCache = []  // ratioIppanCache[taxIdx][entityIdx] | null配列
         let nameArr = []
         let prefArr = []
+        let idArr = []
         const prefArray = await fetch("pref-array.json").then(e => e.json())
 
         async function buildCache(zeimokuRows, nameData, todohukenNameData) {
@@ -970,6 +1027,7 @@
 
             nameArr = idOrder.map(id => idToNameMap.get(id)?.name ?? nameFromId(id).name)
             prefArr = idOrder.map(id => nameFromId(id).pref)
+            idArr = idOrder.slice()
 
             const zeimokuKeyToTaxIdx = new Map(TAX_DEFS.map((def, i) => [def.key, i]))
             valCache = TAX_DEFS.map(() => new Float64Array(idOrder.length).fill(NaN))
@@ -1005,7 +1063,6 @@
 
         function getActivePrefectures() {
             const tabs = document.querySelectorAll('#pref-tabs .threshold-tab.active')
-            if (tabs.length === 0) return null
             return new Set([...tabs].map(b => b.dataset.pref))
         }
 
@@ -1056,13 +1113,13 @@
                     const val = vals[i]
 
                     if (!(val > 0)) continue
-                    if (activePref && !activePref.has(prefArr[i])) continue
+                    if (!activePref.has(prefArr[i])) continue
 
                     const filterVal = mode === 'ratio' ? ratios[i] : mode === 'ratioIppan' ? ratiosIppan[i] : val
 
                     if (!inRanges(filterVal, ranges)) continue
 
-                    rows.push({ name: nameArr[i], pref: prefArr[i], cat: def.cat, tax: def.label, val, ratio: ratios ? ratios[i] : NaN, ratioIppan: ratiosIppan ? ratiosIppan[i] : NaN })
+                    rows.push({ id: idArr[i], name: nameArr[i], pref: prefArr[i], cat: def.cat, tax: def.label, val, ratio: ratios ? ratios[i] : NaN, ratioIppan: ratiosIppan ? ratiosIppan[i] : NaN })
                 }
             }
 
@@ -1081,8 +1138,8 @@
             document.querySelectorAll('#result-table thead th').forEach(th => {
                 const col = th.dataset.col
                 th.classList.toggle('sort-active', col === sortCol)
-                th.querySelector('.sort-arrow').textContent =
-                    col === sortCol ? (sortDir === 1 ? ' ▲' : ' ▼') : ''
+                const arrow = th.querySelector('.sort-arrow')
+                if (arrow) arrow.textContent = col === sortCol ? (sortDir === 1 ? ' ▲' : ' ▼') : ''
             })
             document.getElementById('result-count').innerHTML =
                 `<span>${rows.length.toLocaleString()}</span> 件`
@@ -1102,13 +1159,26 @@
                     const cls = fmt ? fmt.level : ''
                     const txt = fmt ? fmt.text : r.val.toLocaleString() + ' 千円'
                     const tr = document.createElement('tr')
-                    tr.innerHTML = `<td class="td-name">${r.name}</td>
+
+                    const ratioColor = (ratio) => {
+                        if (ratio < 0.1) {
+                            return 'danger'
+                        } else if (ratio < 0.5) {
+                            return 'warn'
+                        } else {
+                            return ''
+                        }
+                    }
+
+                    tr.innerHTML = `
+                        <td class="td-link"><a href="index.html#/detail?id=${encodeURIComponent(r.id)}" class="detail-btn">決算</a></td>
+                        <td class="td-name">${r.name}</td>
                         <td class="td-pref">${r.pref}</td>
                         <td class="td-cat">${r.cat}</td>
                         <td class="td-tax">${r.tax}</td>
                         <td class="td-val ${cls}">${txt}</td>
-                        <td class="td-ratio">${Number.isFinite(r.ratio) ? r.ratio.toLocaleString("ja-JP", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) + ' %' : '—'}</td>
-                        <td class="td-ratio">${Number.isFinite(r.ratioIppan) ? r.ratioIppan.toLocaleString("ja-JP", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) + ' %' : '—'}</td>`
+                        <td class="td-val ${cls}">${Number.isFinite(r.ratio) ? r.ratio.toLocaleString("ja-JP", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) + ' %' : '—'}</td>
+                        <td class="td-val ${cls}">${Number.isFinite(r.ratioIppan) ? r.ratioIppan.toLocaleString("ja-JP", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) + ' %' : '—'}</td>`
                     frag.appendChild(tr)
                 }
                 tbody.appendChild(frag)
@@ -1203,12 +1273,12 @@
                 hdr.innerHTML = `<span class="cat-header-label">${def.cat}</span>`
 
                 const selBtn = document.createElement('button')
-                selBtn.className = 'cat-btn'
+                selBtn.className = 'cat-btn btn-select-all'
                 selBtn.textContent = '全選択'
                 selBtn.addEventListener('click', () => setCatActive(def.cat, true))
 
                 const deselBtn = document.createElement('button')
-                deselBtn.className = 'cat-btn'
+                deselBtn.className = 'cat-btn btn-clear-all'
                 deselBtn.textContent = '全解除'
                 deselBtn.addEventListener('click', () => setCatActive(def.cat, false))
 
@@ -1560,6 +1630,8 @@
             prefTabsEl.querySelectorAll('.threshold-tab').forEach(b => {
                 if (prefSet.has(b.dataset.pref)) b.classList.add('active')
             })
+        } else {
+            prefTabsEl.querySelectorAll('.threshold-tab').forEach(b => b.classList.add('active'))
         }
 
         // ── 共有リンクボタン ──────────────────────────────────
