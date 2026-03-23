@@ -1085,7 +1085,7 @@
 
         function inRanges(val, ranges) {
             if (ranges.length === 0) return false
-            return ranges.some(r => val > r.min && val <= r.max)
+            return ranges.some(r => val >= r.min && val <= r.max)
         }
 
         const CHUNK_SIZE = 80
