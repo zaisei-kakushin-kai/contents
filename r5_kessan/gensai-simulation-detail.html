@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>減債基金シミュレーション — 詳細 @ 財政革新会</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print"
+        onload="this.media='all'">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-2: #111111;
+            --bg-panel: #161616;
+            --orange: #ff6600;
+            --orange-dim: #cc5200;
+            --orange-glow: #ff660033;
+            --yellow: #ffcc00;
+            --cyan: #00ccff;
+            --green: #00cc66;
+            --red: #ff3333;
+            --text: #e8e8e8;
+            --text-dim: #aaaaaa;
+            --gray: #888888;
+            --gray-dim: #444444;
+            --border: #2a2a2a;
+            --mono: "Share Tech Mono", monospace;
+            --jp: "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+            /* 財源カラー */
+            --c-gensai: #00ccff;
+            --c-zaichou: #ff6600;
+            --c-tsumitate: #ffcc00;
+            --c-tokutei: #cc66ff;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--jp);
+            font-size: 13px;
+            min-height: 100vh;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .03) 2px, rgba(0, 0, 0, .03) 4px);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ── topbar ── */
+        #topbar {
+            height: 56px;
+            background: var(--bg-2);
+            border-bottom: 2px solid var(--orange);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .topbar-titles .title-org-name {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .topbar-titles .title-app-name {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff660044;
+        }
+
+        .topbar-back {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            text-decoration: none;
+            padding: 4px 10px;
+            border: 1px solid var(--gray-dim);
+        }
+
+        .topbar-back:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        /* ── page ── */
+        #page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 16px 80px;
+        }
+
+        /* ── loading / not found ── */
+        #loading {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            padding: 40px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        #not-found {
+            display: none;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--gray);
+            padding: 40px 0;
+        }
+
+        /* ── entity header ── */
+        .entity-header {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--orange);
+            padding: 16px 20px 14px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .entity-header .eh-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .entity-pref {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            letter-spacing: 1px;
+        }
+
+        .entity-name {
+            font-family: var(--jp);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .entity-header .eh-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .entity-badge {
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--orange-dim);
+            border: 1px solid var(--orange-dim);
+            padding: 2px 8px;
+            letter-spacing: 1px;
+        }
+
+        /* ── share button ── */
+        .share-btn {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            background: transparent;
+            border: 1px solid var(--gray-dim);
+            padding: 4px 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color .15s, border-color .15s;
+        }
+
+        .share-btn:hover {
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+
+        /* ── section label ── */
+        .kpi-section-label {
+            font-family: var(--jp);
+            font-size: 13px;
+            color: var(--text);
+            letter-spacing: .5px;
+            padding: 0 0 6px;
+            margin: 24px 0 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .kpi-section-label span {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: 1px;
+            margin-left: 8px;
+        }
+
+        /* ── kpi grid ── */
+        .kpi-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 2px;
+        }
+
+        .kpi-grid--debt {
+            grid-template-columns: 2fr 1fr 1fr;
+        }
+
+        .kpi-grid--fund {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        @media (max-width: 640px) {
+            .kpi-grid--debt {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .kpi-grid--fund {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* ── kpi card ── */
+        .kpi-card {
+            background: var(--bg-panel);
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .kpi-card--hero {
+            padding: 18px 22px;
+            border-left: 3px solid var(--orange-dim);
+        }
+
+        .kpi-card--hero .kpi-value {
+            font-size: 32px;
+            color: var(--orange);
+        }
+
+        .kpi-card--hero .kpi-unit {
+            color: var(--orange-dim);
+        }
+
+        .kpi-card--alert .kpi-value {
+            color: var(--red);
+        }
+
+        .kpi-card--warn .kpi-value {
+            color: var(--yellow);
+        }
+
+        .kpi-card--good .kpi-value {
+            color: var(--green);
+        }
+
+        .kpi-label {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+            letter-spacing: .3px;
+            line-height: 1.4;
+        }
+
+        .kpi-value {
+            font-family: var(--mono);
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--cyan);
+            letter-spacing: -.5px;
+            line-height: 1;
+        }
+
+        .kpi-unit {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .kpi-sub {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: .3px;
+            border-top: 1px solid var(--border);
+            padding-top: 4px;
+            margin-top: 2px;
+        }
+
+        /* ── scenario table (Design D: 差分ウォーターフォール型) ── */
+        .d-table {
+            border: 1px solid var(--border);
+            margin-top: 2px;
+        }
+
+        .d-head {
+            display: grid;
+            grid-template-columns: 160px 1fr 90px;
+            background: var(--bg-2);
+            border-bottom: 1px solid var(--border);
+            padding: 6px 14px;
+        }
+
+        .d-head span {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--gray);
+            letter-spacing: 1px;
+        }
+
+        .d-head span:last-child {
+            text-align: right;
+        }
+
+        .d-row {
+            display: grid;
+            grid-template-columns: 160px 1fr 90px;
+            align-items: center;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            transition: background .1s;
+        }
+
+        .d-row:last-child {
+            border-bottom: none;
+        }
+
+        .d-row:hover {
+            background: #160e00;
+        }
+
+        .d-label {
+            padding: 10px 14px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .d-add-label {
+            font-size: 9px;
+            opacity: .7;
+        }
+
+        .d-bars {
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .d-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .d-bar-name {
+            font-family: var(--mono);
+            font-size: 9px;
+            width: 44px;
+            text-align: right;
+            flex-shrink: 0;
+            opacity: .85;
+        }
+
+        .d-bar-track {
+            flex: 1;
+            height: 14px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .d-bar-base {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            opacity: .35;
+        }
+
+        .d-bar-new {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-right: 2px solid rgba(255, 255, 255, .2);
+        }
+
+        .d-pct {
+            padding: 10px 14px 10px 0;
+            font-family: var(--mono);
+            font-size: 20px;
+            text-align: right;
+            color: var(--cyan);
+        }
+
+        .d-delta {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--green);
+            text-align: right;
+            opacity: .8;
+        }
+
+        .d-amount {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        .d-pct.is-full {
+            color: var(--green);
+        }
+
+        .d-pct.is-high {
+            color: var(--cyan);
+        }
+
+        .d-pct.is-mid {
+            color: var(--yellow);
+        }
+
+        .d-pct.is-low {
+            color: var(--red);
+        }
+
+        @media (max-width: 560px) {
+
+            .d-head,
+            .d-row {
+                grid-template-columns: 110px 1fr 70px;
+            }
+
+            .d-label {
+                padding: 8px 10px;
+                font-size: 9px;
+            }
+
+            .d-pct {
+                font-size: 14px;
+                padding: 8px 10px 8px 0;
+            }
+
+            .d-bar-name {
+                width: 32px;
+            }
+        }
+
+
+        /* ── sim note (markdown) ── */
+        #sim-note {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--gray-dim);
+            padding: 16px 20px;
+            line-height: 1.9;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        #sim-note h1,
+        #sim-note h2,
+        #sim-note h3 {
+            font-family: var(--mono);
+            color: var(--orange);
+            letter-spacing: 1px;
+            margin: 16px 0 6px;
+        }
+
+        #sim-note h1 {
+            font-size: 16px;
+            border-left: 3px solid var(--orange);
+            padding-left: 10px;
+            background: var(--orange-glow);
+        }
+
+        #sim-note h2 {
+            font-size: 13px;
+            border-left: 3px solid var(--orange-dim);
+            padding-left: 10px;
+        }
+
+        #sim-note h3 {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        #sim-note p {
+            margin-bottom: 8px;
+        }
+
+        #sim-note strong {
+            color: var(--text);
+        }
+
+        #sim-note code {
+            font-family: var(--mono);
+            font-size: 11px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            padding: 1px 5px;
+            color: var(--cyan);
+        }
+
+        #sim-note ul,
+        #sim-note ol {
+            padding-left: 20px;
+            margin-bottom: 8px;
+        }
+
+        #sim-note li {
+            margin-bottom: 4px;
+        }
+
+        #sim-note blockquote {
+            border-left: 3px solid var(--yellow);
+            padding: 6px 12px;
+            background: var(--bg-2);
+            color: var(--yellow);
+            font-family: var(--mono);
+            font-size: 12px;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="topbar">
+        <div class="topbar-titles">
+            <span class="title-org-name">財政革新会</span>
+            <span class="title-app-name">減債基金で公債費相殺</span>
+        </div>
+        <a class="topbar-back" id="back-btn" href="gensai-simulation-kensaku.html">← 検索に戻る</a>
+    </div>
+
+    <div id="page">
+
+        <div id="loading">
+            <span>&gt;_</span>
+            <span>データを読み込んでいます</span>
+            <span class="blink">█</span>
+        </div>
+
+        <div id="not-found">
+            自治体が見つかりませんでした。<a href="gensai-simulation-kensaku.html" style="color:var(--orange);">← 検索に戻る</a>
+        </div>
+
+        <div id="detail-section" style="display:none;">
+            <div id="entity-header" class="entity-header"></div>
+
+            <div class="kpi-section-label" id="section-label-debt"></div>
+            <div class="kpi-grid kpi-grid--debt" id="kpi-debt"></div>
+
+            <div class="kpi-section-label" id="section-label-fund"></div>
+            <div class="kpi-grid kpi-grid--fund" id="kpi-fund"></div>
+
+            <div class="kpi-section-label"><span>▸ SCENARIO</span> 振替シナリオ別　地方債相殺割合</div>
+            <div class="d-table">
+                <div class="d-head">
+                    <span>財源</span>
+                    <span>相殺割合の内訳</span>
+                    <span>合計</span>
+                </div>
+                <div id="scenario-table"></div>
+            </div>
+
+            <div id="sim-note" style="display:none; margin-top:24px;"></div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { parquetRead, parquetMetadata } from 'https://cdn.jsdelivr.net/npm/hyparquet/+esm'
+
+        async function loadParquet(url) {
+            const res = await fetch(url)
+            const arrayBuffer = await res.arrayBuffer()
+            const metadata = parquetMetadata(arrayBuffer)
+            const columns = metadata.schema.slice(1).map(s => s.name)
+            let records = []
+            await parquetRead({
+                file: arrayBuffer,
+                onComplete: (rows) => {
+                    records = rows.map(row =>
+                        Object.fromEntries(columns.map((col, i) => [col, row[i]]))
+                    )
+                },
+            })
+            return records
+        }
+        // ── formatters ──────────────────────────────────────────
+        function fmtKin(bigint, unit) {
+            if (typeof bigint === 'string') {
+                bigint = bigint.replace('-', '-')
+            } else if (null === bigint) {
+                return "-"
+            }
+            const v = parseFloat(bigint)
+            if (!Number.isFinite(v)) {
+                return bigint
+            }
+
+            if (unit) {
+                return `${bigint.toLocaleString()} ${unit}`
+            }
+
+            // 億
+            const MAN = 10
+            const OKU = 10_0000
+            const CHO = 10_0000_0000
+            const maximumFractionDigits = 3
+            const minimumFractionDigits = 0
+            const opt = { maximumFractionDigits, minimumFractionDigits }
+            const absV = Math.abs(v)
+            if (absV < MAN) {
+                return v.toLocaleString("ja-JP", { maximumFractionDigits: 0, minimumFractionDigits: 0 }) + ' 千円'
+            } else if (absV < OKU) {
+                return (v / MAN).toLocaleString("ja-JP", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' 万円'
+            } else if (absV < CHO) {
+                return (v / OKU).toLocaleString("ja-JP", opt) + ' 億円'
+            } else {
+                return (v / CHO).toLocaleString("ja-JP", opt) + ' 兆円'
+            }
+        }
+
+        function fmtPct(v) {
+            if (v == null || !Number.isFinite(+v)) return '—'
+            return (+v).toLocaleString('ja-JP', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%'
+        }
+
+        // ── simulation metrics ───────────────────────────────────
+        function sousaiRitsu(newGensai, kousaihi) {
+            if (!kousaihi) return 0
+            return Math.min(newGensai / kousaihi * 100, 100)
+        }
+
+        function kousaihiSakugenGaku(newGensai, kousaihi) {
+            return Math.min(newGensai, kousaihi)
+        }
+
+        // ── KPI card builder ─────────────────────────────────────
+        function kpiCard({ label, value, unit, sub, hero, colorClass }) {
+            const cls = ['kpi-card', hero ? 'kpi-card--hero' : '', colorClass || ''].filter(Boolean).join(' ')
+            return `<div class="${cls}">
+                <div class="kpi-label">${label}</div>
+                <div class="kpi-value">${value}</div>
+                ${unit ? `<div class="kpi-unit">${unit}</div>` : ''}
+                ${sub ? `<div class="kpi-sub">${sub}</div>` : ''}
+            </div>`
+        }
+
+        function kousaihiColorClass(ratio) {
+            if (ratio >= 25) return 'kpi-card--alert'
+            if (ratio >= 18) return 'kpi-card--warn'
+            return ''
+        }
+
+        // ── markdown loader ──────────────────────────────────────
+        function mdToHtml(md) {
+            return md
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+                .replace(/^- (.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>\n?)+/g, s => `<ul>${s}</ul>`)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.+?)`/g, '<code>$1</code>')
+                .replace(/\n{2,}/g, '</p><p>')
+                .replace(/(^|\n)(?!<)([^\n<][^\n]*)(\n|$)/g, '$1<p>$2</p>$3')
+        }
+
+        async function loadSimNote() {
+            const el = document.getElementById('sim-note')
+            try {
+                const res = await fetch('gensai-sousai-note.md')
+                if (!res.ok) return
+                el.innerHTML = mdToHtml(await res.text())
+                el.style.display = ''
+            } catch (_) { }
+        }
+
+        // ── share link ───────────────────────────────────────────
+        const ICON_LINK = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
+        const ICON_CHECK = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><polyline points="20 6 9 17 4 12"/></svg>`
+
+        function copyShareUrl() {
+            const btn = document.getElementById('btn-share')
+            const reset = () => { btn.innerHTML = ICON_LINK + '共有リンク' }
+            navigator.clipboard.writeText(location.href).then(() => {
+                btn.innerHTML = ICON_CHECK + 'コピーしました'
+                setTimeout(reset, 2000)
+            }).catch(() => {
+                const ta = document.createElement('textarea')
+                ta.value = location.href
+                document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+                btn.innerHTML = ICON_CHECK + 'コピーしました'
+                setTimeout(reset, 2000)
+            })
+        }
+
+        // ── render detail ────────────────────────────────────────
+        function renderDetail(d) {
+            const name = d['団体名'] || ''
+            const pref = d['都道府県名'] || ''
+            document.title = `${name} — 減債基金シミュレーション @ 財政革新会`
+
+            // entity header
+            document.getElementById('entity-header').innerHTML = `
+                <div class="eh-info">
+                    <span class="entity-pref">${pref}</span>
+                    <span class="entity-name">${name}</span>
+                </div>
+                <div class="eh-actions">
+                    <span class="entity-badge">令和5年度 決算</span>
+                    <button id="btn-share" class="share-btn">${ICON_LINK}共有リンク</button>
+                </div>
+            `
+            document.getElementById('btn-share').addEventListener('click', copyShareUrl)
+
+            // Section 1: 地方債残高
+            document.getElementById('section-label-debt').innerHTML =
+                `${name}の地方債残高`
+            const ratioColor = kousaihiColorClass(d['公債費.経常収支比率'])
+            document.getElementById('kpi-debt').innerHTML =
+                kpiCard({ label: '地方債現在高', value: fmtKin(d['地方債']), unit: '残高', hero: true }) +
+                kpiCard({ label: '公債費　決算額', value: fmtKin(d['公債費.決算額']), sub: '歳出に占める割合：' + fmtPct(d['公債費.構成比']) }) +
+                kpiCard({ label: '公債費　構成比', value: fmtPct(d['公債費.構成比']), sub: d['公債費.経常収支比率'] >= 18 ? '⚠ 経常収支比率 ' + fmtPct(d['公債費.経常収支比率']) + ' — 18%超' : '経常収支比率 ' + fmtPct(d['公債費.経常収支比率']), colorClass: ratioColor })
+
+            // Section 2: 積立金や基金
+            document.getElementById('section-label-fund').innerHTML =
+                `${name}の積立金・基金`
+            document.getElementById('kpi-fund').innerHTML =
+                kpiCard({ label: '積立金（今年度積立額）', value: fmtKin(d['積立金']) }) +
+                kpiCard({ label: '財政調整基金（財調）', value: fmtKin(d['財調']) }) +
+                kpiCard({ label: '減債基金', value: fmtKin(d['減債']) }) +
+                kpiCard({ label: '特定目的基金', value: fmtKin(d['特定目的']) })
+
+            // Section 3: シナリオ表
+            document.getElementById('scenario-table').innerHTML = renderScenarios(d)
+
+            document.getElementById('detail-section').style.display = ''
+        }
+
+        // ── scenario table (Design D: 差分ウォーターフォール型) ──────────
+        function ratioClass(r) {
+            if (r == null || !Number.isFinite(+r)) return ''
+            const v = +r
+            if (v >= 100) return 'is-full'
+            if (v >= 75) return 'is-high'
+            if (v >= 40) return 'is-mid'
+            return 'is-low'
+        }
+
+        function renderScenarios(d) {
+            const scenarios = [
+                { label: '減債のみ', color: 'var(--c-gensai)', name: '減債', rKey: '相殺割合.減債', aKey: '相殺額.減債' },
+                { label: '＋ 財調を半分だけ投入', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.05財調', aKey: '相殺額.05財調' },
+                { label: '＋ 財調を全額投入', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.10財調', aKey: '相殺額.10財調' },
+                { label: '＋ 積立金', color: 'var(--c-tsumitate)', name: '積立金', rKey: '相殺割合.積立金', aKey: '相殺額.積立金' },
+                { label: '＋ 特定目的を3割投入', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.03特定目的', aKey: '相殺額.03特定目的' },
+                { label: '＋ 特定目的を7割投入', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.07特定目的', aKey: '相殺額.07特定目的' },
+            ]
+
+            let prevRatio = 0, prevAmount = 0
+            return scenarios.map((sc, i) => {
+                const ratio = +(d[sc.rKey] * 100) || 0
+                const amount = +(d[sc.aKey]) || 0
+                const delta = ratio - prevRatio
+                const deltaAmt = amount - prevAmount
+                const baseW = Math.min(prevRatio, 100)
+                const newW = Math.max(0, Math.min(delta, 100 - baseW))
+                console.log({ amount })
+                const addLabel = i === 0
+                    ? fmtKin(amount)
+                    : (i === 4 ? 'さらに＋ ' : '＋ ') + fmtKin(deltaAmt)
+
+                const barHtml = i === 0
+                    ? `<div class="d-bar-row">
+                            <div class="d-bar-track">
+                                <div class="d-bar-new" style="left:0;width:${newW.toFixed(2)}%;background:${sc.color}"></div>
+                            </div>
+                       </div>`
+                    : `<div class="d-bar-row">
+                            <div class="d-bar-track">
+                                <div class="d-bar-base" style="left:0;width:${baseW.toFixed(2)}%;background:var(--gray-dim)"></div>
+                                <div class="d-bar-new" style="left:${baseW.toFixed(2)}%;width:${newW.toFixed(2)}%;background:${sc.color}"></div>
+                            </div>
+                       </div>`
+
+                const deltaStr = i > 0
+                    ? `<div class="d-delta">▲${delta.toFixed(1)}pt</div>`
+                    : ''
+
+                const pctCls = ratioClass(ratio)
+                prevRatio = ratio
+                prevAmount = amount
+
+                return `<div class="d-row">
+                    <div class="d-label"><span style="color:${sc.color}">${sc.label}</span><br><span class="d-add-label">${addLabel}</span></div>
+                    <div class="d-bars">${barHtml}</div>
+                    <div class="d-pct ${pctCls}">${fmtPct(ratio)}${deltaStr}<div class="d-amount">${fmtKin(amount)}</div></div>
+                </div>`
+            }).join('')
+        }
+
+        // ── init ─────────────────────────────────────────────────
+        async function init() {
+            const params = new URLSearchParams(location.search)
+            const id = params.get('id')
+
+            let allData = null
+            try {
+                allData = await loadParquet('r5_gensai_zaigen.parquet')
+            } catch (err) {
+                console.error(err)
+            }
+
+            if (!allData) {
+                allData = [{
+                    'id': 'sample-hashimoto',
+                    '都道府県名': '和歌山県', '団体名': '橋本市',
+                    '積立金': 3490, '公債費.構成比': 10.9, '公債費.決算額': 3318265,
+                    '公債費.経常収支比率': 19.6, '公債費.経常経費充当一般財源等': 3318158,
+                    '地方債': 24166172, '財調': 3564767, '減債': 360995, '特定目的': 1938263,
+                    '相殺額.減債': 360995, '相殺割合.減債': 1.5,
+                    '相殺額.05財調': 2143483, '相殺割合.05財調': 8.9,
+                    '相殺額.10財調': 3925478, '相殺割合.10財調': 16.2,
+                    '相殺額.積立金': 3928968, '相殺割合.積立金': 16.3,
+                    '相殺額.03特定目的': 4510627, '相殺割合.03特定目的': 18.7,
+                    '相殺額.07特定目的': 5285884, '相殺割合.07特定目的': 21.9,
+                }]
+            }
+
+            document.getElementById('loading').style.display = 'none'
+
+            const hit = id
+                ? allData.find(d => d['id'] === id)
+                : allData.length === 1 ? allData[0] : null
+
+            console.log({ hit })
+            if (!hit) {
+                document.getElementById('loading').style.display = ''
+                return
+            }
+
+            renderDetail(hit)
+            loadSimNote()
+        }
+
+        init()
+    </script>
+
+</body>
+
+</html>

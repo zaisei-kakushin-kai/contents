@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>財源は財政健全化！ — 自治体を検索 @ 財政革新会</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print"
+        onload="this.media='all'">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-2: #111111;
+            --bg-panel: #161616;
+            --orange: #ff6600;
+            --orange-dim: #cc5200;
+            --orange-glow: #ff660033;
+            --yellow: #ffcc00;
+            --cyan: #00ccff;
+            --green: #00cc66;
+            --red: #ff3333;
+            --text: #e8e8e8;
+            --text-dim: #aaaaaa;
+            --gray: #888888;
+            --gray-dim: #444444;
+            --border: #2a2a2a;
+            --mono: "Share Tech Mono", monospace;
+            --jp: "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--jp);
+            font-size: 13px;
+            min-height: 100vh;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .03) 2px, rgba(0, 0, 0, .03) 4px);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ── topbar ── */
+        #topbar {
+            height: 56px;
+            background: var(--bg-2);
+            border-bottom: 2px solid var(--orange);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .topbar-titles .title-org-name {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .topbar-titles .title-app-name {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff660044;
+        }
+
+        .topbar-back {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            text-decoration: none;
+            padding: 4px 10px;
+            border: 1px solid var(--gray-dim);
+        }
+
+        .topbar-back:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        /* ── page ── */
+        #page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 16px 80px;
+        }
+
+        /* ── hero ── */
+        .hero-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--orange-dim);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .hero-title {
+            font-family: var(--mono);
+            font-size: 28px;
+            color: var(--orange);
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px #ff660055;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 600px) {
+            .hero-title {
+                font-size: 20px;
+                letter-spacing: 2px;
+            }
+        }
+
+        /* ── sections ── */
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--orange);
+            padding: 4px 12px;
+            background: var(--orange-glow);
+            margin-bottom: 12px;
+        }
+
+        .section-body {
+            line-height: 1.9;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .section-body p {
+            margin-bottom: 10px;
+        }
+
+        .section-body .example {
+            display: inline-block;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--yellow);
+            padding: 8px 14px;
+            margin: 8px 0;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--yellow);
+        }
+
+        /* ── list ── */
+        .list-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            margin-top: 32px;
+        }
+
+        .list-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--orange);
+            padding: 4px 12px;
+            background: var(--orange-glow);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .control-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        select,
+        input[type=text] {
+            background: var(--bg-2);
+            color: var(--text);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 4px 8px;
+            outline: none;
+        }
+
+        select:focus,
+        input[type=text]:focus {
+            border-color: var(--orange);
+        }
+
+        .result-count {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .result-count span {
+            color: var(--orange);
+        }
+
+        .table-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #result-table {
+            width: 100%;
+            min-width: 640px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        #result-table thead th {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: .08em;
+            text-align: left;
+            padding: 6px 10px;
+            border-bottom: 2px solid var(--orange-dim);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #result-table thead th:hover {
+            color: var(--text);
+        }
+
+        #result-table thead th.sort-active {
+            color: var(--orange);
+        }
+
+        #result-table thead th .sort-arrow {
+            display: inline-block;
+            margin-left: 4px;
+            opacity: .5;
+            font-size: 9px;
+        }
+
+        #result-table thead th.sort-active .sort-arrow {
+            opacity: 1;
+        }
+
+        #result-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        #result-table tbody tr:hover {
+            background: var(--bg-panel);
+        }
+
+        #result-table tbody td {
+            padding: 6px 10px;
+            vertical-align: middle;
+        }
+
+        .td-name {
+            font-family: var(--jp);
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .td-pref {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .td-val {
+            font-family: var(--mono);
+            text-align: right;
+            white-space: nowrap;
+            color: var(--cyan);
+        }
+
+        .td-val.danger {
+            color: var(--red);
+        }
+
+        .td-val.warn {
+            color: var(--yellow);
+        }
+
+        .td-val.sousai-hi {
+            color: var(--green);
+        }
+
+        .td-val.sousai-mid {
+            color: var(--cyan);
+        }
+
+        .td-val.sousai-low {
+            color: var(--yellow);
+        }
+
+        .td-ratio {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        /* detail link cell */
+        .td-link {
+            text-align: center;
+            padding: 4px;
+        }
+
+        .detail-btn {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            border: 1px solid var(--gray-dim);
+            background: var(--bg-2);
+            padding: 2px 8px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .detail-btn:hover {
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+
+        /* ── loading ── */
+        #loading {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            padding: 40px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .no-data-msg {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--gray-dim);
+            padding: 32px 0;
+            text-align: center;
+        }
+
+        /* ── pref tabs ── */
+        .pref-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-bottom: 8px;
+        }
+
+        .pref-tab {
+            background: var(--bg-2);
+            color: var(--gray);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 10px;
+            padding: 3px 8px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .pref-tab:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        .pref-tab.active {
+            background: var(--orange-glow);
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+
+        /* ── sort tabs ── */
+        .sort-tabs {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+
+        .sort-tab {
+            background: var(--bg-2);
+            color: var(--gray);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 10px;
+            padding: 3px 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sort-tab:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        .sort-tab.active {
+            background: var(--orange-glow);
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="topbar">
+        <div class="topbar-titles">
+            <span class="title-org-name">財政革新会</span>
+            <span class="title-app-name">財源は財政健全化</span>
+        </div>
+        <a class="topbar-back" href="index.html">← 決算ターミナルへ</a>
+    </div>
+
+    <div id="page">
+
+        <div class="hero-label">財政健全化で減税しよう！</div>
+        <div class="hero-title">減税の財源は財政健全化！</div>
+
+        <div class="section">
+            <div class="section-title">財政健全化が財源を生む、とは？</div>
+            <div class="section-body">
+                <p>高額な公債費によって自治体の財政が圧迫される一方で、基金や積立金が過剰になっている場合があります。
+                    これら基金や積立金を減債基金に振り替えることで、「公債費負担を相殺」し、財源を生み出そうという考えです。
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">繰り上げ償還との違い</div>
+            <div class="section-body">
+                <p>自治体が地方債や借入金を繰上げ償還する場合、将来にわたって支払う予定だった利払金や補償金を支払う必要がある場合があります。</p>
+                <p>当会が推奨する「公債費負担の相殺」は、減債基金に資金を振り替えつつ、当該資金を投資適格の円貨債で運用することで、
+                    将来にわたって円債の償還に必要となる資金を確保しつつ、利払費も相殺しようという考えです。
+                </p>
+                <p>
+                    繰り上げ償還よりも、経済的合理性があります。
+                </p>
+            </div>
+
+        </div>
+
+        <div class="section">
+            <div class="section-title">地方債残高をゼロにすべきか？</div>
+            <div class="section-body">
+                <p>
+                    地方債残高をゼロにした場合、引受業者や債券投資家との関係が切れてしまう場合があります。
+                    <br>
+                    最終的には、政治的世界観によるとは思いますが、
+                    「債券発行収入の全部を減債基金に振り替えることを前提に地方債を発行する」ことで公債費による負担の増加を防ぎつつ、引受業者や投資家との関係を維持することも議論すべきでしょう。
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">政府の保有資産は減債に充てるべきか？</div>
+            <div class="section-body">
+                <p>
+                    政府の管理下にある莫大な資産は常に横領や流用の危険にさらされており、
+                    基金を積み上げている理由にも合理性がないことが珍しくありません。
+                    <br>
+                    政府債務残高の削減は、確実に償還費と利払費の負担を軽減することができるため、
+                    将来にわたって自治体の財政状況を改善することができます。
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">財源を「減税」にあてるべき理由は？</div>
+            <div class="section-body">
+                補助金をはじめとした政府事業は、煩雑な業務が発生してしまうほか、為政者の判断で受益者が決まってしまいます。
+                なによりも、「政府の生み出す格差」が拡大してしまうという問題があります。
+                <br>
+                「減税」であれば、住民が確実に恩恵を受けることができますし、
+                税目自体を完全に廃止すれば、徴税によって発生する業務が消滅します。
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">財政健全化には増税が必要では？</div>
+            <div class="section-body">
+                増税しても、財政健全化は実現できません。
+                事実、消費税を５％に引き上げたときは、政府の消費税負担の増加分の財源を確保することが出来ず、国債を追加して消費税負担の増加分を手当てしました。
+                <br>
+                財政健全化は、減税を伴う方法で実現する必要があります。
+            </div>
+        </div>
+        <!-- list -->
+        <div>
+            <div class="list-header">
+                <div class="list-title">自治体別・公債費・積立金一覧</div>
+            </div>
+
+            <div id="loading">
+                <span>&gt;_</span>
+                <span>データを読み込んでいます</span>
+                <span class="blink">█</span>
+            </div>
+
+            <div id="controls" style="display:none;">
+                <div class="control-group" style="align-items:flex-start; flex-direction:column; gap:6px;">
+                    <span class="control-label">都道府県で絞り込み：</span>
+                    <div class="pref-tabs" id="pref-tabs">
+                        <button class="pref-tab active" data-pref="">すべて</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <span class="control-label">団体名検索：</span>
+                    <input type="text" id="name-search" placeholder="例：橋本市" style="min-width:160px;">
+                </div>
+
+                <div class="result-count" id="result-count"></div>
+
+                <div class="table-scroll-wrapper">
+                    <table id="result-table">
+                        <thead>
+                            <tr>
+                                <th style="width:30px"></th>
+                                <th style="width:110px" data-sort-col="都道府県名" data-sort-type="str">都道府県<span
+                                        class="sort-arrow">↕</span></th>
+                                <th style="width:160px" data-sort-col="団体名" data-sort-type="str">団体名<span
+                                        class="sort-arrow">↕</span></th>
+                                <th style="width:140px; text-align:right" data-sort-col="地方債" data-sort-type="num">
+                                    地方債現在高<span class="sort-arrow">↕</span></th>
+                                <th style="width:140px; text-align:right" data-sort-col="公債費.決算額" data-sort-type="num">
+                                    公債費決算額<span class="sort-arrow">↕</span></th>
+                                <th style="width:140px; text-align:right" data-sort-col="相殺額.10財調" data-sort-type="num">
+                                    相殺額<span class="sort-arrow">↕</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="result-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { parquetRead, parquetMetadata } from 'https://cdn.jsdelivr.net/npm/hyparquet/+esm'
+
+        async function loadParquet(url) {
+            const res = await fetch(url)
+            const arrayBuffer = await res.arrayBuffer()
+            const metadata = parquetMetadata(arrayBuffer)
+            const columns = metadata.schema.slice(1).map(s => s.name)
+            let records = []
+            await parquetRead({
+                file: arrayBuffer,
+                onComplete: (rows) => {
+                    records = rows.map(row =>
+                        Object.fromEntries(columns.map((col, i) => [col, row[i]]))
+                    )
+                },
+            })
+            return records
+        }
+
+        function fmtKin(bigint, unit) {
+            if (typeof bigint === 'string') {
+                bigint = bigint.replace('-', '-')
+            } else if (null === bigint) {
+                return "-"
+            }
+            const v = parseFloat(bigint)
+            if (!Number.isFinite(v)) {
+                return bigint
+            }
+
+            if (unit) {
+                return `${bigint.toLocaleString()} ${unit}`
+            }
+
+            // 億
+            const MAN = 10
+            const OKU = 10_0000
+            const CHO = 10_0000_0000
+            const maximumFractionDigits = 3
+            const minimumFractionDigits = 0
+            const opt = { maximumFractionDigits, minimumFractionDigits }
+            const absV = Math.abs(v)
+            if (absV < MAN) {
+                return v.toLocaleString("ja-JP", { maximumFractionDigits: 0, minimumFractionDigits: 0 }) + ' 千円'
+            } else if (absV < OKU) {
+                return (v / MAN).toLocaleString("ja-JP", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' 万円'
+            } else if (absV < CHO) {
+                return (v / OKU).toLocaleString("ja-JP", opt) + ' 億円'
+            } else {
+                return (v / CHO).toLocaleString("ja-JP", opt) + ' 兆円'
+            }
+        }
+
+        function fmtPct(v) {
+            if (v == null || !Number.isFinite(+v)) return '—'
+            return (+v).toLocaleString('ja-JP', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%'
+        }
+
+        let allData = []
+        let filteredData = []
+        let selectedPref = ''
+        let sortCol = '相殺額.10財調'
+        let sortDir = 'desc'
+        let nameQuery = ''
+
+        function sortData(data) {
+            return [...data].sort((a, b) => {
+                const av = a[sortCol], bv = b[sortCol]
+                let cmp
+                if (typeof av === 'string' || typeof bv === 'string') {
+                    cmp = (av || '').localeCompare(bv || '', 'ja')
+                } else {
+                    cmp = (+(av) || 0) - (+(bv) || 0)
+                }
+                return sortDir === 'desc' ? -cmp : cmp
+            })
+        }
+
+        function updateSortHeaders() {
+            document.querySelectorAll('#result-table thead th[data-sort-col]').forEach(th => {
+                const isActive = th.dataset.sortCol === sortCol
+                th.classList.toggle('sort-active', isActive)
+                th.querySelector('.sort-arrow').textContent = isActive ? (sortDir === 'desc' ? '↓' : '↑') : '↕'
+            })
+        }
+
+        function detailUrl(d) {
+            return `gensai-simulation-detail.html?id=${encodeURIComponent(d['id'] || '')}`
+        }
+
+        function renderTable() {
+            let data = allData
+            if (selectedPref) data = data.filter(d => d['都道府県名'] === selectedPref)
+            if (nameQuery) {
+                const q = nameQuery.trim()
+                data = data.filter(d => (d['団体名'] || '').includes(q) || (d['都道府県名'] || '').includes(q))
+            }
+            filteredData = sortData(data)
+
+            document.getElementById('result-count').innerHTML = `<span>${filteredData.length.toLocaleString()}</span> 件`
+
+            const tbody = document.getElementById('result-body')
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">該当する自治体がありません</td></tr>`
+                return
+            }
+
+            tbody.innerHTML = filteredData.map(d => {
+                const r = +(d['相殺割合.10財調']) || 0
+                const sousaiCls = r >= 0.15 ? 'sousai-hi' : r >= 0.10 ? 'sousai-mid' : r >= 0.05 ? 'sousai-low' : ''
+                return `<tr>
+                    <td class="td-link"><a class="detail-btn" href="${detailUrl(d)}">詳細</a></td>
+                    <td class="td-pref">${d['都道府県名'] || ''}</td>
+                    <td class="td-name">${d['団体名'] || ''}</td>
+                    <td class="td-val">${fmtKin(d['地方債'])}</td>
+                    <td class="td-val">${fmtKin(d['公債費.決算額'])}</td>
+                    <td class="td-val ${sousaiCls}">${fmtKin(d['相殺額.10財調'])}</td>
+                </tr>`
+            }).join('')
+
+            // 行クリックでも詳細ページへ
+            tbody.querySelectorAll('tr').forEach((tr, i) => {
+                tr.addEventListener('click', e => {
+                    if (e.target.closest('a')) return
+                    location.href = detailUrl(filteredData[i])
+                })
+            })
+        }
+
+        function buildPrefTabs() {
+            const prefs = [...new Set(allData.map(d => d['都道府県名']).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ja'))
+            const container = document.getElementById('pref-tabs')
+            container.innerHTML = `<button class="pref-tab active" data-pref="">すべて</button>` +
+                prefs.map(p => `<button class="pref-tab" data-pref="${p}">${p}</button>`).join('')
+            container.querySelectorAll('.pref-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.pref-tab').forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    selectedPref = btn.dataset.pref
+                    renderTable()
+                })
+            })
+        }
+
+        async function init() {
+            let data = null
+            try {
+                data = await loadParquet('r5_gensai_zaigen.parquet')
+            } catch (_) { }
+
+            if (!data || data.length === 0) {
+                data = [{
+                    'id': 'sample-hashimoto',
+                    '都道府県名': '和歌山県', '団体名': '橋本市',
+                    '積立金': 3490, '公債費.構成比': 10.9, '公債費.決算額': 3318265,
+                    '公債費.経常収支比率': 19.6, '公債費.経常経費充当一般財源等': 3318158,
+                    '地方債': 24166172, '財調': 3564767, '減債': 360995, '特定目的': 1938263
+                }]
+            }
+
+            allData = data
+            document.getElementById('loading').style.display = 'none'
+            document.getElementById('controls').style.display = ''
+
+            buildPrefTabs()
+
+            document.querySelectorAll('#result-table thead th[data-sort-col]').forEach(th => {
+                th.addEventListener('click', () => {
+                    if (sortCol === th.dataset.sortCol) {
+                        sortDir = sortDir === 'desc' ? 'asc' : 'desc'
+                    } else {
+                        sortCol = th.dataset.sortCol
+                        sortDir = th.dataset.sortType === 'str' ? 'asc' : 'desc'
+                    }
+                    updateSortHeaders()
+                    renderTable()
+                })
+            })
+
+            updateSortHeaders()
+
+            document.getElementById('name-search').addEventListener('input', e => {
+                nameQuery = e.target.value
+                renderTable()
+            })
+
+            renderTable()
+        }
+
+        init()
+    </script>
+
+</body>
+
+</html>

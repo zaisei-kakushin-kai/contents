@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>減債基金の積み増しで公債費を相殺しよう @ 財政革新会</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print"
+        onload="this.media='all'">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-2: #111111;
+            --bg-panel: #161616;
+            --orange: #ff6600;
+            --orange-dim: #cc5200;
+            --orange-glow: #ff660033;
+            --yellow: #ffcc00;
+            --cyan: #00ccff;
+            --green: #00cc66;
+            --red: #ff3333;
+            --text: #e8e8e8;
+            --text-dim: #aaaaaa;
+            --gray: #888888;
+            --gray-dim: #444444;
+            --border: #2a2a2a;
+            --mono: "Share Tech Mono", monospace;
+            --jp: "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--jp);
+            font-size: 13px;
+            min-height: 100vh;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ── topbar ── */
+        #topbar {
+            height: 56px;
+            background: var(--bg-2);
+            border-bottom: 2px solid var(--orange);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .topbar-titles .title-org-name {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .topbar-titles .title-app-name {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff660044;
+        }
+
+        .topbar-back {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            text-decoration: none;
+            padding: 4px 10px;
+            border: 1px solid var(--gray-dim);
+        }
+
+        .topbar-back:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        /* ── page ── */
+        #page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 16px 80px;
+        }
+
+        /* ── hero ── */
+        .hero-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--orange-dim);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .hero-title {
+            font-family: var(--mono);
+            font-size: 28px;
+            color: var(--orange);
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px #ff660055;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 600px) {
+            .hero-title {
+                font-size: 20px;
+                letter-spacing: 2px;
+            }
+        }
+
+        /* ── sections ── */
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--orange);
+            padding: 4px 12px;
+            background: var(--orange-glow);
+            margin-bottom: 12px;
+        }
+
+        .section-body {
+            line-height: 1.9;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .section-body p {
+            margin-bottom: 10px;
+        }
+
+        .section-body .example {
+            display: inline-block;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--yellow);
+            padding: 8px 14px;
+            margin: 8px 0;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--yellow);
+        }
+
+        /* ── search panel ── */
+        .search-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--orange-dim);
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            white-space: nowrap;
+        }
+
+        .search-prompt {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            text-shadow: 0 0 6px #ff660099;
+            user-select: none;
+        }
+
+        .search-input {
+            background: var(--bg-2);
+            color: var(--text);
+            border: 1px solid var(--orange-dim);
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 5px 10px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            min-width: 180px;
+        }
+
+        .search-input:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 8px var(--orange-glow);
+        }
+
+        select.search-input {
+            cursor: pointer;
+        }
+
+        .search-count {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            margin-left: auto;
+        }
+
+        .search-count span {
+            color: var(--orange);
+        }
+
+        /* ── entity header ── */
+        .entity-header {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--orange);
+            padding: 14px 20px 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .entity-pref {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            letter-spacing: 0.5px;
+        }
+
+        .entity-name {
+            font-family: var(--jp);
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 1px;
+            text-shadow: 0 0 24px #ffffff11;
+        }
+
+        .entity-badge {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--orange-dim);
+            border: 1px solid var(--orange-dim);
+            padding: 2px 8px;
+            letter-spacing: 1px;
+        }
+
+        /* ── kpi section header ── */
+        .kpi-section-label {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--orange);
+            padding: 4px 12px;
+            background: var(--orange-glow);
+            margin: 20px 0 8px;
+        }
+
+        /* ── kpi grid ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 2px;
+        }
+
+        /* hero card (first in grid, spans wider on larger screens) */
+        .kpi-grid.kpi-grid--hero {
+            grid-template-columns: 2fr repeat(2, 1fr) repeat(2, 1fr);
+        }
+
+        @media (max-width: 760px) {
+            .kpi-grid.kpi-grid--hero {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-grid,
+            .kpi-grid.kpi-grid--hero {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* ── kpi card ── */
+        .kpi-card {
+            background: var(--bg-panel);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card--hero {
+            padding: 16px 20px;
+            border-top: 2px solid var(--orange-dim);
+        }
+
+        .kpi-card--hero .kpi-value {
+            font-size: 28px;
+            color: var(--orange);
+        }
+
+        .kpi-card--hero .kpi-unit {
+            color: var(--orange-dim);
+        }
+
+        .kpi-card--alert .kpi-value {
+            color: var(--red);
+        }
+
+        .kpi-card--warn .kpi-value {
+            color: var(--yellow);
+        }
+
+        .kpi-card--good .kpi-value {
+            color: var(--green);
+        }
+
+        .kpi-label {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+        }
+
+        .kpi-value {
+            font-family: var(--mono);
+            font-size: 20px;
+            font-weight: 300;
+            color: var(--cyan);
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+
+        .kpi-unit {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .kpi-sub {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 0.3px;
+            border-top: 1px solid var(--border);
+            padding-top: 4px;
+            margin-top: 2px;
+        }
+
+        /* ── result list ── */
+        .list-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            margin-top: 32px;
+        }
+
+        .list-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--orange);
+            padding: 4px 12px;
+            background: var(--orange-glow);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .control-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        select,
+        input[type=text] {
+            background: var(--bg-2);
+            color: var(--text);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 4px 8px;
+            outline: none;
+        }
+
+        select:focus,
+        input[type=text]:focus {
+            border-color: var(--orange);
+        }
+
+        .result-count {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .result-count span {
+            color: var(--orange);
+        }
+
+        .table-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #result-table {
+            width: 100%;
+            min-width: 640px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        #result-table thead th {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: 0.08em;
+            text-align: left;
+            padding: 6px 10px;
+            border-bottom: 2px solid var(--orange-dim);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #result-table thead th:hover {
+            color: var(--text);
+        }
+
+        #result-table thead th.sort-active {
+            color: var(--orange);
+        }
+
+        #result-table thead th .sort-arrow {
+            margin-left: 4px;
+            font-size: 9px;
+            opacity: 0.6;
+        }
+
+        #result-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        #result-table tbody tr:hover {
+            background: var(--bg-panel);
+        }
+
+        #result-table tbody tr.selected {
+            background: #1a1400;
+            outline: 1px solid var(--orange-dim);
+        }
+
+        #result-table tbody td {
+            padding: 6px 10px;
+            vertical-align: middle;
+        }
+
+        .td-name {
+            font-family: var(--jp);
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .td-pref {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .td-val {
+            font-family: var(--mono);
+            text-align: right;
+            white-space: nowrap;
+            color: var(--cyan);
+        }
+
+        .td-val.danger { color: var(--red); }
+        .td-val.warn   { color: var(--yellow); }
+        .td-val.good   { color: var(--green); }
+
+        .td-ratio {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        /* ── loading ── */
+        #loading {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            padding: 40px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* ── simulation panel ── */
+        .sim-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--orange-dim);
+            padding: 16px;
+        }
+
+        .sim-flow {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            flex-wrap: wrap;
+        }
+
+        /* source funds column */
+        .sim-sources {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            flex: 1 1 260px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+
+        .sim-source {
+            background: var(--bg-2);
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sim-source-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .sim-source-name {
+            font-family: var(--jp);
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .sim-source-balance {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .sim-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sim-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 2px;
+            background: var(--gray-dim);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .sim-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--orange);
+            cursor: pointer;
+            box-shadow: 0 0 6px #ff660066;
+        }
+
+        .sim-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: var(--orange);
+            border: none;
+            cursor: pointer;
+        }
+
+        .sim-source-amount {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--orange);
+            text-align: right;
+            min-width: 80px;
+            white-space: nowrap;
+        }
+
+        .sim-source-pct {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--orange-dim);
+            text-align: right;
+        }
+
+        .sim-all-btn {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            background: transparent;
+            border: 1px solid var(--gray-dim);
+            padding: 1px 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .sim-all-btn:hover {
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+
+        /* arrow */
+        .sim-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+            color: var(--orange);
+            font-family: var(--mono);
+            font-size: 22px;
+            flex-shrink: 0;
+            text-shadow: 0 0 8px #ff660066;
+        }
+
+        @media (max-width: 600px) {
+            .sim-arrow {
+                padding: 8px 0;
+                transform: rotate(90deg);
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* target card */
+        .sim-target {
+            flex: 1 1 220px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--orange-dim);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .sim-target-label {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .sim-target-value {
+            font-family: var(--mono);
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--orange);
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
+
+        .sim-target-base {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray-dim);
+            border-top: 1px solid var(--border);
+            padding-top: 6px;
+        }
+
+        /* coverage bar */
+        .sim-coverage {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sim-coverage-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: 1px;
+        }
+
+        .sim-bar-track {
+            position: relative;
+            height: 20px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .sim-bar-base {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: #cc5200aa;
+            transition: width 0.3s ease;
+        }
+
+        .sim-bar-new {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--orange);
+            transition: width 0.3s ease;
+            box-shadow: 2px 0 8px #ff660066;
+        }
+
+        .sim-bar-target-line {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: var(--yellow);
+            opacity: 0.7;
+        }
+
+        .sim-bar-label {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .sim-coverage-stats {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .sim-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sim-stat-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--gray);
+            letter-spacing: 0.5px;
+        }
+
+        .sim-stat-value {
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--cyan);
+        }
+
+        .sim-stat-value.is-good { color: var(--green); }
+        .sim-stat-value.is-warn { color: var(--yellow); }
+        .sim-stat-value.is-alert { color: var(--red); }
+
+        .sim-legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+
+        /* ── sim result cards ── */
+        .sim-result-row {
+            display: flex;
+            gap: 1px;
+            margin-top: 12px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+
+        .sim-result-card {
+            flex: 1 1 0;
+            background: var(--bg-2);
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sim-result-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: 1px;
+        }
+
+        .sim-result-value {
+            font-family: var(--mono);
+            font-size: 28px;
+            font-weight: 300;
+            line-height: 1;
+            letter-spacing: -0.5px;
+            color: var(--cyan);
+            transition: color 0.2s;
+        }
+
+        .sim-result-value.is-good  { color: var(--green); }
+        .sim-result-value.is-warn  { color: var(--yellow); }
+        .sim-result-value.is-alert { color: var(--red); }
+
+        .sim-result-sub {
+            font-family: var(--jp);
+            font-size: 10px;
+            color: var(--gray-dim);
+            margin-top: 2px;
+        }
+
+        .sim-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--gray);
+        }
+
+        .sim-legend-dot {
+            width: 10px;
+            height: 10px;
+            flex-shrink: 0;
+        }
+
+        /* ── no-data placeholder ── */
+        .no-data-msg {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--gray-dim);
+            padding: 32px 0;
+            text-align: center;
+        }
+
+        /* ── pref filter tabs ── */
+        .pref-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-bottom: 8px;
+        }
+
+        .pref-tab {
+            background: var(--bg-2);
+            color: var(--gray);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 10px;
+            padding: 3px 8px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .pref-tab:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        .pref-tab.active {
+            background: var(--orange-glow);
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+
+        /* ── sim note (markdown) ── */
+        #sim-note {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--gray-dim);
+            padding: 16px 20px;
+            line-height: 1.9;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        #sim-note h1, #sim-note h2, #sim-note h3 {
+            font-family: var(--mono);
+            color: var(--orange);
+            letter-spacing: 1px;
+            margin: 16px 0 6px;
+        }
+
+        #sim-note h1 { font-size: 16px; border-left: 3px solid var(--orange); padding-left: 10px; background: var(--orange-glow); }
+        #sim-note h2 { font-size: 13px; border-left: 3px solid var(--orange-dim); padding-left: 10px; }
+        #sim-note h3 { font-size: 12px; color: var(--text-dim); }
+
+        #sim-note p { margin-bottom: 8px; }
+
+        #sim-note strong { color: var(--text); }
+
+        #sim-note code {
+            font-family: var(--mono);
+            font-size: 11px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            padding: 1px 5px;
+            color: var(--cyan);
+        }
+
+        #sim-note ul, #sim-note ol {
+            padding-left: 20px;
+            margin-bottom: 8px;
+        }
+
+        #sim-note li { margin-bottom: 4px; }
+
+        #sim-note blockquote {
+            border-left: 3px solid var(--yellow);
+            padding: 6px 12px;
+            background: var(--bg-2);
+            color: var(--yellow);
+            font-family: var(--mono);
+            font-size: 12px;
+            margin: 8px 0;
+        }
+
+        /* ── share button ── */
+        .share-btn {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            background: transparent;
+            border: 1px solid var(--gray-dim);
+            padding: 4px 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .share-btn:hover {
+            color: var(--orange);
+            border-color: var(--orange-dim);
+        }
+
+        /* ── sort controls ── */
+        .sort-tabs {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+
+        .sort-tab {
+            background: var(--bg-2);
+            color: var(--gray);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 10px;
+            padding: 3px 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sort-tab:hover { color: var(--text); border-color: var(--gray); }
+        .sort-tab.active { background: var(--orange-glow); color: var(--orange); border-color: var(--orange-dim); }
+    </style>
+</head>
+
+<body>
+
+    <div id="topbar">
+        <div class="topbar-titles">
+            <span class="title-org-name">財政革新会</span>
+            <span class="title-app-name">減債基金で公債費相殺</span>
+        </div>
+        <a class="topbar-back" href="index.html">← 決算ターミナルへ</a>
+    </div>
+
+    <div id="page">
+
+        <!-- hero -->
+        <div class="hero-label">財政健全化で減税しよう！</div>
+        <div class="hero-title">減債基金の積み増しで<br>公債費を相殺しよう</div>
+
+        <!-- explanation sections -->
+        <div class="section">
+            <div class="section-title">なぜ減債基金を積み増すべきか？</div>
+            <div class="section-body">
+                <p>
+                    公債費（地方債の元利償還金）は、自治体の経常的な支出の中でも大きな割合を占めており、
+                    財政の硬直化を招く主な原因の一つです。
+                </p>
+                <p>
+                    <strong>減債基金</strong>とは、将来の公債費（地方債の償還）に備えて積み立てる基金です。
+                    この基金を積み増すことで、将来の公債費負担を軽減し、財政の健全化を図ることができます。
+                </p>
+                <div class="example">
+                    例：公債費の経常収支比率が20%を超える自治体では、
+                    経常的な収入の5分の1以上が公債費に充てられています。<br>
+                    減債基金を積み増し、繰上償還に充てることで、この比率を引き下げ、
+                    住民サービスの向上や減税の財源を確保できます。
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">財政調整基金（財調）との違い</div>
+            <div class="section-body">
+                <p>
+                    <strong>財政調整基金（財調）</strong>は年度間の財政の不均衡を調整するための基金です。
+                    景気の変動や突発的な歳入減に備えるバッファーとして機能します。
+                </p>
+                <p>
+                    一方、<strong>減債基金</strong>は地方債の償還に特化した基金です。
+                    財調を取り崩して公債費に充てることもできますが、
+                    財調の本来の目的を損なわずに公債費を相殺するためには、
+                    減債基金を専門的に積み増すことが重要です。
+                </p>
+            </div>
+        </div>
+
+        <!-- list section -->
+        <div>
+            <div class="list-header">
+                <div class="list-title">自治体別・公債費・積立金一覧</div>
+            </div>
+
+            <div id="loading">
+                <span>&gt;_</span>
+                <span>データを読み込んでいます</span>
+                <span class="blink">█</span>
+            </div>
+
+            <div id="controls" style="display:none;">
+                <!-- pref filter -->
+                <div class="control-group" style="align-items:flex-start; flex-direction:column; gap:6px;">
+                    <span class="control-label">都道府県で絞り込み：</span>
+                    <div class="pref-tabs" id="pref-tabs">
+                        <button class="pref-tab active" data-pref="">すべて</button>
+                    </div>
+                </div>
+
+                <!-- sort -->
+                <div class="control-group">
+                    <span class="control-label">並び替え：</span>
+                    <div class="sort-tabs" id="sort-tabs">
+                        <button class="sort-tab active" data-sort="kousaihi_ratio">公債費率 ↓</button>
+                        <button class="sort-tab" data-sort="chihou_sai">地方債残高 ↓</button>
+                        <button class="sort-tab" data-sort="gensai_ratio">減債比率 ↑</button>
+                        <button class="sort-tab" data-sort="name_asc">団体名 A→Z</button>
+                    </div>
+                </div>
+
+                <!-- text search -->
+                <div class="control-group">
+                    <span class="control-label">団体名検索：</span>
+                    <input type="text" id="name-search" placeholder="例：橋本市" style="min-width:160px;">
+                </div>
+
+                <div class="result-count" id="result-count"></div>
+
+                <div class="table-scroll-wrapper">
+                    <table id="result-table">
+                        <thead>
+                            <tr>
+                                <th style="width:110px">都道府県</th>
+                                <th style="width:140px">団体名</th>
+                                <th style="width:120px; text-align:right">地方債現在高</th>
+                                <th style="width:120px; text-align:right">公債費決算額</th>
+                                <th style="width:80px; text-align:right">構成比</th>
+                                <th style="width:100px; text-align:right">経常収支比率</th>
+                                <th style="width:120px; text-align:right">減債基金</th>
+                                <th style="width:120px; text-align:right">財調</th>
+                                <th style="width:120px; text-align:right">特定目的基金</th>
+                            </tr>
+                        </thead>
+                        <tbody id="result-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- selected entity detail -->
+        <div id="detail-section" style="display:none; margin-top:32px;">
+            <div id="entity-header" class="entity-header"></div>
+
+            <div class="kpi-section-label">▸ 地方債・公債費の状況</div>
+            <div class="kpi-grid kpi-grid--hero" id="kpi-debt"></div>
+
+            <div class="kpi-section-label" style="margin-top:16px;">▸ 減債基金への振替シミュレーション</div>
+            <div id="sim-panel"></div>
+            <div id="sim-note" style="display:none; margin-top:16px;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // ── formatter ───────────────────────────────────────────
+        function fmtKin(v) {
+            if (v == null || !Number.isFinite(+v)) return '—'
+            const n = +v
+            const MAN = 10_000, OKU = 100_000_000
+            if (Math.abs(n) >= OKU * 10)
+                return (n / OKU).toLocaleString('ja-JP', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' 億円'
+            if (Math.abs(n) >= OKU)
+                return (n / OKU).toLocaleString('ja-JP', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + ' 億円'
+            if (Math.abs(n) >= MAN)
+                return (n / MAN).toLocaleString('ja-JP', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' 万円'
+            return n.toLocaleString('ja-JP') + ' 千円'
+        }
+
+        function fmtPct(v) {
+            if (v == null || !Number.isFinite(+v)) return '—'
+            return (+v).toLocaleString('ja-JP', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%'
+        }
+
+        // ── simulation metrics ───────────────────────────────────
+        function sousaiRitsu(newGensai, kousaihi) {
+            if (!kousaihi) return 0
+            return Math.min(newGensai / kousaihi * 100, 100)
+        }
+
+        function kousaihiSakugenGaku(newGensai, kousaihi) {
+            return Math.min(newGensai, kousaihi)
+        }
+
+        // ── KPI card builder ─────────────────────────────────────
+        function kpiCard({ label, value, unit, sub, hero, colorClass }) {
+            const cls = [
+                'kpi-card',
+                hero ? 'kpi-card--hero' : '',
+                colorClass || ''
+            ].filter(Boolean).join(' ')
+            return `<div class="${cls}">
+                <div class="kpi-label">${label}</div>
+                <div class="kpi-value">${value}</div>
+                ${unit ? `<div class="kpi-unit">${unit}</div>` : ''}
+                ${sub ? `<div class="kpi-sub">${sub}</div>` : ''}
+            </div>`
+        }
+
+        // ── color class for 経常収支比率 ────────────────────────
+        function kousaihiColorClass(ratio) {
+            if (ratio >= 25) return 'kpi-card--alert'
+            if (ratio >= 18) return 'kpi-card--warn'
+            return ''
+        }
+
+        // ── markdown loader ──────────────────────────────────────
+        function mdToHtml(md) {
+            return md
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+                .replace(/^- (.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>\n?)+/g, s => `<ul>${s}</ul>`)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.+?)`/g, '<code>$1</code>')
+                .replace(/\n{2,}/g, '</p><p>')
+                .replace(/^(?!<[hbuol])(.+)$/gm, '$1')
+                .replace(/^<\/p><p>$/, '')
+                .replace(/(^|\n)(?!<)([^\n<][^\n]*)(\n|$)/g, '$1<p>$2</p>$3')
+        }
+
+        async function loadSimNote() {
+            const el = document.getElementById('sim-note')
+            try {
+                const res = await fetch('gensai-sousai-note.md')
+                if (!res.ok) return
+                const text = await res.text()
+                el.innerHTML = mdToHtml(text)
+                el.style.display = ''
+            } catch (_) { /* ファイルがなければ非表示のまま */ }
+        }
+
+        // ── share link ───────────────────────────────────────────
+        const ICON_LINK  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
+        const ICON_CHECK = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><polyline points="20 6 9 17 4 12"/></svg>`
+
+        function copyShareUrl(pref, dantai) {
+            const url = new URL(location.href)
+            url.searchParams.set('pref', pref)
+            url.searchParams.set('dantai', dantai)
+            const btn = document.getElementById('btn-share')
+            const reset = () => { btn.innerHTML = ICON_LINK + '共有リンク' }
+            navigator.clipboard.writeText(url.toString()).then(() => {
+                btn.innerHTML = ICON_CHECK + 'コピーしました'
+                setTimeout(reset, 2000)
+            }).catch(() => {
+                const ta = document.createElement('textarea')
+                ta.value = url.toString()
+                document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+                btn.innerHTML = ICON_CHECK + 'コピーしました'
+                setTimeout(reset, 2000)
+            })
+        }
+
+        // ── render entity detail ─────────────────────────────────
+        function renderDetail(d) {
+            // URL に自治体を反映
+            const url = new URL(location.href)
+            url.searchParams.set('pref', d['都道府県名'] || '')
+            url.searchParams.set('dantai', d['団体名'] || '')
+            history.replaceState(null, '', url)
+
+            // header
+            document.getElementById('entity-header').innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <span class="entity-pref">${d['都道府県名'] || ''}</span>
+                    <span class="entity-name">${d['団体名'] || ''}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+                    <span class="entity-badge">令和5年度 決算</span>
+                    <button id="btn-share" class="share-btn">${ICON_LINK}共有リンク</button>
+                </div>
+            `
+            document.getElementById('btn-share').addEventListener('click', () =>
+                copyShareUrl(d['都道府県名'] || '', d['団体名'] || '')
+            )
+
+            // group 1: debt
+            const ratioColor = kousaihiColorClass(d['公債費.経常収支比率'])
+            document.getElementById('kpi-debt').innerHTML =
+                kpiCard({
+                    label: '地方債現在高',
+                    value: fmtKin(d['地方債']),
+                    unit: '（残高）',
+                    hero: true,
+                    colorClass: 'kpi-card--hero'
+                }) +
+                kpiCard({
+                    label: '公債費 決算額',
+                    value: fmtKin(d['公債費.決算額']),
+                    unit: ''
+                }) +
+                kpiCard({
+                    label: '公債費 構成比',
+                    value: fmtPct(d['公債費.構成比']),
+                    unit: '（歳出に占める割合）'
+                }) +
+                kpiCard({
+                    label: '経常収支比率（公債費）',
+                    value: fmtPct(d['公債費.経常収支比率']),
+                    unit: '（経常収入に対する割合）',
+                    sub: d['公債費.経常収支比率'] >= 18 ? '⚠ 18%超：財政硬直化の兆候' : '',
+                    colorClass: ratioColor
+                }) +
+                kpiCard({
+                    label: '経常経費充当一般財源等',
+                    value: fmtKin(d['公債費.経常経費充当一般財源等']),
+                    unit: ''
+                })
+
+            // group 2: simulation panel
+            const gensai   = d['減債']     || 0
+            const zaichou  = d['財調']     || 0
+            const tokutei  = d['特定目的'] || 0
+            const tsumitate = d['積立金']  || 0
+            const kousaihi = d['公債費.決算額'] || 0
+
+            const sources = [
+                { key: 'tsumitate', label: '積立金（今年度積立額）', max: tsumitate, val: tsumitate },
+                { key: 'zaichou',   label: '財政調整基金（財調）',   max: zaichou,  val: 0 },
+                { key: 'tokutei',   label: '特定目的基金',           max: tokutei,  val: 0 },
+            ]
+
+            document.getElementById('sim-panel').innerHTML = renderSimPanel(gensai, kousaihi, sources)
+            bindSimEvents(gensai, kousaihi, sources)
+
+            document.getElementById('detail-section').style.display = ''
+        }
+
+        // ── simulation panel renderer ─────────────────────────────
+        function renderSimPanel(gensaiBase, kousaihi, sources) {
+            const sourceHtml = sources.map(s => `
+                <div class="sim-source" data-key="${s.key}">
+                    <div class="sim-source-head">
+                        <span class="sim-source-name">${s.label}</span>
+                        <span class="sim-source-balance">${fmtKin(s.max)}</span>
+                    </div>
+                    <div class="sim-slider-row">
+                        <input type="range" class="sim-slider" data-key="${s.key}"
+                            min="0" max="${s.max}" step="${Math.max(1, Math.floor(s.max / 200))}"
+                            value="${s.val}">
+                        <button class="sim-all-btn" data-key="${s.key}">全額</button>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                        <span style="font-family:var(--mono);font-size:9px;color:var(--gray);">振替額</span>
+                        <div>
+                            <span class="sim-source-amount" id="sim-amt-${s.key}">${fmtKin(s.val)}</span>
+                            <div class="sim-source-pct" id="sim-pct-${s.key}">${s.max > 0 ? fmtPct(s.val / s.max * 100) : '—'}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+
+            return `<div class="sim-panel">
+                <div class="sim-flow">
+                    <div class="sim-sources">${sourceHtml}</div>
+                    <div class="sim-arrow">→</div>
+                    <div class="sim-target">
+                        <div class="sim-target-label">減債基金（シミュレーション）</div>
+                        <div class="sim-target-value" id="sim-total">—</div>
+                        <div class="sim-target-base" id="sim-target-base">現在の残高: ${fmtKin(gensaiBase)}</div>
+                    </div>
+                </div>
+                <div class="sim-coverage">
+                    <div class="sim-coverage-label">公債費カバー率（公債費決算額 ${fmtKin(kousaihi)} 比）</div>
+                    <div class="sim-bar-track">
+                        <div class="sim-bar-base"  id="sim-bar-base" style="width:0%"></div>
+                        <div class="sim-bar-new"   id="sim-bar-new"  style="width:0%"></div>
+                        <div class="sim-bar-label" id="sim-bar-label"></div>
+                    </div>
+                    <div class="sim-legend">
+                        <div class="sim-legend-item">
+                            <div class="sim-legend-dot" style="background:#cc5200aa;"></div>現在の減債基金
+                        </div>
+                        <div class="sim-legend-item">
+                            <div class="sim-legend-dot" style="background:var(--orange);"></div>振替後の減債基金
+                        </div>
+                    </div>
+                    <div class="sim-coverage-stats">
+                        <div class="sim-stat">
+                            <span class="sim-stat-label">現在のカバー率</span>
+                            <span class="sim-stat-value" id="sim-cover-base">—</span>
+                        </div>
+                        <div class="sim-stat">
+                            <span class="sim-stat-label">→ 振替後のカバー率</span>
+                            <span class="sim-stat-value" id="sim-cover-new">—</span>
+                        </div>
+                        <div class="sim-stat">
+                            <span class="sim-stat-label">振替合計額</span>
+                            <span class="sim-stat-value" id="sim-transfer-total">—</span>
+                        </div>
+                    </div>
+                    <div class="sim-result-row">
+                        <div class="sim-result-card">
+                            <div class="sim-result-label">公債費 相殺率</div>
+                            <div class="sim-result-value" id="sim-sousai-ritsu">—</div>
+                            <div class="sim-result-sub">減債基金で相殺できる公債費の割合</div>
+                        </div>
+                        <div class="sim-result-card">
+                            <div class="sim-result-label">見込み相殺額</div>
+                            <div class="sim-result-value" id="sim-sakugen-gaku">—</div>
+                            <div class="sim-result-sub">公債費から実際に削減できる金額</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`
+        }
+
+        // ── bind simulation events ────────────────────────────────
+        function bindSimEvents(gensaiBase, kousaihi, sources) {
+            const state = Object.fromEntries(sources.map(s => [s.key, s.val]))
+
+            function update() {
+                const transfer = Object.values(state).reduce((a, b) => a + b, 0)
+                const newTotal = gensaiBase + transfer
+
+                document.getElementById('sim-total').textContent = fmtKin(newTotal)
+
+                const basePct = kousaihi > 0 ? gensaiBase / kousaihi * 100 : 0
+                const newPct  = kousaihi > 0 ? newTotal   / kousaihi * 100 : 0
+
+                const barBase = Math.min(basePct, 100)
+                const barNew  = Math.min(newPct, 100)
+                document.getElementById('sim-bar-base').style.width = barBase + '%'
+                document.getElementById('sim-bar-new').style.width  = barNew  + '%'
+                document.getElementById('sim-bar-label').textContent = fmtPct(newPct)
+
+                const coverBase = document.getElementById('sim-cover-base')
+                const coverNew  = document.getElementById('sim-cover-new')
+                coverBase.textContent = fmtPct(basePct)
+                coverNew.textContent  = fmtPct(newPct)
+
+                const colorClass = newPct >= 100 ? 'is-good' : newPct >= 50 ? '' : 'is-alert'
+                coverNew.className = 'sim-stat-value ' + colorClass
+
+                document.getElementById('sim-transfer-total').textContent = fmtKin(transfer)
+
+                const ritsu = sousaiRitsu(newTotal, kousaihi)
+                const sakugen = kousaihiSakugenGaku(newTotal, kousaihi)
+                const ritsuEl = document.getElementById('sim-sousai-ritsu')
+                ritsuEl.textContent = fmtPct(ritsu)
+                ritsuEl.className = 'sim-result-value ' +
+                    (ritsu >= 100 ? 'is-good' : ritsu >= 50 ? 'is-warn' : 'is-alert')
+                document.getElementById('sim-sakugen-gaku').textContent = fmtKin(sakugen)
+
+                // update per-source displays
+                sources.forEach(s => {
+                    document.getElementById('sim-amt-' + s.key).textContent = fmtKin(state[s.key])
+                    const pctEl = document.getElementById('sim-pct-' + s.key)
+                    pctEl.textContent = s.max > 0 ? fmtPct(state[s.key] / s.max * 100) : '—'
+                })
+            }
+
+            document.querySelectorAll('.sim-slider').forEach(slider => {
+                slider.addEventListener('input', () => {
+                    state[slider.dataset.key] = +slider.value
+                    update()
+                })
+            })
+
+            document.querySelectorAll('.sim-all-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const key = btn.dataset.key
+                    const src = sources.find(s => s.key === key)
+                    state[key] = src.max
+                    document.querySelector(`.sim-slider[data-key="${key}"]`).value = src.max
+                    update()
+                })
+            })
+
+            update()
+        }
+
+        // ── state ────────────────────────────────────────────────
+        let allData = []
+        let filteredData = []
+        let selectedPref = ''
+        let sortKey = 'kousaihi_ratio'
+        let nameQuery = ''
+        let selectedRow = null
+
+        // ── sort comparators ─────────────────────────────────────
+        function sortData(data) {
+            return [...data].sort((a, b) => {
+                switch (sortKey) {
+                    case 'kousaihi_ratio':
+                        return (b['公債費.経常収支比率'] || 0) - (a['公債費.経常収支比率'] || 0)
+                    case 'chihou_sai':
+                        return (b['地方債'] || 0) - (a['地方債'] || 0)
+                    case 'gensai_ratio': {
+                        const ra = a['公債費.決算額'] > 0 ? (a['減債'] || 0) / a['公債費.決算額'] : 0
+                        const rb = b['公債費.決算額'] > 0 ? (b['減債'] || 0) / b['公債費.決算額'] : 0
+                        return ra - rb
+                    }
+                    case 'name_asc':
+                        return (a['団体名'] || '').localeCompare(b['団体名'] || '', 'ja')
+                    default:
+                        return 0
+                }
+            })
+        }
+
+        // ── render table ─────────────────────────────────────────
+        function renderTable() {
+            let data = allData
+
+            if (selectedPref) data = data.filter(d => d['都道府県名'] === selectedPref)
+            if (nameQuery) {
+                const q = nameQuery.trim()
+                data = data.filter(d =>
+                    (d['団体名'] || '').includes(q) || (d['都道府県名'] || '').includes(q)
+                )
+            }
+
+            filteredData = sortData(data)
+
+            const count = document.getElementById('result-count')
+            count.innerHTML = `<span>${filteredData.length.toLocaleString()}</span> 件`
+
+            const tbody = document.getElementById('result-body')
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="no-data-msg">該当する自治体がありません</td></tr>`
+                return
+            }
+
+            tbody.innerHTML = filteredData.map((d, i) => {
+                const ratio = d['公債費.経常収支比率']
+                const ratioClass = ratio >= 25 ? 'danger' : ratio >= 18 ? 'warn' : ''
+                return `<tr data-idx="${i}">
+                    <td class="td-pref">${d['都道府県名'] || ''}</td>
+                    <td class="td-name">${d['団体名'] || ''}</td>
+                    <td class="td-val">${fmtKin(d['地方債'])}</td>
+                    <td class="td-val">${fmtKin(d['公債費.決算額'])}</td>
+                    <td class="td-ratio">${fmtPct(d['公債費.構成比'])}</td>
+                    <td class="td-val ${ratioClass}">${fmtPct(d['公債費.経常収支比率'])}</td>
+                    <td class="td-val">${fmtKin(d['減債'])}</td>
+                    <td class="td-val">${fmtKin(d['財調'])}</td>
+                    <td class="td-val">${fmtKin(d['特定目的'])}</td>
+                </tr>`
+            }).join('')
+
+            // click to show detail
+            tbody.querySelectorAll('tr').forEach(tr => {
+                tr.addEventListener('click', () => {
+                    if (selectedRow) selectedRow.classList.remove('selected')
+                    tr.classList.add('selected')
+                    selectedRow = tr
+                    const idx = +tr.dataset.idx
+                    renderDetail(filteredData[idx])
+                    document.getElementById('detail-section').scrollIntoView({ behavior: 'smooth', block: 'start' })
+                })
+            })
+        }
+
+        // ── build pref tabs ──────────────────────────────────────
+        function buildPrefTabs() {
+            const prefs = [...new Set(allData.map(d => d['都道府県名']).filter(Boolean))].sort((a, b) =>
+                a.localeCompare(b, 'ja'))
+            const container = document.getElementById('pref-tabs')
+            container.innerHTML = `<button class="pref-tab active" data-pref="">すべて</button>` +
+                prefs.map(p => `<button class="pref-tab" data-pref="${p}">${p}</button>`).join('')
+
+            container.querySelectorAll('.pref-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.pref-tab').forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    selectedPref = btn.dataset.pref
+                    renderTable()
+                })
+            })
+        }
+
+        // ── data loading ─────────────────────────────────────────
+        async function init() {
+            // Try to fetch data from JSON (generated from parquet by server.py)
+            // Falls back to embedded sample data if not available
+            let data = null
+            try {
+                const res = await fetch('gensai-sousai-data.json')
+                if (res.ok) data = await res.json()
+            } catch (_) { /* ignore */ }
+
+            if (!data) {
+                // Embedded sample data — replace with generated JSON in production
+                data = [
+                    {
+                        '都道府県名': '和歌山県',
+                        '団体名': '橋本市',
+                        '積立金': 3490,
+                        '公債費.構成比': 10.9,
+                        '公債費.決算額': 3318265,
+                        '公債費.経常収支比率': 19.6,
+                        '公債費.経常経費充当一般財源等': 3318158,
+                        '地方債': 24166172,
+                        '財調': 3564767,
+                        '減債': 360995,
+                        '特定目的': 1938263
+                    }
+                ]
+            }
+
+            allData = data
+
+            document.getElementById('loading').style.display = 'none'
+            document.getElementById('controls').style.display = ''
+
+            buildPrefTabs()
+
+            // sort tabs
+            document.getElementById('sort-tabs').querySelectorAll('.sort-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('sort-tabs').querySelectorAll('.sort-tab')
+                        .forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    sortKey = btn.dataset.sort
+                    renderTable()
+                })
+            })
+
+            // name search
+            document.getElementById('name-search').addEventListener('input', e => {
+                nameQuery = e.target.value
+                renderTable()
+            })
+
+            renderTable()
+
+            // URL パラメータで自治体が指定されていれば自動選択
+            const params = new URLSearchParams(location.search)
+            const paramPref   = params.get('pref')
+            const paramDantai = params.get('dantai')
+            if (paramPref && paramDantai) {
+                const hit = allData.find(d =>
+                    d['都道府県名'] === paramPref && d['団体名'] === paramDantai
+                )
+                if (hit) {
+                    renderDetail(hit)
+                    document.getElementById('detail-section').scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+            } else if (allData.length === 1) {
+                renderDetail(allData[0])
+            }
+        }
+
+        init()
+        loadSimNote()
+    </script>
+
+</body>
+
+</html>
