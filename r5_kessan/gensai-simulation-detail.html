@@ -149,7 +149,7 @@
             background: var(--bg-panel);
             border: 1px solid var(--border);
             border-top: 3px solid var(--orange);
-            padding: 16px 20px 14px;
+            padding: 16px 20px 48px;
             margin-bottom: 20px;
             display: flex;
             align-items: flex-end;
@@ -185,6 +185,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-left: auto;
         }
 
         .entity-badge {
@@ -201,6 +202,9 @@
 
         /* ── share button ── */
         .share-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 14px;
             font-family: var(--mono);
             font-size: 11px;
             color: var(--gray);
@@ -215,6 +219,27 @@
         .share-btn:hover {
             color: var(--orange);
             border-color: var(--orange-dim);
+        }
+
+        .kessan-link-btn {
+            position: absolute;
+            bottom: 12px;
+            left: 14px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--cyan);
+            border: 1px solid #006688;
+            background: #00ccff0d;
+            padding: 4px 10px;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color .15s, border-color .15s, background .15s;
+        }
+
+        .kessan-link-btn:hover {
+            color: var(--text);
+            border-color: var(--cyan);
+            background: #00ccff1a;
         }
 
         /* ── section label ── */
@@ -331,6 +356,19 @@
             border-top: 1px solid var(--border);
             padding-top: 4px;
             margin-top: 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .kpi-sub-label {
+            font-size: 9px;
+            color: var(--gray);
+        }
+
+        .kpi-sub-value {
+            font-size: 11px;
+            color: var(--text-dim);
         }
 
         /* ── scenario table (Design D: 差分ウォーターフォール型) ── */
@@ -341,7 +379,7 @@
 
         .d-head {
             display: grid;
-            grid-template-columns: 160px 1fr 90px;
+            grid-template-columns: 160px 1fr 130px;
             background: var(--bg-2);
             border-bottom: 1px solid var(--border);
             padding: 6px 14px;
@@ -360,7 +398,7 @@
 
         .d-row {
             display: grid;
-            grid-template-columns: 160px 1fr 90px;
+            grid-template-columns: 160px 1fr 130px;
             align-items: center;
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
@@ -437,9 +475,10 @@
         .d-pct {
             padding: 10px 14px 10px 0;
             font-family: var(--mono);
-            font-size: 20px;
+            font-size: 22px;
             text-align: right;
             color: var(--cyan);
+            line-height: 1.1;
         }
 
         .d-delta {
@@ -452,21 +491,22 @@
 
         .d-amount {
             font-family: var(--mono);
-            font-size: 10px;
-            color: var(--gray);
+            font-size: 14px;
+            color: inherit;
             text-align: right;
-            margin-top: 2px;
+            margin-top: 4px;
+            letter-spacing: -.3px;
         }
 
-        .d-pct.is-full {
+        .d-pct.is-half {
             color: var(--green);
         }
 
-        .d-pct.is-high {
+        .d-pct.is-quater {
             color: var(--cyan);
         }
 
-        .d-pct.is-mid {
+        .d-pct.is-tenth {
             color: var(--yellow);
         }
 
@@ -478,7 +518,7 @@
 
             .d-head,
             .d-row {
-                grid-template-columns: 110px 1fr 70px;
+                grid-template-columns: 100px 1fr 100px;
             }
 
             .d-label {
@@ -487,8 +527,12 @@
             }
 
             .d-pct {
-                font-size: 14px;
+                font-size: 16px;
                 padding: 8px 10px 8px 0;
+            }
+
+            .d-amount {
+                font-size: 11px;
             }
 
             .d-bar-name {
@@ -659,7 +703,7 @@
             const MAN = 10
             const OKU = 10_0000
             const CHO = 10_0000_0000
-            const maximumFractionDigits = 3
+            const maximumFractionDigits = 2
             const minimumFractionDigits = 0
             const opt = { maximumFractionDigits, minimumFractionDigits }
             const absV = Math.abs(v)
@@ -690,13 +734,23 @@
         }
 
         // ── KPI card builder ─────────────────────────────────────
+        // sub: { label, value } | { label, value }[] | string
         function kpiCard({ label, value, unit, sub, hero, colorClass }) {
             const cls = ['kpi-card', hero ? 'kpi-card--hero' : '', colorClass || ''].filter(Boolean).join(' ')
+            let subHtml = ''
+            if (sub) {
+                const items = Array.isArray(sub) ? sub : [sub]
+                subHtml = `<div class="kpi-sub">${items.map(s =>
+                    typeof s === 'object'
+                        ? `<span class="kpi-sub-label">${s.label}</span><span class="kpi-sub-value">${s.value}</span>`
+                        : `<span>${s}</span>`
+                ).join('')}</div>`
+            }
             return `<div class="${cls}">
                 <div class="kpi-label">${label}</div>
                 <div class="kpi-value">${value}</div>
                 ${unit ? `<div class="kpi-unit">${unit}</div>` : ''}
-                ${sub ? `<div class="kpi-sub">${sub}</div>` : ''}
+                ${subHtml}
             </div>`
         }
 
@@ -765,6 +819,7 @@
                 </div>
                 <div class="eh-actions">
                     <span class="entity-badge">令和5年度 決算</span>
+                    <a class="kessan-link-btn" href="index.html#/detail?id=${encodeURIComponent(d['id'] || '')}">決算データ →</a>
                     <button id="btn-share" class="share-btn">${ICON_LINK}共有リンク</button>
                 </div>
             `
@@ -775,9 +830,9 @@
                 `${name}の地方債残高`
             const ratioColor = kousaihiColorClass(d['公債費.経常収支比率'])
             document.getElementById('kpi-debt').innerHTML =
-                kpiCard({ label: '地方債現在高', value: fmtKin(d['地方債']), unit: '残高', hero: true }) +
-                kpiCard({ label: '公債費　決算額', value: fmtKin(d['公債費.決算額']), sub: '歳出に占める割合：' + fmtPct(d['公債費.構成比']) }) +
-                kpiCard({ label: '公債費　構成比', value: fmtPct(d['公債費.構成比']), sub: d['公債費.経常収支比率'] >= 18 ? '⚠ 経常収支比率 ' + fmtPct(d['公債費.経常収支比率']) + ' — 18%超' : '経常収支比率 ' + fmtPct(d['公債費.経常収支比率']), colorClass: ratioColor })
+                kpiCard({ label: '地方債現在高', value: fmtKin(d['地方債']), hero: true }) +
+                kpiCard({ label: '公債費　決算額', value: fmtKin(d['公債費.決算額']), sub: { label: '経常経費充当一般財源等', value: fmtKin(d['公債費.経常経費充当一般財源等']) } }) +
+                kpiCard({ label: '公債費　構成比', value: fmtPct(d['公債費.構成比']), sub: { label: '経常収支比率', value: fmtPct(d['公債費.経常収支比率']) }, colorClass: ratioColor })
 
             // Section 2: 積立金や基金
             document.getElementById('section-label-fund').innerHTML =
@@ -798,60 +853,56 @@
         function ratioClass(r) {
             if (r == null || !Number.isFinite(+r)) return ''
             const v = +r
-            if (v >= 100) return 'is-full'
-            if (v >= 75) return 'is-high'
-            if (v >= 40) return 'is-mid'
+            if (v >= 50) return 'is-half'
+            if (v >= 20) return 'is-quater'
+            if (v >= 10) return 'is-tenth'
             return 'is-low'
         }
 
         function renderScenarios(d) {
             const scenarios = [
                 { label: '減債のみ', color: 'var(--c-gensai)', name: '減債', rKey: '相殺割合.減債', aKey: '相殺額.減債' },
-                { label: '＋ 財調を半分だけ投入', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.05財調', aKey: '相殺額.05財調' },
-                { label: '＋ 財調を全額投入', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.10財調', aKey: '相殺額.10財調' },
+                { label: '＋ 財調を半分投入', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.05財調', aKey: '相殺額.05財調' },
+                { label: '＋ 財調を全部投入', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.10財調', aKey: '相殺額.10財調' },
                 { label: '＋ 積立金', color: 'var(--c-tsumitate)', name: '積立金', rKey: '相殺割合.積立金', aKey: '相殺額.積立金' },
-                { label: '＋ 特定目的を3割投入', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.03特定目的', aKey: '相殺額.03特定目的' },
-                { label: '＋ 特定目的を7割投入', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.07特定目的', aKey: '相殺額.07特定目的' },
+                { label: '＋ 特定目的を半分投入', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.05特定目的', aKey: '相殺額.05特定目的' },
+                { label: '＋ 特定目的を全部入', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.10特定目的', aKey: '相殺額.10特定目的' },
             ]
 
-            let prevRatio = 0, prevAmount = 0
+            const ratios = scenarios.map(sc => +(d[sc.rKey] * 100) || 0)
+            const amounts = scenarios.map(sc => +(d[sc.aKey]) || 0)
+
             return scenarios.map((sc, i) => {
-                const ratio = +(d[sc.rKey] * 100) || 0
-                const amount = +(d[sc.aKey]) || 0
+                const ratio = ratios[i]
+                const amount = amounts[i]
+                const prevRatio = i > 0 ? ratios[i - 1] : 0
+                const prevAmount = i > 0 ? amounts[i - 1] : 0
                 const delta = ratio - prevRatio
                 const deltaAmt = amount - prevAmount
-                const baseW = Math.min(prevRatio, 100)
-                const newW = Math.max(0, Math.min(delta, 100 - baseW))
-                console.log({ amount })
+
+                // 各セグメント: j=0..i-1 は暗め、j=i は明るく
+                const segs = Array.from({ length: i + 1 }, (_, j) => {
+                    const left = Math.min(j > 0 ? ratios[j - 1] : 0, 100)
+                    const width = Math.max(0, Math.min(ratios[j] - (j > 0 ? ratios[j - 1] : 0), 100 - left))
+                    return `<div style="position:absolute;top:0;left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;height:100%;background:${scenarios[j].color};opacity:${j < i ? 0.3 : 1};${j === i ? 'border-right:2px solid rgba(255,255,255,.2)' : ''}"></div>`
+                }).join('')
+
+                const barHtml = `<div class="d-bar-row">
+                    <div class="d-bar-track">${segs}</div>
+                </div>`
+
                 const addLabel = i === 0
                     ? fmtKin(amount)
-                    : (i === 4 ? 'さらに＋ ' : '＋ ') + fmtKin(deltaAmt)
-
-                const barHtml = i === 0
-                    ? `<div class="d-bar-row">
-                            <div class="d-bar-track">
-                                <div class="d-bar-new" style="left:0;width:${newW.toFixed(2)}%;background:${sc.color}"></div>
-                            </div>
-                       </div>`
-                    : `<div class="d-bar-row">
-                            <div class="d-bar-track">
-                                <div class="d-bar-base" style="left:0;width:${baseW.toFixed(2)}%;background:var(--gray-dim)"></div>
-                                <div class="d-bar-new" style="left:${baseW.toFixed(2)}%;width:${newW.toFixed(2)}%;background:${sc.color}"></div>
-                            </div>
-                       </div>`
+                    : (i === 5 ? 'さらに＋ ' : '＋ ') + fmtKin(deltaAmt)
 
                 const deltaStr = i > 0
                     ? `<div class="d-delta">▲${delta.toFixed(1)}pt</div>`
                     : ''
 
-                const pctCls = ratioClass(ratio)
-                prevRatio = ratio
-                prevAmount = amount
-
                 return `<div class="d-row">
                     <div class="d-label"><span style="color:${sc.color}">${sc.label}</span><br><span class="d-add-label">${addLabel}</span></div>
                     <div class="d-bars">${barHtml}</div>
-                    <div class="d-pct ${pctCls}">${fmtPct(ratio)}${deltaStr}<div class="d-amount">${fmtKin(amount)}</div></div>
+                    <div class="d-pct ${ratioClass(ratio)}"><div class="d-amount">${fmtKin(amount)}</div>${fmtPct(ratio)}${deltaStr}</div>
                 </div>`
             }).join('')
         }
@@ -879,8 +930,8 @@
                     '相殺額.05財調': 2143483, '相殺割合.05財調': 8.9,
                     '相殺額.10財調': 3925478, '相殺割合.10財調': 16.2,
                     '相殺額.積立金': 3928968, '相殺割合.積立金': 16.3,
-                    '相殺額.03特定目的': 4510627, '相殺割合.03特定目的': 18.7,
-                    '相殺額.07特定目的': 5285884, '相殺割合.07特定目的': 21.9,
+                    '相殺額.05特定目的': 4510627, '相殺割合.05特定目的': 18.7,
+                    '相殺額.10特定目的': 5285884, '相殺割合.10特定目的': 21.9,
                 }]
             }
 

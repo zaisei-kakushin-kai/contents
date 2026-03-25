@@ -398,22 +398,27 @@
 
         /* ── pref tabs ── */
         .pref-tabs {
-            display: flex;
+            display: inline-flex;
             flex-wrap: wrap;
             gap: 2px;
             margin-bottom: 8px;
         }
 
         .pref-tab {
+            flex-grow: 1;
             background: var(--bg-2);
             color: var(--gray);
             border: 1px solid var(--gray-dim);
-            font-family: var(--mono);
+            font-family: var(--jp);
             font-size: 10px;
-            padding: 3px 8px;
+            padding: 3px 0;
+            width: 80px;
+            text-align: center;
             cursor: pointer;
             user-select: none;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .pref-tab:hover {
@@ -512,8 +517,8 @@
             <div class="section-title">政府の保有資産は減債に充てるべきか？</div>
             <div class="section-body">
                 <p>
-                    政府の管理下にある莫大な資産は常に横領や流用の危険にさらされており、
-                    基金を積み上げている理由にも合理性がないことが珍しくありません。
+                    政府の管理下にある莫大な資産は常に横領や流用の危険にさらされているため、将来にわたって確実に恩恵がある「償還費・利払費の削減」という手段によって、歳出を減らすべきです。
+                    また、特に合理的な理由の無いまま、基金を積み上げていることも珍しくありません。
                     <br>
                     政府債務残高の削減は、確実に償還費と利払費の負担を軽減することができるため、
                     将来にわたって自治体の財政状況を改善することができます。
@@ -579,10 +584,11 @@
                                         class="sort-arrow">↕</span></th>
                                 <th style="width:140px; text-align:right" data-sort-col="地方債" data-sort-type="num">
                                     地方債現在高<span class="sort-arrow">↕</span></th>
-                                <th style="width:140px; text-align:right" data-sort-col="公債費.決算額" data-sort-type="num">
-                                    公債費決算額<span class="sort-arrow">↕</span></th>
-                                <th style="width:140px; text-align:right" data-sort-col="相殺額.10財調" data-sort-type="num">
-                                    相殺額<span class="sort-arrow">↕</span></th>
+                                <th style="width:140px; text-align:right" data-sort-col="公債費.構成比" data-sort-type="num">
+                                    公債費 構成比<span class="sort-arrow">↕</span></th>
+                                <th style="width:140px; text-align:right" data-sort-col="相殺割合.10財調"
+                                    data-sort-type="num">
+                                    相殺割合<span class="sort-arrow">↕</span></th>
                             </tr>
                         </thead>
                         <tbody id="result-body"></tbody>
@@ -632,7 +638,7 @@
             const MAN = 10
             const OKU = 10_0000
             const CHO = 10_0000_0000
-            const maximumFractionDigits = 3
+            const maximumFractionDigits = 2
             const minimumFractionDigits = 0
             const opt = { maximumFractionDigits, minimumFractionDigits }
             const absV = Math.abs(v)
@@ -709,8 +715,8 @@
                     <td class="td-pref">${d['都道府県名'] || ''}</td>
                     <td class="td-name">${d['団体名'] || ''}</td>
                     <td class="td-val">${fmtKin(d['地方債'])}</td>
-                    <td class="td-val">${fmtKin(d['公債費.決算額'])}</td>
-                    <td class="td-val ${sousaiCls}">${fmtKin(d['相殺額.10財調'])}</td>
+                    <td class="td-val">${(d['公債費.構成比'])} %</td>
+                    <td class="td-val ${sousaiCls}">${((d['相殺割合.10財調'] * 100).toFixed(1))} %</td>
                 </tr>`
             }).join('')
 
@@ -723,8 +729,8 @@
             })
         }
 
-        function buildPrefTabs() {
-            const prefs = [...new Set(allData.map(d => d['都道府県名']).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ja'))
+        async function buildPrefTabs() {
+            const prefs = await fetch("pref-array.json").then(e => e.json())
             const container = document.getElementById('pref-tabs')
             container.innerHTML = `<button class="pref-tab active" data-pref="">すべて</button>` +
                 prefs.map(p => `<button class="pref-tab" data-pref="${p}">${p}</button>`).join('')
@@ -758,7 +764,7 @@
             document.getElementById('loading').style.display = 'none'
             document.getElementById('controls').style.display = ''
 
-            buildPrefTabs()
+            await buildPrefTabs()
 
             document.querySelectorAll('#result-table thead th[data-sort-col]').forEach(th => {
                 th.addEventListener('click', () => {
