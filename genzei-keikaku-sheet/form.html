@@ -88,9 +88,9 @@
     /* Meta Row */
     .meta-row {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
       margin-bottom: 36px;
       padding: 20px 24px;
       background: var(--paper-dark);
@@ -104,6 +104,17 @@
       align-items: center;
       gap: 8px;
       grid-template-columns: unset;
+    }
+
+    .meta-row .field-group.grow {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .meta-row .field-group.grow input {
+      flex: 1;
+      min-width: 120px;
+      width: auto;
     }
 
     /* Section */
@@ -166,7 +177,7 @@
     .field-group {
       display: grid;
       grid-template-columns: 200px 1fr;
-      align-items: center;
+      align-items: start;
       gap: 12px;
       margin-bottom: 12px;
     }
@@ -218,10 +229,28 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
     }
 
     .input-wrap input {
       flex: 1;
+      min-width: 120px;
+    }
+
+    /* 漢数字ヒント */
+    .kanji-hint {
+      flex-basis: 100%;
+      font-family: 'Noto Serif JP', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #7a5a14;
+      letter-spacing: 0.06em;
+      padding-left: 2px;
+      margin-top: 2px;
+    }
+
+    .kanji-hint:empty {
+      display: none;
     }
 
     /* Computed field */
@@ -362,10 +391,51 @@
       padding-bottom: 8px;
     }
 
-    .summary-grid {
+    .summary-municipality {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .summary-municipality label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .summary-municipality .value {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .summary-row {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .summary-plan-label {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      margin-top: 14px;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .summary-plan-label .plan-name {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.75);
+      font-weight: 400;
     }
 
     .summary-item label {
@@ -472,6 +542,11 @@
         font-size: 9px;
       }
 
+      .kanji-hint {
+        font-size: 9px;
+        padding: 1px 5px;
+      }
+
       .tax-indent {
         padding-left: 12px;
       }
@@ -513,7 +588,6 @@
         display: none;
       }
 
-      /* セクションが途中で切れないように */
       .section {
         break-inside: avoid;
         page-break-inside: avoid;
@@ -575,13 +649,11 @@
         padding: 14px 12px;
       }
 
-      /* プラン名入力の固定幅を上書き */
       .subsection-title input[type="text"] {
         width: 100% !important;
         max-width: 100%;
       }
 
-      /* 目的税名の固定幅を上書き */
       .field-group label input[type="text"] {
         width: 100% !important;
         max-width: 100%;
@@ -619,16 +691,16 @@
     </div>
 
     <div class="meta-row">
-      <div class="field-group">
+      <div class="field-group" style="flex-shrink:0; white-space:nowrap;">
         <label>年度<span class="required">*</span></label>
-        <div class="input-wrap">
+        <div class="input-wrap" style="flex-wrap:nowrap;">
           <input type="text" id="year" placeholder="例：令和7" oninput="updateSummary()" style="width:100px;">
           <span class="unit">年度</span>
         </div>
       </div>
-      <div class="field-group">
+      <div class="field-group grow">
         <label>地方自治体名<span class="required">*</span></label>
-        <input type="text" id="municipality" placeholder="例：○○市・○○町" oninput="updateSummary()" style="width:200px;">
+        <input type="text" id="municipality" placeholder="例：○○市・○○町" oninput="updateSummary()">
       </div>
     </div>
 
@@ -638,8 +710,9 @@
       <div class="field-group">
         <label>歳出総額<span class="required">*</span></label>
         <div class="input-wrap">
-          <input type="number" id="totalExpenditure" placeholder="0" min="0" oninput="updateAll()">
+          <input type="number" id="totalExpenditure" value="0" min="0" oninput="updateAll()">
           <span class="unit">千円</span>
+          <span class="kanji-hint" id="totalExpenditure_kanji"></span>
         </div>
       </div>
     </div>
@@ -652,6 +725,7 @@
         <div class="input-wrap">
           <div class="computed-field" id="totalMunicipalTax">―</div>
           <span class="unit">千円（自動計算）</span>
+          <span class="kanji-hint" id="totalMunicipalTax_kanji"></span>
         </div>
       </div>
       <div class="tax-indent">
@@ -663,15 +737,17 @@
             <div class="field-group">
               <label>税額</label>
               <div class="input-wrap">
-                <input type="number" id="personalFlat" placeholder="0" min="0" oninput="updateAll()">
+                <input type="number" id="personalFlat" value="0" min="0" oninput="updateAll()">
                 <span class="unit">千円</span>
+                <span class="kanji-hint" id="personalFlat_kanji"></span>
               </div>
             </div>
             <div class="field-group">
               <label>うち超過課税額</label>
               <div class="input-wrap">
-                <input type="number" id="personalFlatExtra" placeholder="0" min="0" oninput="updateAll()">
+                <input type="number" id="personalFlatExtra" value="0" min="0" oninput="updateAll()">
                 <span class="unit">千円</span>
+                <span class="kanji-hint" id="personalFlatExtra_kanji"></span>
               </div>
             </div>
           </div>
@@ -684,15 +760,17 @@
             <div class="field-group">
               <label>税額</label>
               <div class="input-wrap">
-                <input type="number" id="incomeRate" placeholder="0" min="0" oninput="updateAll()">
+                <input type="number" id="incomeRate" value="0" min="0" oninput="updateAll()">
                 <span class="unit">千円</span>
+                <span class="kanji-hint" id="incomeRate_kanji"></span>
               </div>
             </div>
             <div class="field-group">
               <label>うち超過課税額</label>
               <div class="input-wrap">
-                <input type="number" id="incomeRateExtra" placeholder="0" min="0" oninput="updateAll()">
+                <input type="number" id="incomeRateExtra" value="0" min="0" oninput="updateAll()">
                 <span class="unit">千円</span>
+                <span class="kanji-hint" id="incomeRateExtra_kanji"></span>
               </div>
             </div>
           </div>
@@ -705,15 +783,17 @@
             <div class="field-group">
               <label>税額</label>
               <div class="input-wrap">
-                <input type="number" id="corporateFlat" placeholder="0" min="0" oninput="updateAll()">
+                <input type="number" id="corporateFlat" value="0" min="0" oninput="updateAll()">
                 <span class="unit">千円</span>
+                <span class="kanji-hint" id="corporateFlat_kanji"></span>
               </div>
             </div>
             <div class="field-group">
               <label>うち超過課税額</label>
               <div class="input-wrap">
-                <input type="number" id="corporateFlatExtra" placeholder="0" min="0" oninput="updateAll()">
+                <input type="number" id="corporateFlatExtra" value="0" min="0" oninput="updateAll()">
                 <span class="unit">千円</span>
+                <span class="kanji-hint" id="corporateFlatExtra_kanji"></span>
               </div>
             </div>
           </div>
@@ -726,15 +806,17 @@
             <div class="field-group">
               <label>税額</label>
               <div class="input-wrap">
-                <input type="number" id="corporateRate" placeholder="0" min="0" oninput="updateAll()">
+                <input type="number" id="corporateRate" value="0" min="0" oninput="updateAll()">
                 <span class="unit">千円</span>
+                <span class="kanji-hint" id="corporateRate_kanji"></span>
               </div>
             </div>
             <div class="field-group">
               <label>うち超過課税額</label>
               <div class="input-wrap">
-                <input type="number" id="corporateRateExtra" placeholder="0" min="0" oninput="updateAll()">
+                <input type="number" id="corporateRateExtra" value="0" min="0" oninput="updateAll()">
                 <span class="unit">千円</span>
+                <span class="kanji-hint" id="corporateRateExtra_kanji"></span>
               </div>
             </div>
           </div>
@@ -746,6 +828,7 @@
           <div class="input-wrap">
             <div class="computed-field" id="totalExtra">―</div>
             <span class="unit">千円（自動計算）</span>
+            <span class="kanji-hint" id="totalExtra_kanji"></span>
           </div>
         </div>
 
@@ -760,6 +843,7 @@
         <div class="input-wrap">
           <div class="computed-field" id="totalPurposeTax">―</div>
           <span class="unit">千円（自動計算）</span>
+          <span class="kanji-hint" id="totalPurposeTax_kanji"></span>
         </div>
       </div>
       <div class="tax-indent">
@@ -770,8 +854,9 @@
               oninput="updateAll()">
           </label>
           <div class="input-wrap">
-            <input type="number" id="purposeTax1" placeholder="0" min="0" oninput="updateAll()">
+            <input type="number" id="purposeTax1" value="0" min="0" oninput="updateAll()">
             <span class="unit">千円</span>
+            <span class="kanji-hint" id="purposeTax1_kanji"></span>
           </div>
         </div>
         <div class="field-group">
@@ -781,8 +866,9 @@
               oninput="updateAll()">
           </label>
           <div class="input-wrap">
-            <input type="number" id="purposeTax2" placeholder="0" min="0" oninput="updateAll()">
+            <input type="number" id="purposeTax2" value="0" min="0" oninput="updateAll()">
             <span class="unit">千円</span>
+            <span class="kanji-hint" id="purposeTax2_kanji"></span>
           </div>
         </div>
       </div>
@@ -803,8 +889,9 @@
         <div class="field-group">
           <label>必要額<span class="required">*</span></label>
           <div class="input-wrap">
-            <input type="number" id="planAmount1" placeholder="0" min="0" oninput="updateAll()">
+            <input type="number" id="planAmount1" value="0" min="0" oninput="updateAll()">
             <span class="unit">千円</span>
+            <span class="kanji-hint" id="planAmount1_kanji"></span>
           </div>
         </div>
         <div class="field-group">
@@ -827,8 +914,9 @@
         <div class="field-group">
           <label>必要額<span class="required">*</span></label>
           <div class="input-wrap">
-            <input type="number" id="planAmount2" placeholder="0" min="0" oninput="updateAll()">
+            <input type="number" id="planAmount2" value="0" min="0" oninput="updateAll()">
             <span class="unit">千円</span>
+            <span class="kanji-hint" id="planAmount2_kanji"></span>
           </div>
         </div>
         <div class="field-group">
@@ -844,24 +932,45 @@
     <!-- サマリー -->
     <div class="summary-box">
       <h3>▶ 計画サマリー</h3>
-      <div class="summary-grid">
+
+      <div class="summary-municipality">
+        <label>自治体</label>
+        <div class="value" id="sumMunicipality">―</div>
+      </div>
+
+      <div class="summary-item" style="margin-bottom:10px;">
+        <label>歳出総額</label>
+        <div class="value" id="sumExpenditure">―</div>
+      </div>
+
+      <div class="summary-plan-label">
+        プラン１<span class="plan-name" id="sumPlanName1"></span>
+      </div>
+      <div class="summary-row">
         <div class="summary-item">
-          <label>自治体</label>
-          <div class="value" id="sumMunicipality">―</div>
-        </div>
-        <div class="summary-item">
-          <label>歳出総額</label>
-          <div class="value" id="sumExpenditure">―</div>
-        </div>
-        <div class="summary-item">
-          <label>プラン１　削減率</label>
+          <label>削減率</label>
           <div class="value highlight" id="sumRate1">―</div>
         </div>
         <div class="summary-item">
-          <label>プラン２　削減率</label>
-          <div class="value highlight" id="sumRate2">―</div>
+          <label>削減額</label>
+          <div class="value" id="sumAmount1">―</div>
         </div>
       </div>
+
+      <div class="summary-plan-label">
+        プラン２<span class="plan-name" id="sumPlanName2"></span>
+      </div>
+      <div class="summary-row">
+        <div class="summary-item">
+          <label>削減率</label>
+          <div class="value highlight" id="sumRate2">―</div>
+        </div>
+        <div class="summary-item">
+          <label>削減額</label>
+          <div class="value" id="sumAmount2">―</div>
+        </div>
+      </div>
+
     </div>
 
     <div class="actions">
@@ -874,6 +983,44 @@
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
+    // 千円単位の数値を漢数字表記に変換（億・万・千）
+    function toKanji(senEn) {
+      const n = parseFloat(senEn);
+      if (isNaN(n)) return '';
+      const yen = Math.round(n * 1000);
+      if (yen === 0) return '0円';
+      const cho = Math.floor(yen / 1000000000000);
+      const oku = Math.floor((yen % 1000000000000) / 100000000);
+      const man = Math.floor((yen % 100000000) / 10000);
+      const sen = Math.floor((yen % 10000) / 1000);
+
+      let result = '';
+      if (cho > 0) result += cho.toLocaleString('ja-JP') + '兆';
+      if (oku > 0) result += oku.toLocaleString('ja-JP') + '億';
+      if (man > 0) result += man.toLocaleString('ja-JP') + '万';
+      if (sen > 0) result += sen + '千';
+      return (result || '0') + '円';
+    }
+
+    function updateKanji(inputId, rawValue) {
+      const el = document.getElementById(inputId + '_kanji');
+      if (!el) return;
+      const inputEl = document.getElementById(inputId);
+      if (!inputEl || inputEl.value === '') {
+        el.textContent = '';
+        return;
+      }
+      const kanji = toKanji(rawValue);
+      el.textContent = kanji ? '= ' + kanji : '';
+    }
+
+    function updateKanjiComputed(spanId, senEnValue) {
+      const el = document.getElementById(spanId + '_kanji');
+      if (!el) return;
+      const kanji = senEnValue > 0 ? toKanji(senEnValue) : '';
+      el.textContent = kanji ? '= ' + kanji : '';
+    }
+
     function fmt(num) {
       if (isNaN(num) || num === null || num === '') return '―';
       return Number(num).toLocaleString('ja-JP') + ' 千円';
@@ -894,26 +1041,39 @@
       const municipal = val('personalFlat') + val('incomeRate') + val('corporateFlat') + val('corporateRate');
       document.getElementById('totalMunicipalTax').textContent =
         municipal > 0 ? municipal.toLocaleString('ja-JP') + ' 千円' : '―';
+      updateKanjiComputed('totalMunicipalTax', municipal);
 
       // 超過課税合計
       const extra = val('personalFlatExtra') + val('incomeRateExtra') + val('corporateFlatExtra') + val('corporateRateExtra');
       document.getElementById('totalExtra').textContent =
         extra > 0 ? extra.toLocaleString('ja-JP') + ' 千円' : '―';
+      updateKanjiComputed('totalExtra', extra);
 
       // 目的税合計
       const purposeTotal = val('purposeTax1') + val('purposeTax2');
       document.getElementById('totalPurposeTax').textContent =
         purposeTotal > 0 ? purposeTotal.toLocaleString('ja-JP') + ' 千円' : '―';
+      updateKanjiComputed('totalPurposeTax', purposeTotal);
 
       const total = val('totalExpenditure');
 
-      // プラン１削減率
-      const r1 = pct(val('planAmount1'), total);
-      document.getElementById('planRate1').textContent = r1;
+      // プラン削減率
+      document.getElementById('planRate1').textContent = pct(val('planAmount1'), total);
+      document.getElementById('planRate2').textContent = pct(val('planAmount2'), total);
 
-      // プラン２削減率
-      const r2 = pct(val('planAmount2'), total);
-      document.getElementById('planRate2').textContent = r2;
+      // 各入力フィールドの漢数字更新
+      const numericFields = [
+        'totalExpenditure',
+        'personalFlat', 'personalFlatExtra',
+        'incomeRate', 'incomeRateExtra',
+        'corporateFlat', 'corporateFlatExtra',
+        'corporateRate', 'corporateRateExtra',
+        'purposeTax1', 'purposeTax2',
+        'planAmount1', 'planAmount2',
+      ];
+      numericFields.forEach(id => {
+        updateKanji(id, val(id));
+      });
 
       updateSummary();
       syncToQuery();
@@ -926,15 +1086,20 @@
         (year && muni) ? year + '年度　' + muni : (muni || year || '―');
 
       const total = val('totalExpenditure');
-      document.getElementById('sumExpenditure').textContent = total > 0 ? fmt(total) : '―';
 
-      const r1 = pct(val('planAmount1'), total);
-      const r2 = pct(val('planAmount2'), total);
+      document.getElementById('sumExpenditure').textContent = total > 0 ? toKanji(total) : '―';
+
+      const a1 = val('planAmount1');
+      const a2 = val('planAmount2');
       const n1 = document.getElementById('planName1').value;
       const n2 = document.getElementById('planName2').value;
 
-      document.getElementById('sumRate1').textContent = (n1 ? n1 + '　' : '') + r1;
-      document.getElementById('sumRate2').textContent = (n2 ? n2 + '　' : '') + r2;
+      document.getElementById('sumPlanName1').textContent = n1 ? '　' + n1 : '';
+      document.getElementById('sumPlanName2').textContent = n2 ? '　' + n2 : '';
+      document.getElementById('sumAmount1').textContent = a1 > 0 ? toKanji(a1) : '―';
+      document.getElementById('sumAmount2').textContent = a2 > 0 ? toKanji(a2) : '―';
+      document.getElementById('sumRate1').textContent = pct(a1, total);
+      document.getElementById('sumRate2').textContent = pct(a2, total);
       syncToQuery();
     }
 
@@ -951,7 +1116,6 @@
       'planName2', 'planAmount2',
     ];
 
-    // URLのクエリパラメータをフォームに復元
     function loadFromQuery() {
       const params = new URLSearchParams(window.location.search);
       FIELDS.forEach(id => {
@@ -961,7 +1125,6 @@
       updateAll();
     }
 
-    // フォームの値をURLクエリパラメータに反映（pushState）
     function syncToQuery() {
       const params = new URLSearchParams();
       FIELDS.forEach(id => {
@@ -974,17 +1137,18 @@
 
     function resetForm() {
       if (!confirm('入力内容をすべてリセットしますか？')) return;
-      const inputs = document.querySelectorAll('input[type="text"], input[type="number"]');
-      inputs.forEach(i => i.value = '');
-      document.getElementById('totalMunicipalTax').textContent = '―';
-      document.getElementById('totalExtra').textContent = '―';
-      document.getElementById('totalPurposeTax').textContent = '―';
-      document.getElementById('planRate1').textContent = '―';
-      document.getElementById('planRate2').textContent = '―';
-      document.getElementById('sumMunicipality').textContent = '―';
-      document.getElementById('sumExpenditure').textContent = '―';
-      document.getElementById('sumRate1').textContent = '―';
-      document.getElementById('sumRate2').textContent = '―';
+      document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+      document.querySelectorAll('input[type="number"]').forEach(i => i.value = '0');
+      ['totalMunicipalTax', 'totalExtra', 'totalPurposeTax', 'planRate1', 'planRate2'].forEach(id => {
+        document.getElementById(id).textContent = '―';
+      });
+      document.querySelectorAll('.kanji-hint').forEach(el => el.textContent = '');
+      ['sumMunicipality', 'sumExpenditure', 'sumAmount1', 'sumRate1', 'sumAmount2', 'sumRate2'].forEach(id => {
+        document.getElementById(id).textContent = '―';
+      });
+      ['sumPlanName1', 'sumPlanName2'].forEach(id => {
+        document.getElementById(id).textContent = '';
+      });
       history.replaceState(null, '', window.location.pathname);
     }
 
