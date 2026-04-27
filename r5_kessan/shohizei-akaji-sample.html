@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消費税赤字自治体 @ 財政革新会</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print"
+        onload="this.media='all'">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-2: #111111;
+            --bg-panel: #161616;
+            --orange: #ff6600;
+            --orange-dim: #cc5200;
+            --orange-glow: #ff660033;
+            --yellow: #ffcc00;
+            --red: #ff3333;
+            --red-dim: #cc2222;
+            --red-glow: #ff333322;
+            --green: #44bb77;
+            --text: #e8e8e8;
+            --gray: #888888;
+            --gray-dim: #444444;
+            --border: #2a2a2a;
+            --mono: "Share Tech Mono", monospace;
+            --jp: "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--jp);
+            font-size: 13px;
+            min-height: 100vh;
+        }
+
+        /* ── topbar ── */
+        #topbar {
+            height: 56px;
+            background: var(--bg-2);
+            border-bottom: 2px solid var(--red);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .topbar-titles .title-org-name {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .topbar-titles .title-app-name {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--red);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff333344;
+        }
+
+        .topbar-back {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            text-decoration: none;
+            padding: 4px 10px;
+            border: 1px solid var(--gray-dim);
+        }
+
+        .topbar-back:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        /* ── page ── */
+        #page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 16px 80px;
+        }
+
+        /* ── hero ── */
+        .hero-eyebrow {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--red-dim);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .hero-title {
+            font-family: var(--mono);
+            font-size: 32px;
+            color: var(--red);
+            letter-spacing: 4px;
+            text-shadow: 0 0 24px #ff333355;
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .hero-sub {
+            font-family: var(--jp);
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 28px;
+            line-height: 1.8;
+        }
+
+        /* ── KPI cards ── */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 600px) {
+            .kpi-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .kpi-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 14px 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .kpi-card.danger::before {
+            background: var(--red);
+        }
+
+        .kpi-card.warn::before {
+            background: var(--yellow);
+        }
+
+        .kpi-card.ok::before {
+            background: var(--green);
+        }
+
+        .kpi-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: 0.12em;
+            margin-bottom: 6px;
+        }
+
+        .kpi-value {
+            font-family: var(--mono);
+            font-size: 22px;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .kpi-card.danger .kpi-value {
+            color: var(--red);
+        }
+
+        .kpi-card.warn .kpi-value {
+            color: var(--yellow);
+        }
+
+        .kpi-card.ok .kpi-value {
+            color: var(--green);
+        }
+
+        .kpi-unit {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .kpi-sub {
+            font-family: var(--jp);
+            font-size: 11px;
+            color: var(--gray);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* ── section ── */
+        .section {
+            margin-bottom: 36px;
+        }
+
+        .section-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--red);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--red);
+            padding: 4px 12px;
+            background: var(--red-glow);
+            margin-bottom: 12px;
+        }
+
+        .section-body {
+            line-height: 1.9;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .section-body p {
+            margin-bottom: 10px;
+        }
+
+        .callout {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--yellow);
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .callout-title {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--yellow);
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+
+        /* ── controls ── */
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .control-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .tab-btn {
+            background: var(--bg-2);
+            color: var(--gray);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 4px 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tab-btn:hover {
+            color: var(--text);
+            border-color: var(--gray);
+        }
+
+        .tab-btn.active {
+            background: var(--red-glow);
+            color: var(--red);
+            border-color: var(--red-dim);
+        }
+
+        .tab-btn.btn-all {
+            color: var(--green);
+            border-color: #2a6644;
+        }
+
+        .tab-btn.btn-all:hover {
+            color: #66ddaa;
+            border-color: var(--green);
+        }
+
+        .tab-btn.btn-none {
+            color: var(--red-dim);
+            border-color: #662222;
+        }
+
+        .tab-btn.btn-none:hover {
+            color: var(--red);
+            border-color: var(--red-dim);
+        }
+
+        input[type=text] {
+            background: var(--bg-2);
+            color: var(--text);
+            border: 1px solid var(--gray-dim);
+            font-family: var(--mono);
+            font-size: 12px;
+            padding: 4px 10px;
+            outline: none;
+            width: 160px;
+        }
+
+        input[type=text]:focus {
+            border-color: var(--red-dim);
+        }
+
+        input[type=text]::placeholder {
+            color: var(--gray-dim);
+        }
+
+        /* ── result count ── */
+        .result-count {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .result-count span {
+            color: var(--red);
+        }
+
+        /* ── table ── */
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #result-table {
+            width: 100%;
+            min-width: 740px;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 12px;
+        }
+
+        #result-table thead th {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            letter-spacing: 0.08em;
+            text-align: left;
+            padding: 6px 10px;
+            border-bottom: 2px solid var(--red-dim);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #result-table thead th:hover {
+            color: var(--text);
+        }
+
+        #result-table thead th.sort-active {
+            color: var(--red);
+        }
+
+        #result-table thead th .sort-arr {
+            margin-left: 4px;
+            font-size: 9px;
+            opacity: 0.7;
+        }
+
+        #result-table thead th.right {
+            text-align: right;
+        }
+
+        #result-table tbody tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        #result-table tbody tr:hover {
+            background: var(--bg-panel);
+        }
+
+        #result-table tbody td {
+            padding: 7px 10px;
+            vertical-align: middle;
+        }
+
+        .td-rank {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray-dim);
+            text-align: right;
+        }
+
+        .td-name {
+            font-family: var(--jp);
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .td-pref {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--gray);
+            white-space: nowrap;
+        }
+
+        .td-num {
+            font-family: var(--mono);
+            font-size: 11px;
+            text-align: right;
+            white-space: nowrap;
+            color: #aaa;
+        }
+
+        .td-num.akaji {
+            color: var(--red);
+        }
+
+        .td-num.yellow {
+            color: var(--yellow);
+        }
+
+        .td-bar-cell {
+            padding: 7px 8px;
+        }
+
+        .inline-bar {
+            height: 6px;
+            background: var(--red-dim);
+            opacity: 0.55;
+            border-radius: 1px;
+            min-width: 2px;
+        }
+
+        /* ── loading ── */
+        #loading {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--red);
+            padding: 40px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* ── note ── */
+        .note {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--gray-dim);
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+            padding-top: 16px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="topbar">
+        <div class="topbar-titles">
+            <span class="title-org-name">財政革新会</span>
+            <span class="title-app-name">消費税赤字自治体</span>
+        </div>
+        <a class="topbar-back" href="index.html">← 決算ターミナルへ</a>
+    </div>
+
+    <div id="page">
+
+        <div class="hero-eyebrow">R5 KESSAN / SHOHIZEI AKAJI</div>
+        <div class="hero-title">消費税赤字自治体</div>
+        <div class="hero-sub">
+            消費税による歳入より、消費税による住民・事業者の負担が上回る自治体の一覧です。
+        </div>
+
+        <!-- KPI -->
+        <div class="kpi-row">
+            <div class="kpi-card danger">
+                <div class="kpi-label">赤字自治体数</div>
+                <div class="kpi-value" id="kpi-count">—</div>
+                <div class="kpi-sub">全自治体の <span id="kpi-pct" style="color:var(--red)">—</span></div>
+            </div>
+            <div class="kpi-card danger">
+                <div class="kpi-label">合計赤字額</div>
+                <div class="kpi-value" id="kpi-total">—</div>
+                <div class="kpi-unit">億円</div>
+            </div>
+            <div class="kpi-card warn">
+                <div class="kpi-label">最大赤字自治体</div>
+                <div class="kpi-value" id="kpi-max-name" style="font-size:16px; line-height:1.4;">—</div>
+                <div class="kpi-sub" id="kpi-max-val">—</div>
+            </div>
+        </div>
+
+        <!-- 解説 -->
+        <div class="section">
+            <div class="section-title">政府の消費税負担とは？</div>
+            <div class="section-body">
+                <p>
+                    消費税が3%から5%に引き上げられた際、政府は消費税負担分の財源を捻出できず、国債を4000億円分追加発行することになりました。
+                </p>
+                <p>
+                    消費税を廃止すれば、政府の消費税負担は減りますし、増税すれば増えます。
+                </p>
+                <p>
+                    そのため、減税する場合は政府の消費税負担を減税の財源の一つに数えるべきですし、増税するのであれば、政府の消費税負担の財源も示すべきです。
+                </p>
+                <p>
+                    このウェブサイトでは大蔵省の基準に基づいて、地方自治体の消費税負担を概算したものを公開しています。
+                </p>
+                <div class="callout">
+                    <div class="callout-title">▎ 消費税による歳入の内訳</div>
+                    地方消費税交付金<br>
+                    ＋ 地方交付税（消費税分）<br>
+                    ＋ 国民健康保険繰出（消費税分）<br>
+                    ＝ 消費税による歳入
+                </div>
+                <div class="callout">
+                    <div class="callout-title">▎ 消費税負担の概算</div>
+                    投資的経費(除く人件費)<br>
+                    ＋ 物件費
+                    ＋ 維持補修費
+                    ＝ 消費税負担額
+                </div>
+            </div>
+        </div>
+
+        <!-- 一覧 -->
+        <div class="section">
+            <div class="section-title">赤字自治体一覧</div>
+
+            <div id="loading"><span>&gt;_</span><span>データを読み込んでいます</span><span class="blink">█</span></div>
+
+            <div id="controls" style="display:none;">
+
+                <div class="controls-row" style="margin-bottom:8px;">
+                    <span class="control-label">検索：</span>
+                    <input type="text" id="search-input" placeholder="団体名で絞り込み…">
+                    <button class="tab-btn active" id="toggle-akaji-only">赤字のみ表示</button>
+                </div>
+
+                <div class="controls-row"
+                    style="align-items:flex-start; flex-direction:column; gap:6px; margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span class="control-label">都道府県：</span>
+                        <button class="tab-btn btn-all" id="btn-pref-all">全て選択</button>
+                        <button class="tab-btn btn-none" id="btn-pref-clear">全て解除</button>
+                    </div>
+                    <div id="pref-tabs" style="display:flex; flex-wrap:wrap; gap:2px;"></div>
+                </div>
+
+                <div class="result-count" id="result-count"></div>
+
+                <div class="table-scroll">
+                    <table id="result-table">
+                        <colgroup>
+                            <col style="width:4%"> <!-- rank -->
+                            <col style="width:10%"> <!-- 都道府県 -->
+                            <col style="width:14%"> <!-- 団体名 -->
+                            <col style="width:14%"> <!-- 消費税による歳入 -->
+                            <col style="width:14%"> <!-- 消費税負担額 -->
+                            <col style="width:14%"> <!-- 実質収入 -->
+                            <col style="width:10%"> <!-- 実質収入率 -->
+                            <col style="width:20%"> <!-- bar -->
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th data-col="pref">都道府県<span class="sort-arr"></span></th>
+                                <th data-col="name">団体名<span class="sort-arr"></span></th>
+                                <th data-col="sainyu" class="right">消費税による歳入<span class="sort-arr"></span></th>
+                                <th data-col="futan" class="right">消費税負担額<span class="sort-arr"></span></th>
+                                <th data-col="jisshu" class="right">実質収入<span class="sort-arr"></span></th>
+                                <th data-col="rate" class="right">実質収入率<span class="sort-arr"></span></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="result-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            ※ 消費税による歳入 = 地方消費税交付金 ＋ 地方交付税（消費税分）<br>
+            ※ 実質収入 = 消費税による歳入 − 消費税負担額<br>
+            ※ データ出典：令和5年度決算カード / 財政革新会による試算
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { parquetRead, parquetMetadata } from 'https://cdn.jsdelivr.net/npm/hyparquet/+esm'
+
+        // ── データ読み込み ────────────────────────────────────────────────
+        async function loadParquet(url) {
+            const res = await fetch(url)
+            const ab = await res.arrayBuffer()
+            const meta = parquetMetadata(ab)
+            const cols = meta.schema.slice(1).map(s => s.name)
+            let records = []
+            await parquetRead({
+                file: ab,
+                onComplete: rows => {
+                    records = rows.map(row => Object.fromEntries(cols.map((c, i) => [c, row[i]])))
+                }
+            })
+            return records
+        }
+
+        const raw = await loadParquet('r5_kessan_shohizei.parquet')
+
+        // 列マッピング
+        const DATA = raw.map(d => ({
+            pref: d['都道府県名'] ?? '',
+            name: d['団体名'] ?? '',
+            sainyu: d['消費税による歳入'] ?? 0,
+            futan: d['消費税負担額'] ?? 0,
+            jisshu: d['実質収入'] ?? 0,
+            rate: d['実質収入率'] ?? 0,
+        }))
+
+        const AKAJI = DATA.filter(d => d.jisshu < 0)
+
+        // ── KPI ──────────────────────────────────────────────────────────
+        const totalAkaji = AKAJI.reduce((s, d) => s + d.jisshu, 0)
+        const worst = [...AKAJI].sort((a, b) => a.jisshu - b.jisshu)[0]
+
+        document.getElementById('kpi-count').textContent = AKAJI.length.toLocaleString('ja-JP')
+        document.getElementById('kpi-pct').textContent = (AKAJI.length / DATA.length * 100).toFixed(1) + '%'
+        document.getElementById('kpi-total').textContent = Math.round(Math.abs(totalAkaji) / 100000).toLocaleString('ja-JP')
+        document.getElementById('kpi-max-name').textContent = worst.name
+        document.getElementById('kpi-max-val').textContent =
+            '▼ ' + fmtVal(Math.abs(worst.jisshu)) + 'の赤字'
+
+        // ── pref filter ──────────────────────────────────────────────────
+        const prefs = [...new Set(DATA.map(d => d.pref))].sort()
+        const prefTabsEl = document.getElementById('pref-tabs')
+        let activePref = new Set(prefs)
+
+        prefs.forEach(p => {
+            const btn = document.createElement('button')
+            btn.className = 'tab-btn active'
+            btn.dataset.pref = p
+            btn.textContent = p
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active')
+                activePref[btn.classList.contains('active') ? 'add' : 'delete'](p)
+                render()
+            })
+            prefTabsEl.appendChild(btn)
+        })
+
+        document.getElementById('btn-pref-all').addEventListener('click', () => {
+            activePref = new Set(prefs)
+            prefTabsEl.querySelectorAll('.tab-btn').forEach(b => b.classList.add('active'))
+            render()
+        })
+        document.getElementById('btn-pref-clear').addEventListener('click', () => {
+            activePref = new Set()
+            prefTabsEl.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+            render()
+        })
+
+        // ── akaji-only toggle ────────────────────────────────────────────
+        let akajiOnly = false
+        document.getElementById('toggle-akaji-only').classList.remove('active')
+        document.getElementById('toggle-akaji-only').addEventListener('click', e => {
+            akajiOnly = !akajiOnly
+            e.target.classList.toggle('active', akajiOnly)
+            render()
+        })
+
+        // ── sort ─────────────────────────────────────────────────────────
+        let sortCol = 'jisshu'
+        let sortDir = 1  // 1=昇順（赤字大→小）
+
+        document.querySelectorAll('#result-table thead th[data-col]').forEach(th => {
+            th.addEventListener('click', () => {
+                const col = th.dataset.col
+                if (sortCol === col) sortDir = -sortDir
+                else { sortCol = col; sortDir = 1 }
+                updateSortUI()
+                render()
+            })
+        })
+
+        function updateSortUI() {
+            document.querySelectorAll('#result-table thead th[data-col]').forEach(th => {
+                const active = th.dataset.col === sortCol
+                th.classList.toggle('sort-active', active)
+                th.querySelector('.sort-arr').textContent = active ? (sortDir === 1 ? ' ▲' : ' ▼') : ''
+            })
+        }
+        updateSortUI()
+
+        // ── search ───────────────────────────────────────────────────────
+        document.getElementById('search-input').addEventListener('input', render)
+
+        // ── format ───────────────────────────────────────────────────────
+        function fmtVal(v) {
+            const abs = Math.abs(v)
+            if (abs < 10) return Math.round(v).toLocaleString('ja-JP') + ' 千円'
+            if (abs < 100000) return (v / 10).toLocaleString('ja-JP') + ' 万円'
+            if (abs < 1000000000) return (v / 100000).toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 億円'
+            return (v / 1000000000).toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + ' 兆円'
+        }
+
+        // ── render ───────────────────────────────────────────────────────
+        function render() {
+            const query = document.getElementById('search-input').value.trim()
+            const pool = akajiOnly ? AKAJI : DATA
+
+            let rows = pool.filter(d => activePref.has(d.pref))
+            if (query) rows = rows.filter(d => d.name.includes(query))
+
+            rows.sort((a, b) => {
+                const va = a[sortCol], vb = b[sortCol]
+                if (typeof va === 'string') return sortDir * va.localeCompare(vb, 'ja')
+                return sortDir * (va - vb)
+            })
+
+            const maxAbs = Math.max(...rows.map(d => Math.abs(d.jisshu)), 1)
+
+            document.getElementById('result-count').innerHTML =
+                `<span>${rows.length.toLocaleString('ja-JP')}</span> 件`
+
+            const tbody = document.getElementById('result-tbody')
+            tbody.innerHTML = ''
+            rows.forEach((d, i) => {
+                const isAkaji = d.jisshu < 0
+                const barW = (Math.abs(d.jisshu) / maxAbs * 100).toFixed(1)
+                const ratePct = (d.rate * 100).toFixed(1) + '%'
+                const tr = document.createElement('tr')
+                tr.innerHTML = `
+            <td class="td-rank">${i + 1}</td>
+            <td class="td-pref">${d.pref}</td>
+            <td class="td-name">${d.name}</td>
+            <td class="td-num">${fmtVal(d.sainyu)}</td>
+            <td class="td-num">${fmtVal(d.futan)}</td>
+            <td class="td-num ${isAkaji ? 'akaji' : ''}">${isAkaji ? '▼ ' : ''}${fmtVal(Math.abs(d.jisshu))}</td>
+            <td class="td-num yellow">${ratePct}</td>
+            <td class="td-bar-cell"><div class="inline-bar" style="width:${barW}%"></div></td>
+        `
+                tbody.appendChild(tr)
+            })
+        }
+
+        // ── init ─────────────────────────────────────────────────────────
+        document.getElementById('loading').style.display = 'none'
+        document.getElementById('controls').style.display = 'block'
+        render()
+    </script>
+</body>
+
+</html>
