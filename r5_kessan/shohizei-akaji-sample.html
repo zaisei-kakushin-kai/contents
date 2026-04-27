@@ -514,7 +514,7 @@
                 <div class="kpi-sub">全自治体の <span id="kpi-pct" style="color:var(--red)">—</span></div>
             </div>
             <div class="kpi-card danger">
-                <div class="kpi-label">合計赤字額</div>
+                <div class="kpi-label">消費税負担額・合計</div>
                 <div class="kpi-value" id="kpi-total">—</div>
                 <div class="kpi-unit">億円</div>
             </div>
@@ -545,7 +545,6 @@
                     <div class="callout-title">▎ 消費税による歳入の内訳</div>
                     地方消費税交付金<br>
                     ＋ 地方交付税（消費税分）<br>
-                    ＋ 国民健康保険繰出（消費税分）<br>
                     ＝ 消費税による歳入
                 </div>
                 <div class="callout">
@@ -656,7 +655,7 @@
         const AKAJI = DATA.filter(d => d.jisshu < 0)
 
         // ── KPI ──────────────────────────────────────────────────────────
-        const totalAkaji = AKAJI.reduce((s, d) => s + d.jisshu, 0)
+        const totalAkaji = DATA.reduce((s, d) => s + d.futan, 0)
         const worst = [...AKAJI].sort((a, b) => a.jisshu - b.jisshu)[0]
 
         document.getElementById('kpi-count').textContent = AKAJI.length.toLocaleString('ja-JP')
