@@ -933,7 +933,6 @@
     <div id="hdr-search-wrap">
       <input type="text" id="inp-search" placeholder="都道府県・団体名で検索…" autocomplete="off">
       <span id="search-count"></span>
-      <span id="hdr-count"></span>
     </div>
   </header>
 
@@ -1119,9 +1118,6 @@
     // ---- UI 初期化 ----
     function initUI() {
       const latest = state.allYears.at(-1);
-      document.getElementById('hdr-count').textContent =
-        `掲載中の団体数: ${state.entityMap.size.toLocaleString()} 団体`;
-
       document.getElementById('inp-search').addEventListener('input', e => {
         state.filterQuery = e.target.value.toLowerCase(); applyFilter();
       });
