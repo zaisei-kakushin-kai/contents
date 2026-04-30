@@ -864,7 +864,7 @@
   </div>
 
   <script type="module">
-    import { parquetRead, asyncBufferFromUrl } from 'https://cdn.jsdelivr.net/npm/hyparquet/src/index.js';
+    import { parquetRead } from 'https://cdn.jsdelivr.net/npm/hyparquet/src/index.js';
 
 
     // depth0=グループ, depth1=子, depth2=孫（税率バリアント等）
@@ -958,7 +958,13 @@
     // ---- データ読み込み ----
     async function loadData() {
       try {
-        const file = await asyncBufferFromUrl({ url: './main.parquet' });
+        setText('loading-text', 'データを読み込み中…');
+        const response = await fetch('./main.parquet');
+        const buffer = await response.arrayBuffer();
+        const file = {
+          byteLength: buffer.byteLength,
+          slice: (start, end) => Promise.resolve(buffer.slice(start, end ?? buffer.byteLength)),
+        };
         setText('loading-text', 'データを解析中…');
         await parquetRead({
           file,
