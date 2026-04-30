@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>軽自動車税 台数表</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Hiragino Sans', 'Yu Gothic UI', Meiryo, sans-serif;
+      font-size: 13px;
+      background: #f0f2f5;
+      color: #222;
+      overscroll-behavior: none;
+    }
+
+    /* ---- ヘッダー ---- */
+    header {
+      background: #1a56db;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    #hdr-count {
+      font-size: 11px;
+      opacity: .75;
+      white-space: nowrap;
+    }
+
+    /* ---- フィルターバー ---- */
+    .filter-bar {
+      background: white;
+      border-bottom: 1px solid #dde;
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+      position: sticky;
+      top: 44px;
+      z-index: 40;
+    }
+
+    .fg {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .fg>label {
+      font-size: 10px;
+      color: #888;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+
+    .fg select,
+    .fg input[type=text] {
+      padding: 5px 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 12px;
+      min-width: 130px;
+      background: white;
+    }
+
+    .fg select:focus,
+    .fg input:focus {
+      outline: 2px solid #1a56db;
+      border-color: transparent;
+    }
+
+    .year-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .year-row label {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* ---- カードエリア ---- */
+    .card-area {
+      padding: 0 20px 24px;
+    }
+
+    .pref-group {
+      margin-top: 20px;
+    }
+
+    .pref-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: #555;
+      padding: 8px 0 8px;
+      border-bottom: 2px solid #e4e8f0;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .pref-heading-count {
+      font-size: 11px;
+      font-weight: 400;
+      color: #aaa;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    /* ---- サマリーカード ---- */
+    .s-card {
+      background: white;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+      border: 1px solid #e4e8f0;
+      cursor: pointer;
+      transition: box-shadow .15s, transform .15s, border-color .15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .s-card:hover {
+      box-shadow: 0 4px 16px rgba(26, 86, 219, .18);
+      border-color: #93b4f5;
+      transform: translateY(-2px);
+    }
+
+    .s-card:active {
+      transform: translateY(0);
+    }
+
+    .s-card-accent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #1a56db, #3b82f6);
+    }
+
+    .s-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .s-card-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1a1a2e;
+      line-height: 1.2;
+    }
+
+    .s-card-pref {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    .s-card-year {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: #eef2ff;
+      color: #1a56db;
+      white-space: nowrap;
+    }
+
+    .s-card-total {
+      margin: 6px 0;
+    }
+
+    .s-card-total-label {
+      font-size: 11px;
+      color: #bbb;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .s-card-total-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1a1a2e;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+    }
+
+    .s-card-total-unit {
+      font-size: 11px;
+      color: #bbb;
+      margin-left: 2px;
+    }
+
+    .s-card-bar-track {
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      display: flex;
+      gap: 1px;
+      margin: 8px 0 5px;
+    }
+
+    .s-card-bar-seg {
+      height: 100%;
+    }
+
+    .s-card-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .s-card-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      color: #777;
+    }
+
+    .s-card-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+    }
+
+    /* ---- ページネーション ---- */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 16px 20px;
+      flex-wrap: wrap;
+    }
+
+    .pg-btn {
+      padding: 5px 11px;
+      border: 1px solid #dde;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #444;
+    }
+
+    .pg-btn:hover:not(:disabled) {
+      background: #eef2ff;
+      border-color: #93b4f5;
+      color: #1a56db;
+    }
+
+    .pg-btn:disabled {
+      color: #ccc;
+      cursor: default;
+    }
+
+    .pg-btn.active {
+      background: #1a56db;
+      color: white;
+      border-color: #1a56db;
+      font-weight: 700;
+    }
+
+    .pg-info {
+      font-size: 11px;
+      color: #999;
+      padding: 0 8px;
+    }
+
+    /* ---- ローディング ---- */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      gap: 16px;
+    }
+
+    .loader-ring {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #eef2ff;
+      border-top-color: #1a56db;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #loading-text {
+      font-size: 14px;
+      color: #666;
+    }
+
+    #loading-progress {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* ---- エラー ---- */
+    #error-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: white;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      gap: 12px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    #error-screen.show {
+      display: flex;
+    }
+
+    .error-icon {
+      font-size: 40px;
+    }
+
+    .error-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .error-msg {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.7;
+      max-width: 480px;
+    }
+
+    .error-code {
+      font-size: 11px;
+      background: #f5f5f5;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-family: monospace;
+      color: #444;
+    }
+
+    /* ---- ボトムシート ---- */
+    .sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+
+    .sheet-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bottom-sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 80vh;
+      background: white;
+      z-index: 101;
+      border-radius: 16px 16px 0 0;
+      transform: translateY(100%);
+      transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -6px 32px rgba(0, 0, 0, .18);
+    }
+
+    .bottom-sheet.open {
+      transform: translateY(0);
+    }
+
+    .sheet-handle-wrap {
+      padding: 10px 0 4px;
+      flex-shrink: 0;
+      cursor: grab;
+      text-align: center;
+    }
+
+    .sheet-handle {
+      display: inline-block;
+      width: 40px;
+      height: 4px;
+      border-radius: 2px;
+      background: #ddd;
+    }
+
+    .sheet-header {
+      padding: 0 20px 12px;
+      flex-shrink: 0;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .sheet-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1a1a2e;
+    }
+
+    .sheet-sub {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 3px;
+    }
+
+    .sheet-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: #f0f0f0;
+      cursor: pointer;
+      font-size: 15px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sheet-close:hover {
+      background: #e0e0e0;
+    }
+
+    .sheet-year-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 20px;
+      border-bottom: 1px solid #eee;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
+    .sheet-year-tab {
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      font-size: 13px;
+      cursor: pointer;
+      color: #aaa;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+
+    .sheet-year-tab.active {
+      color: #1a56db;
+      border-bottom-color: #1a56db;
+      font-weight: 700;
+    }
+
+    .sheet-year-tab:hover:not(.active) {
+      color: #555;
+    }
+
+    .sheet-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px 32px;
+    }
+
+    /* ---- 詳細コンテンツ ---- */
+    .summary-nums {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .sum-box {
+      background: #f6f8ff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px solid #e4eaf8;
+    }
+
+    .sum-box-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .sum-box-val {
+      font-size: 22px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sum-box-val.blue {
+      color: #1a56db;
+    }
+
+    .sum-box-val.green {
+      color: #16a34a;
+    }
+
+    .sum-box-unit {
+      font-size: 11px;
+      color: #bbb;
+      margin-left: 2px;
+    }
+
+    .metric-toggle {
+      display: flex;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .metric-btn {
+      flex: 1;
+      padding: 6px 0;
+      border: none;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .metric-btn.active {
+      background: #1a56db;
+      color: white;
+      font-weight: 600;
+    }
+
+    .metric-btn:hover:not(.active) {
+      background: #f0f4ff;
+    }
+
+    .cat-section {
+      margin-bottom: 20px;
+    }
+
+    .cat-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #bbb;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .cat-row {
+      margin-bottom: 9px;
+    }
+
+    .cat-row-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 3px;
+    }
+
+    .cat-label {
+      font-size: 11px;
+      color: #444;
+    }
+
+    .cat-label.sub {
+      padding-left: 12px;
+      font-size: 10px;
+      color: #888;
+    }
+
+    .cat-val {
+      font-size: 12px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: #1a1a2e;
+    }
+
+    .cat-bar-track {
+      height: 7px;
+      background: #f0f2f5;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .cat-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .4s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .expand-btn {
+      background: none;
+      border: 1px dashed #ccc;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 11px;
+      color: #888;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .expand-btn:hover {
+      background: #f8f8f8;
+      color: #444;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #bbb;
+      font-size: 14px;
+    }
+
+    /* ---- 年度カラム表 ---- */
+    .yr-table-wrap {
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+
+    .yr-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #bbb;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .yr-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .yr-table thead th {
+      background: #f4f6fb;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #888;
+      border-bottom: 2px solid #e4eaf8;
+      text-align: right;
+    }
+
+    .yr-table thead th:first-child {
+      text-align: left;
+      min-width: 120px;
+    }
+
+    .yr-table thead th.latest-hd {
+      color: #1a56db;
+    }
+
+    .yr-table thead th:last-child {
+      text-align: center;
+    }
+
+    .yr-table tbody td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #f2f2f2;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: #666;
+    }
+
+    .yr-table tbody td:first-child {
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .yr-table tbody tr.sub td:first-child {
+      padding-left: 18px;
+      font-weight: normal;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .yr-table tbody tr.sub2 td:first-child {
+      padding-left: 32px;
+      font-weight: normal;
+      font-size: 11px;
+      color: #bbb;
+    }
+
+    .yr-table tbody td.latest-col {
+      font-weight: 800;
+      color: #1a56db;
+    }
+
+    .yr-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .yr-table tbody tr:hover td {
+      background: #f8faff;
+    }
+
+    .diff-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 8px;
+      margin-left: 2px;
+      vertical-align: middle;
+    }
+
+    .diff-badge.up {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .diff-badge.down {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .diff-badge.flat {
+      background: #f0f0f0;
+      color: #aaa;
+    }
+
+    .yr-table tbody tr.section-sep td {
+      padding: 8px 8px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #bbb;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border-bottom: 2px solid #e4eaf8;
+      background: #f8faff;
+    }
+
+    .toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+      font-size: 10px;
+      color: #ccc;
+      cursor: pointer;
+      margin-right: 3px;
+      flex-shrink: 0;
+      transition: color .15s, background .15s;
+      vertical-align: middle;
+    }
+
+    .toggle-btn:hover {
+      color: #1a56db;
+      background: #eef2ff;
+    }
+
+    .toggle-btn.open {
+      color: #1a56db;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loading">
+    <div class="loader-ring"></div>
+    <div id="loading-text">main.parquet を読み込み中…</div>
+    <div id="loading-progress"></div>
+  </div>
+
+  <div id="error-screen">
+    <div class="error-icon">⚠️</div>
+    <div class="error-title">データの読み込みに失敗しました</div>
+    <div class="error-msg" id="error-msg"></div>
+    <div class="error-code" id="error-code"></div>
+  </div>
+
+  <header>
+    <h1>軽自動車税 台数表</h1>
+    <span id="hdr-count"></span>
+  </header>
+
+  <div class="filter-bar">
+    <input type="text" id="inp-search" placeholder="都道府県・団体名で検索…" autocomplete="off"
+      style="padding:6px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;min-width:260px;outline:none;">
+    <span id="search-count" style="font-size:12px;color:#888;white-space:nowrap;align-self:center;"></span>
+  </div>
+
+  <div id="main-content" style="display:none">
+    <div class="card-area" id="card-area">
+      <div class="empty" id="empty-state" style="display:none">条件に一致する団体が見つかりませんでした</div>
+    </div>
+  </div>
+
+  <!-- ボトムシート -->
+  <div class="sheet-overlay" id="sheet-overlay"></div>
+  <div class="bottom-sheet" id="bottom-sheet">
+    <div class="sheet-handle-wrap" id="sheet-handle-wrap">
+      <div class="sheet-handle"></div>
+    </div>
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-title" id="sheet-title"></div>
+        <div class="sheet-sub" id="sheet-sub"></div>
+      </div>
+      <button class="sheet-close" id="sheet-close">✕</button>
+    </div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </div>
+
+  <script type="module">
+    import { parquetRead, asyncBufferFromUrl } from 'https://cdn.jsdelivr.net/npm/hyparquet/src/index.js';
+
+
+    // depth0=グループ, depth1=子, depth2=孫（税率バリアント等）
+    const C = (label, color, children = []) => ({ label, color, children });
+    const KC = '#60a5fa'; // 税率バリアント色
+    const KEY_GROUPS = [
+      C('合計', '#1a1a2e'),
+      C('原動機付自転車・小計', '#f97316', [
+        C('原動機付自転車・50cc以下', '#f97316'),
+        C('原動機付自転車・50cc～90cc', '#f97316'),
+        C('原動機付自転車・90cc～', '#f97316'),
+        C('原動機付自転車・ミニカー', '#f97316'),
+        C('原動機付自転車・特定小型', '#f97316'),
+        C('原動機付自転車・第一種 　一般原付　(総排気量0.05L又は定格出力0.6kW以下)', '#f97316'),
+        C('原動機付自転車・第一種　 一般原付　(総排気量0.125L以下かつ最高出力4.0kW以下)', '#f97316'),
+        C('原動機付自転車・第一種 　特定原付 　（定格出力0.6kW以下)', '#f97316'),
+        C('原動機付自転車・第二種　乙 　(総排気量0.09L又は定格出力0.8kW以下)', '#f97316'),
+        C('原動機付自転車・第二種　甲　 (総排気量0.125L又は定格出力1.0kW以下)', '#f97316'),
+      ]),
+      C('二輪の小型自動車', '#8b5cf6'),
+      C('二輪車等計', '#8b5cf6'),
+      C('軽自動車及び小型特殊自動車・小計', '#3b82f6', [
+        C('軽自動車及び小型特殊自動車・一般・二輪車（側車付のものを含む）', '#3b82f6'),
+        C('軽自動車及び小型特殊自動車・一般・三輪車・計', '#3b82f6', [
+          C('軽自動車及び小型特殊自動車・一般・三輪車', '#3b82f6'),
+          C('軽自動車及び小型特殊自動車・一般・三輪車（新税率適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・三輪車（重課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・三輪車（75％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・三輪車・乗用・営業用（50％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・三輪車・乗用・営業用（25％軽課適用分）', KC),
+        ]),
+        C('軽自動車及び小型特殊自動車・一般・四輪車・計', '#3b82f6', [
+          C('軽自動車及び小型特殊自動車・一般・四輪車・小計', '#3b82f6'),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・自家用', '#3b82f6'),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・営業用', '#3b82f6'),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・自家用', '#3b82f6'),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・営業用', '#3b82f6'),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・小計（新税率適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・自家用（新税率適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・営業用（新税率適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・自家用（新税率適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・営業用（新税率適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・小計（重課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・自家用（重課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・営業用（重課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・自家用（重課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・営業用（重課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・小計（75％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・自家用（75％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・営業用（75％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・自家用（75％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・営業用（75％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・小計（50％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・自家用（50％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・営業用（50％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・自家用（50％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・営業用（50％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・小計（25％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・自家用（25％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・乗用・営業用（25％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・自家用（25％軽課適用分）', KC),
+          C('軽自動車及び小型特殊自動車・一般・四輪車・貨物用・営業用（25％軽課適用分）', KC),
+        ]),
+        C('軽自動車及び小型特殊自動車・農耕用', '#22c55e'),
+        C('軽自動車及び小型特殊自動車・専ら雪上を走行するもの', '#22c55e'),
+        C('軽自動車及び小型特殊自動車・特殊作業用', '#22c55e'),
+      ]),
+    ];
+    const KEY_LABEL_SET = new Set([
+      ...KEY_GROUPS.map(g => g.label),
+      ...KEY_GROUPS.flatMap(g => g.children.map(c => c.label)),
+      ...KEY_GROUPS.flatMap(g => g.children.flatMap(c => c.children.map(gc => gc.label))),
+    ]);
+
+    const BAR_LABELS = [
+      { label: '軽自動車及び小型特殊自動車・小計', color: '#3b82f6' },
+      { label: '二輪車等計', color: '#8b5cf6' },
+      { label: '原動機付自転車・小計', color: '#f97316' },
+    ];
+
+    const state = {
+      entityMap: new Map(),
+      allPrefs: [], allYears: [],
+      filtered: [],
+      filterQuery: '',
+      openCode: null,
+      detailMetric: 'f',
+      expandedGroups: new Set(),
+    };
+
+    // ---- データ読み込み ----
+    async function loadData() {
+      try {
+        const file = await asyncBufferFromUrl({ url: './main.parquet' });
+        setText('loading-text', 'データを解析中…');
+        await parquetRead({
+          file,
+          rowFormat: 'object',
+          onComplete: rows => {
+            setText('loading-progress', `${rows.length.toLocaleString()} 行を処理中…`);
+            buildEntityMap(rows);
+          },
+        });
+        initUI();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+      } catch (e) {
+        showError(e);
+      }
+    }
+
+    function buildEntityMap(rows) {
+      for (const row of rows) {
+        const year = String(row['年度'] ?? '');
+        const code = String(row['団体コード'] ?? '');
+        const pref = String(row['都道府県名'] ?? '');
+        const name = String(row['団体名'] ?? '');
+        const label = String(row['表側'] ?? '');
+        const f = Number(row['賦課期日現在台数_計'] ?? 0);
+        const s = Number(row['差引課税台数_計'] ?? 0);
+
+        if (!state.entityMap.has(code)) {
+          state.entityMap.set(code, { code, pref, name, years: new Map() });
+        }
+        const entity = state.entityMap.get(code);
+        if (!entity.years.has(year)) entity.years.set(year, new Map());
+        entity.years.get(year).set(label, { f, s });
+      }
+      state.allPrefs = [...new Set([...state.entityMap.values()].map(e => e.pref))].sort();
+      state.allYears = [...new Set(
+        [...state.entityMap.values()].flatMap(e => [...e.years.keys()])
+      )].sort();
+    }
+
+    // ---- UI 初期化 ----
+    function initUI() {
+      const latest = state.allYears.at(-1);
+      document.getElementById('hdr-count').textContent =
+        `${latest}年度データ / ${state.entityMap.size.toLocaleString()} 団体`;
+
+      document.getElementById('inp-search').addEventListener('input', e => {
+        state.filterQuery = e.target.value.toLowerCase(); applyFilter();
+      });
+      document.getElementById('inp-search').addEventListener('focus', e => {
+        e.target.style.borderColor = '#1a56db';
+        e.target.style.boxShadow = '0 0 0 2px #c7d9ff';
+      });
+      document.getElementById('inp-search').addEventListener('blur', e => {
+        e.target.style.borderColor = '#ccc';
+        e.target.style.boxShadow = '';
+      });
+      document.getElementById('sheet-overlay').addEventListener('click', closeSheet);
+      document.getElementById('sheet-close').addEventListener('click', closeSheet);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+      initDrag();
+
+      applyFilter();
+
+      // URL に ?code= があれば初期表示でシートを開く
+      const initCode = new URLSearchParams(location.search).get('code');
+      if (initCode && state.entityMap.has(initCode)) {
+        history.replaceState({ sheetCode: initCode }, '', location.search);
+        _doOpenSheet(initCode);
+      }
+    }
+
+    // ---- フィルター & レンダリング ----
+    function applyFilter() {
+      const q = state.filterQuery;
+      const latest = state.allYears.at(-1);
+      state.filtered = [...state.entityMap.values()].filter(e =>
+        (!q || e.pref.toLowerCase().includes(q) || e.name.toLowerCase().includes(q)) &&
+        e.years.has(latest)
+      ).sort((a, b) => a.pref < b.pref ? -1 : a.pref > b.pref ? 1 : a.name < b.name ? -1 : 1);
+      const total = state.entityMap.size;
+      const hit = state.filtered.length;
+      const countEl = document.getElementById('search-count');
+      if (countEl) {
+        countEl.textContent = q
+          ? `${hit.toLocaleString()} 件 / ${total.toLocaleString()} 件`
+          : `${total.toLocaleString()} 件`;
+      }
+      render();
+    }
+
+    function render() {
+      const { filtered } = state;
+      const latest = state.allYears.at(-1);
+      const area = document.getElementById('card-area');
+      document.getElementById('empty-state').style.display = filtered.length === 0 ? 'block' : 'none';
+
+      // 都道府県グループに分類
+      const groups = new Map();
+      for (const e of filtered) {
+        if (!groups.has(e.pref)) groups.set(e.pref, []);
+        groups.get(e.pref).push(e);
+      }
+
+      // empty-state を除いた既存グループ要素を削除
+      [...area.querySelectorAll('.pref-group')].forEach(el => el.remove());
+
+      for (const [pref, entities] of groups) {
+        const section = document.createElement('div');
+        section.className = 'pref-group';
+        section.innerHTML = `
+          <div class="pref-heading">
+            ${esc(pref)}
+            <span class="pref-heading-count">${entities.length} 団体</span>
+          </div>
+          <div class="card-grid">
+            ${entities.map(e => renderCard(e, latest)).join('')}
+          </div>`;
+        area.appendChild(section);
+      }
+    }
+
+    function renderCard(e, year) {
+      const yd = e.years.get(year) ?? new Map();
+      const total = yd.get('合計')?.f ?? 0;
+
+      const segs = BAR_LABELS.map(b => {
+        const v = yd.get(b.label)?.f ?? 0;
+        const pct = total > 0 ? Math.max(1, v / total * 100) : 0;
+        return `<div class="s-card-bar-seg" style="width:${pct.toFixed(1)}%;background:${b.color}"></div>`;
+      }).join('');
+
+      const legend = BAR_LABELS.map(b => {
+        const v = yd.get(b.label)?.f ?? 0;
+        const pct = total > 0 ? Math.round(v / total * 100) : 0;
+        const short = b.label.includes('軽自動車') ? '軽自' : b.label.includes('二輪車等') ? '二輪' : '原付';
+        return `<div class="s-card-legend-item"><div class="s-card-dot" style="background:${b.color}"></div>${short} ${pct}%</div>`;
+      }).join('');
+
+      return `<div class="s-card" onclick="window.__openSheet('${esc(e.code)}')">
+        <div class="s-card-accent"></div>
+        <div class="s-card-head">
+          <div>
+            <div class="s-card-name">${esc(e.name)}</div>
+            <div class="s-card-pref">${esc(e.pref)} · ${esc(e.code)}</div>
+          </div>
+          <div class="s-card-year">${year}年度</div>
+        </div>
+        <div class="s-card-total">
+          <div class="s-card-total-label">合計（賦課期日現在）</div>
+          <div class="s-card-total-val">${total.toLocaleString('ja-JP')}<span class="s-card-total-unit">台</span></div>
+        </div>
+        <div class="s-card-bar-track">${segs}</div>
+        <div class="s-card-legend">${legend}</div>
+      </div>`;
+    }
+
+
+    // ---- ボトムシート ----
+    function _doOpenSheet(code) {
+      const e = state.entityMap.get(code);
+      if (!e) return;
+      state.openCode = code;
+      state.detailMetric = 'f';
+      state.expandedGroups = new Set();
+
+      document.getElementById('sheet-title').textContent = e.name;
+      document.getElementById('sheet-sub').textContent = `${e.pref} · ${e.code}`;
+      renderSheetBody();
+
+      document.getElementById('sheet-overlay').classList.add('open');
+      document.getElementById('bottom-sheet').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    window.__openSheet = code => {
+      _doOpenSheet(code);
+      history.pushState({ sheetCode: code }, '', `?code=${encodeURIComponent(code)}`);
+    };
+
+    window.__setMetric = m => { state.detailMetric = m; renderSheetBody(); };
+    window.__toggleGroup = key => {
+      if (state.expandedGroups.has(key)) state.expandedGroups.delete(key);
+      else state.expandedGroups.add(key);
+      renderSheetBody();
+    };
+
+    function renderSheetBody() {
+      const e = state.entityMap.get(state.openCode);
+      const m = state.detailMetric;
+      const years = [...e.years.keys()].sort();
+      const latest = years.at(-1);
+      const latestYd = e.years.get(latest) ?? new Map();
+
+      const totalF = latestYd.get('合計')?.f ?? 0;
+      const totalS = latestYd.get('合計')?.s ?? 0;
+      const prevF = (e.years.get(years.at(-2)) ?? new Map()).get('合計')?.f ?? 0;
+      const dF = prevF > 0 ? totalF - prevF : null;
+      const dTag = dF === null ? ''
+        : dF === 0 ? `<span class="diff-badge flat">±0</span>`
+          : dF > 0 ? `<span class="diff-badge up">▲ +${dF.toLocaleString()}</span>`
+            : `<span class="diff-badge down">▼ ${dF.toLocaleString()}</span>`;
+
+      const colspan = years.length + 2;
+      let bodyRows = `<tr class="section-sep"><td colspan="${colspan}">年度推移</td></tr>`;
+
+      KEY_GROUPS.forEach((g, gi) => {
+        const vals = years.map(y => e.years.get(y)?.get(g.label)?.[m] ?? null);
+
+
+        const gKey = `g${gi}`;
+        const gOpen = state.expandedGroups.has(gKey);
+
+        bodyRows += tableRow(shortLabel(g.label), g.color, 0, years, vals, latest,
+          g.children.length > 0 ? { key: gKey, isOpen: gOpen } : null);
+        if (gOpen) {
+          g.children.forEach((child, ci) => {
+            const cv = years.map(y => e.years.get(y)?.get(child.label)?.[m] ?? null);
+            const cKey = `g${gi}c${ci}`;
+            const cOpen = state.expandedGroups.has(cKey);
+            bodyRows += tableRow(shortLabel(child.label), child.color, 1, years, cv, latest,
+              child.children.length > 0 ? { key: cKey, isOpen: cOpen } : null);
+            if (cOpen) {
+              child.children.forEach(gc => {
+                const gcv = years.map(y => e.years.get(y)?.get(gc.label)?.[m] ?? null);
+                bodyRows += tableRow(shortLabel(gc.label), gc.color, 2, years, gcv, latest, null);
+              });
+            }
+          });
+        }
+      });
+
+      document.getElementById('sheet-body').innerHTML = `
+      <div class="summary-nums">
+        <div class="sum-box">
+          <div class="sum-box-label">賦課期日現在台数（${latest}年度）${dTag}</div>
+          <div class="sum-box-val blue">${totalF.toLocaleString('ja-JP')}<span class="sum-box-unit">台</span></div>
+        </div>
+        <div class="sum-box">
+          <div class="sum-box-label">差引課税台数（${latest}年度）</div>
+          <div class="sum-box-val green">${totalS.toLocaleString('ja-JP')}<span class="sum-box-unit">台</span></div>
+        </div>
+      </div>
+      <div class="metric-toggle">
+        <button class="metric-btn ${m === 'f' ? 'active' : ''}" onclick="window.__setMetric('f')">賦課期日現在台数</button>
+        <button class="metric-btn ${m === 's' ? 'active' : ''}" onclick="window.__setMetric('s')">差引課税台数</button>
+      </div>
+      <div class="yr-table-wrap">
+        <table class="yr-table">
+          ${tableHeader(years)}
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>`;
+    }
+
+    function tableHeader(years) {
+      const ths = years.map((y, i) =>
+        `<th class="${i === years.length - 1 ? 'latest-hd' : ''}">${y}</th>`
+      ).join('');
+      const cols = years.map(() => `<col style="width:52px">`).join('');
+      return `<colgroup><col>${cols}<col style="width:68px"></colgroup>
+        <thead><tr><th>カテゴリ</th>${ths}<th style="text-align:left">推移</th></tr></thead>`;
+    }
+
+    function tableRow(label, color, depth, years, vals, latest, toggle) {
+      const cells = years.map((y, i) => {
+        const v = vals[i];
+        const isLatest = y === latest;
+        const display = fmtK(v);
+        return `<td class="${isLatest ? 'latest-col' : ''}">${display}</td>`;
+      }).join('');
+
+      const vL = vals.at(-1) ?? 0, vP = vals.at(-4) ?? 0;
+      let badge = '';
+      if (vP > 0 && vL != null) {
+        const diff = (100 - ((vL / vP) * 100)).toFixed(1);
+        if (diff < 0) {
+          badge = `<span class="diff-badge up">▲${Math.abs(diff)}%</span>`
+        } else if (diff > 0) {
+          badge = `<span class="diff-badge down">▼${diff}%</span>`
+        } else {
+          badge = `<span class="diff-badge flat">±0%</span>`
+        }
+      }
+
+      const btn = toggle
+        ? `<span class="toggle-btn ${toggle.isOpen ? 'open' : ''}" onclick="window.__toggleGroup('${toggle.key}')">${toggle.isOpen ? '▼' : '▶'}</span>`
+        : `<span style="display:inline-block;width:19px"></span>`;
+      const trCls = depth === 2 ? 'sub2' : depth === 1 ? 'sub' : '';
+      const fw = depth === 0 ? '700' : 'normal';
+      return `<tr class="${trCls}">
+        <td style="color:${color};font-weight:${fw}">${btn}${label}</td>
+        ${cells}
+        <td style="text-align:center">${badge}${miniSpark(vals.filter(v => v != null), color)}</td>
+      </tr>`;
+    }
+
+    function miniSpark(vals, color, w = 44, h = 16) {
+      if (vals.length < 2) return '';
+      const mn = Math.min(...vals), mx = Math.max(...vals), range = mx - mn || 1;
+      const xs = vals.map((_, i) => (i / (vals.length - 1) * w).toFixed(1));
+      const ys = vals.map(v => (h - 2 - (v - mn) / range * (h - 4)).toFixed(1));
+      const pts = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
+      return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible;vertical-align:middle;margin-left:3px">
+        <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8"
+          stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="${xs.at(-1)}" cy="${ys.at(-1)}" r="2.5" fill="${color}"/>
+      </svg>`;
+    }
+
+    function fmtK(v) {
+      if ('number' === typeof v || 'bigint' === typeof v) {
+        return v.toLocaleString();
+      } else if (v == null) {
+        return '-'
+      }
+      return v
+    }
+
+    function shortLabel(l) {
+      return l
+        .replace('軽自動車及び小型特殊自動車・一般・', '軽自・一般・')
+        .replace('軽自動車及び小型特殊自動車・', '軽自・')
+        .replace('原動機付自転車・', '原付・');
+    }
+
+    function _doCloseSheet() {
+      document.getElementById('sheet-overlay').classList.remove('open');
+      document.getElementById('bottom-sheet').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closeSheet() {
+      if (history.state?.sheetCode) {
+        history.back(); // popstate が _doCloseSheet を呼ぶ
+      } else {
+        _doCloseSheet();
+        if (location.search) history.replaceState({}, '', location.pathname);
+      }
+    }
+
+    window.addEventListener('popstate', e => {
+      if (e.state?.sheetCode) {
+        _doOpenSheet(e.state.sheetCode);
+      } else {
+        _doCloseSheet();
+      }
+    });
+
+    // ---- ドラッグで閉じる ----
+    function initDrag() {
+      const sheet = document.getElementById('bottom-sheet');
+      let startY = 0, startTime = 0, dragging = false;
+      const onStart = e => {
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        startTime = Date.now(); dragging = true;
+        sheet.style.transition = 'none';
+      };
+      const onMove = e => {
+        if (!dragging) return;
+        const dy = (e.touches ? e.touches[0].clientY : e.clientY) - startY;
+        if (dy > 0) sheet.style.transform = `translateY(${dy}px)`;
+      };
+      const onEnd = e => {
+        if (!dragging) return;
+        dragging = false; sheet.style.transition = '';
+        const dy = (e.changedTouches ? e.changedTouches[0].clientY : e.clientY) - startY;
+        if (dy > 120 || (dy > 40 && Date.now() - startTime < 300)) closeSheet();
+        else sheet.style.transform = '';
+      };
+      const hw = document.getElementById('sheet-handle-wrap');
+      hw.addEventListener('mousedown', onStart);
+      hw.addEventListener('touchstart', onStart, { passive: true });
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('touchmove', onMove, { passive: true });
+      document.addEventListener('mouseup', onEnd);
+      document.addEventListener('touchend', onEnd);
+    }
+
+
+    function setText(id, t) { document.getElementById(id).textContent = t; }
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function showError(e) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-screen').classList.add('show');
+      const isFile = location.protocol === 'file:';
+      document.getElementById('error-msg').innerHTML = isFile
+        ? `<code>file://</code> で開いているため読み込めません。<br>以下のコマンドで簡易サーバーを起動してください：<br><br>
+           <strong>python -m http.server 8000</strong><br><br>その後 <strong>http://localhost:8000</strong> を開いてください。`
+        : `main.parquet が同じディレクトリにあることを確認してください。`;
+      document.getElementById('error-code').textContent = String(e);
+    }
+
+    loadData();
+  </script>
+</body>
+
+</html>
