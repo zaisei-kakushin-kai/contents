@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>軽自動車税 台数表</title>
+  <title>軽自動車税減税の票読みをしよう！</title>
   <style>
     *,
     *::before,
@@ -26,35 +26,61 @@
     header {
       background: #1a56db;
       color: white;
-      padding: 10px 20px;
+      padding: 8px 20px;
       display: flex;
-      align-items: center;
-      gap: 12px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
       position: sticky;
       top: 0;
       z-index: 50;
     }
 
+    #hdr-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
     header h1 {
       font-size: 15px;
       font-weight: 700;
-      flex: 1;
+      line-height: 1.3;
+    }
+
+    #hdr-howto {
+      flex-shrink: 0;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .9);
+      border: 1px solid rgba(255, 255, 255, .5);
+      border-radius: 6px;
+      padding: 3px 10px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    #hdr-howto:hover {
+      background: rgba(255, 255, 255, .15);
     }
 
     #hdr-search-wrap {
       display: flex;
       align-items: center;
       gap: 8px;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
+    }
+
+    #inp-search {
+      flex: 1;
+      min-width: 0;
     }
 
     #hdr-count {
       font-size: 11px;
       opacity: .75;
       white-space: nowrap;
+      margin-left: auto;
     }
 
     #inp-search {
@@ -62,7 +88,6 @@
       border: none;
       border-radius: 6px;
       font-size: 13px;
-      min-width: 220px;
       background: rgba(255, 255, 255, .18);
       color: white;
       outline: none;
@@ -379,14 +404,15 @@
 
     .bottom-sheet {
       position: fixed;
-      left: 0;
-      right: 0;
+      left: 50%;
       bottom: 0;
+      width: 100%;
+      max-width: 960px;
       height: 80vh;
       background: white;
       z-index: 101;
       border-radius: 16px 16px 0 0;
-      transform: translateY(100%);
+      transform: translateX(-50%) translateY(100%);
       transition: transform .32s cubic-bezier(.4, 0, .2, 1);
       display: flex;
       flex-direction: column;
@@ -394,11 +420,21 @@
     }
 
     .bottom-sheet.open {
-      transform: translateY(0);
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .sheet-inner {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
     }
 
     .sheet-handle-wrap {
-      padding: 10px 0 4px;
+      padding: 8px 0 4px;
       flex-shrink: 0;
       cursor: grab;
       text-align: center;
@@ -413,7 +449,7 @@
     }
 
     .sheet-header {
-      padding: 0 20px 12px;
+      padding: 0 16px 10px;
       flex-shrink: 0;
       border-bottom: 1px solid #f0f0f0;
       display: flex;
@@ -453,6 +489,40 @@
       background: #e0e0e0;
     }
 
+    .sheet-share {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 6px;
+      border: 1px solid #dde;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .sheet-share:hover {
+      background: #eef2ff;
+      border-color: #93b4f5;
+      color: #1a56db;
+    }
+
+    .sheet-share.copied {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #16a34a;
+    }
+
+    .sheet-btn-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .sheet-year-tabs {
       display: flex;
       gap: 0;
@@ -487,7 +557,7 @@
     .sheet-body {
       flex: 1;
       overflow-y: auto;
-      padding: 16px 20px 32px;
+      padding: 12px 16px 24px;
     }
 
     /* ---- 詳細コンテンツ ---- */
@@ -529,6 +599,29 @@
       font-size: 11px;
       color: #888;
       margin-left: 2px;
+    }
+
+    .yr-table-toolbar {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      margin-bottom: 6px;
+    }
+
+    .expand-btn {
+      font-size: 11px;
+      padding: 3px 10px;
+      border: 1px solid #dde;
+      border-radius: 5px;
+      background: white;
+      color: #555;
+      cursor: pointer;
+    }
+
+    .expand-btn:hover {
+      background: #eef2ff;
+      border-color: #93b4f5;
+      color: #1a56db;
     }
 
     .metric-toggle {
@@ -833,12 +926,15 @@
   </div>
 
   <header>
-    <h1>軽自動車税 台数表</h1>
+    <div id="hdr-title-row">
+      <h1>軽自動車税・減税の票読み</h1>
+      <a id="hdr-howto" href="about.html">使い方 →</a>
+    </div>
     <div id="hdr-search-wrap">
       <input type="text" id="inp-search" placeholder="都道府県・団体名で検索…" autocomplete="off">
       <span id="search-count"></span>
+      <span id="hdr-count"></span>
     </div>
-    <span id="hdr-count"></span>
   </header>
 
   <div id="main-content" style="display:none">
@@ -850,17 +946,32 @@
   <!-- ボトムシート -->
   <div class="sheet-overlay" id="sheet-overlay"></div>
   <div class="bottom-sheet" id="bottom-sheet">
-    <div class="sheet-handle-wrap" id="sheet-handle-wrap">
-      <div class="sheet-handle"></div>
-    </div>
-    <div class="sheet-header">
-      <div>
-        <div class="sheet-title" id="sheet-title"></div>
-        <div class="sheet-sub" id="sheet-sub"></div>
+    <div class="sheet-inner">
+      <div class="sheet-handle-wrap" id="sheet-handle-wrap">
+        <div class="sheet-handle"></div>
       </div>
-      <button class="sheet-close" id="sheet-close">✕</button>
+      <div class="sheet-header">
+        <div>
+          <div class="sheet-title" id="sheet-title"></div>
+          <div class="sheet-sub" id="sheet-sub"></div>
+        </div>
+        <div class="sheet-btn-row">
+          <button class="sheet-share" id="sheet-share">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+            <span id="sheet-share-label">共有リンク</span>
+          </button>
+          <button class="sheet-close" id="sheet-close">✕</button>
+        </div>
+      </div>
+      <div class="sheet-body" id="sheet-body"></div>
     </div>
-    <div class="sheet-body" id="sheet-body"></div>
   </div>
 
   <script type="module">
@@ -1009,13 +1120,26 @@
     function initUI() {
       const latest = state.allYears.at(-1);
       document.getElementById('hdr-count').textContent =
-        `${latest}年度データ / ${state.entityMap.size.toLocaleString()} 団体`;
+        `掲載中の団体数: ${state.entityMap.size.toLocaleString()} 団体`;
 
       document.getElementById('inp-search').addEventListener('input', e => {
         state.filterQuery = e.target.value.toLowerCase(); applyFilter();
       });
       document.getElementById('sheet-overlay').addEventListener('click', closeSheet);
       document.getElementById('sheet-close').addEventListener('click', closeSheet);
+      document.getElementById('sheet-share').addEventListener('click', () => {
+        const url = location.href;
+        navigator.clipboard.writeText(url).then(() => {
+          const btn = document.getElementById('sheet-share');
+          const label = document.getElementById('sheet-share-label');
+          btn.classList.add('copied');
+          label.textContent = 'コピーしました';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            label.textContent = '共有リンク';
+          }, 2000);
+        });
+      });
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
       initDrag();
 
@@ -1159,6 +1283,23 @@
       renderSheetBody();
     };
 
+    window.__expandAll = () => {
+      KEY_GROUPS.forEach((g, gi) => {
+        if (g.children.length > 0) {
+          state.expandedGroups.add(`g${gi}`);
+          g.children.forEach((c, ci) => {
+            if (c.children.length > 0) state.expandedGroups.add(`g${gi}c${ci}`);
+          });
+        }
+      });
+      renderSheetBody();
+    };
+
+    window.__collapseAll = () => {
+      state.expandedGroups.clear();
+      renderSheetBody();
+    };
+
     function renderSheetBody() {
       const e = state.entityMap.get(state.openCode);
       const m = state.detailMetric;
@@ -1219,6 +1360,10 @@
         <button class="metric-btn ${m === 'f' ? 'active' : ''}" onclick="window.__setMetric('f')">賦課期日現在台数</button>
         <button class="metric-btn ${m === 's' ? 'active' : ''}" onclick="window.__setMetric('s')">差引課税台数</button>
       </div>
+      <div class="yr-table-toolbar">
+        <button class="expand-btn" onclick="window.__expandAll()">すべて展開</button>
+        <button class="expand-btn" onclick="window.__collapseAll()">すべて閉じる</button>
+      </div>
       <div class="yr-table-wrap">
         <table class="yr-table">
           ${tableHeader(years)}
@@ -1233,7 +1378,7 @@
       ).join('');
       const cols = years.map(() => `<col style="width:52px">`).join('');
       return `<colgroup><col>${cols}<col style="width:68px"></colgroup>
-        <thead><tr><th>カテゴリ</th>${ths}<th style="text-align:left">推移</th></tr></thead>`;
+        <thead><tr><th>カテゴリ</th>${ths}<th>推移</th></tr></thead>`;
     }
 
     function tableRow(label, color, depth, years, vals, latest, toggle) {
@@ -1265,7 +1410,7 @@
       return `<tr class="${trCls}">
         <td style="color:${color};font-weight:${fw}">${btn}${label}</td>
         ${cells}
-        <td style="text-align:center">${badge}${miniSpark(vals.filter(v => v != null), color)}</td>
+        <td style="text-align:center">${miniSpark(vals.filter(v => v != null), color)}</td>
       </tr>`;
     }
 
@@ -1333,7 +1478,7 @@
       const onMove = e => {
         if (!dragging) return;
         const dy = (e.touches ? e.touches[0].clientY : e.clientY) - startY;
-        if (dy > 0) sheet.style.transform = `translateY(${dy}px)`;
+        if (dy > 0) sheet.style.transform = `translateX(-50%) translateY(${dy}px)`;
       };
       const onEnd = e => {
         if (!dragging) return;

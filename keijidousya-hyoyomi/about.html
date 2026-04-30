@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使い方・このサイトについて — 軽自動車税・減税の票読み</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic UI', Meiryo, sans-serif;
+            font-size: 14px;
+            background: #f0f2f5;
+            color: #222;
+            line-height: 1.75;
+        }
+
+        header {
+            background: #1a56db;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        header a.back {
+            color: rgba(255, 255, 255, .85);
+            text-decoration: none;
+            font-size: 13px;
+            border: 1px solid rgba(255, 255, 255, .45);
+            border-radius: 6px;
+            padding: 3px 10px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        header a.back:hover {
+            background: rgba(255, 255, 255, .15);
+        }
+
+        header h1 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        main {
+            max-width: 680px;
+            margin: 32px auto;
+            padding: 0 20px 60px;
+        }
+
+        section {
+            margin-bottom: 36px;
+        }
+
+        h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a56db;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #dbe4ff;
+        }
+
+        h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 6px;
+            margin-top: 14px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #93b4f5;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        ol,
+        ul {
+            padding-left: 1.4em;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+            border: 1px solid #e4e8f0;
+            margin-bottom: 16px;
+        }
+
+        .note {
+            font-size: 12px;
+            color: #888;
+            background: #f8f9fc;
+            border-left: 3px solid #c7d7fb;
+            padding: 8px 12px;
+            border-radius: 0 6px 6px 0;
+            margin-top: 10px;
+        }
+
+        .cta {
+            display: inline-block;
+            margin-top: 12px;
+            background: #1a56db;
+            color: white;
+            text-decoration: none;
+            padding: 9px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .cta:hover {
+            background: #1446b8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a class="back" href="index.html">← 一覧に戻る</a>
+        <h1>使い方・このサイトについて</h1>
+    </header>
+
+    <main>
+
+        <section>
+            <div class="card">
+                <h2>このサイトについて</h2>
+                <p>全国の市区町村が公表している<strong>軽自動車税（種別割）の台数データ</strong>をもとに、各団体の登録台数の内訳・推移を手軽に確認できるツールです。</p>
+                <p>軽自動車税の減税を公約に掲げた場合の「票読み」するための参考情報として活用できます。</p>
+                <div class="note">データは総務省公表の地方財政状況調査（決算カード）に基づいています。</div>
+            </div>
+
+            <h2>市町村の判断で軽自動車税は減税できるのか？</h2>
+            <div class="card">
+                <p>
+                    結論からいうと、減税はもちろん、「軽自動車税」そのものの廃止もできます。
+                </p>
+
+                <h3>地方税法上の扱い</h3>
+                <p>
+                    地方税法では、軽自動車税の税率は「標準税率」といわれ、「標準税率」よりも低い値にする(=減税)ことができます。
+                </p>
+                <p>
+                    また、地方税法では軽自動車税は市町村が「課するものとする」と定められており、軽自動車税の課税は義務ではありません。
+                    <br>
+                    軽自動車税を課さないという例外を許容する表現であり、合理的な理由があれば廃止は可能です。
+                </p>
+                <p>
+                    なお、軽自動車税は地方税法上、法定普通税となっているため、起債制限がかかります。
+                </p>
+
+                <h3>財源問題</h3>
+                <p>
+                    多くの自治体において、軽自動車税は歳入構成比に占める割合や歳入額が非常に小さいため、財源問題の解決の難易度が他の税目と比較して、非常に低いという特徴があります。
+                </p>
+
+                <h3>軽自動車税を減税・廃税する理由</h3>
+                <ol>
+                    <li>軽自動車税は痛税感の強い税金です。</li>
+                    <p>
+                        せっかく買った大切な軽自動車に対して、保有するだけで税金を課すものであり、強い痛税感を伴います。
+                    </p>
+                    <li>
+                        人手不足対策に有効です。
+                    </li>
+                    <p>
+                        減税・廃税によって「行政が生み出す本来生じ得ない需要」を削減することができます。徴税のために官民両方で対応のためにかかる人手を減らすことができます。
+                    </p>
+                    <li>
+                        自治体の予算を調べる契機になります。
+                    </li>
+                    <p>
+                        国や自治体は毎年、多くの事業を廃止・新規導入していますが、誰も気が付いていないのが実態です。
+                        減税をきっかけに適正な予算の作り方・強制的に財産を徴発することを以てして行うべき事業であるか、という議論を行う契機になります。
+                    </p>
+                </ol>
+
+                <h3>高市政権の自動車諸税を一部減税する政策について</h3>
+                <p>
+                    高市政権の減税政策によって、軽自動車税の課税は停止されましたが、恒久減税ではありません。
+                    <br />
+                    各市町村の主導なしでは、恒久性のある減税は実現できません。
+                </p>
+            </div>
+
+            <h2>使い方</h2>
+            <div class="card">
+                <ol>
+                    <li><strong>団体を探す</strong> — 上部の検索ボックスに都道府県名や市区町村名を入力すると絞り込めます。</li>
+                    <li><strong>カードをクリック</strong> — 各団体のカードをクリックすると、車種カテゴリ別の台数内訳と年度推移が表示されます。</li>
+                    <li><strong>指標を切り替える</strong> — 「賦課期日現在台数」と「差引課税台数」をボタンで切り替えられます。</li>
+                    <li><strong>共有リンク</strong> — 団体の詳細画面で「共有リンク」ボタンを押すと、その団体へ直接アクセスできるURLをコピーできます。</li>
+                </ol>
+                <a class="cta" href="index.html">一覧を見る →</a>
+            </div>
+            <h2>データについて</h2>
+            <div class="card">
+                <ul>
+                    <li>収録年度：令和元年度〜令和5年度</li>
+                    <li>対象：全国の都道府県・市区町村</li>
+                    <li>出典：総務省「地方財政状況調査」決算カード</li>
+                </ul>
+                <div class="note">データの誤りや更新に気づいた場合はお知らせください。</div>
+            </div>
+        </section>
+
+    </main>
+
+</body>
+
+</html>
