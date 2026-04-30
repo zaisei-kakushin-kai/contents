@@ -42,67 +42,44 @@
       flex: 1;
     }
 
+    #hdr-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
     #hdr-count {
       font-size: 11px;
       opacity: .75;
       white-space: nowrap;
     }
 
-    /* ---- フィルターバー ---- */
-    .filter-bar {
-      background: white;
-      border-bottom: 1px solid #dde;
-      padding: 10px 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: flex-end;
-      position: sticky;
-      top: 44px;
-      z-index: 40;
-    }
-
-    .fg {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .fg>label {
-      font-size: 10px;
-      color: #888;
-      font-weight: 600;
-      letter-spacing: .04em;
-    }
-
-    .fg select,
-    .fg input[type=text] {
-      padding: 5px 8px;
-      border: 1px solid #ccc;
+    #inp-search {
+      padding: 5px 12px;
+      border: none;
       border-radius: 6px;
-      font-size: 12px;
-      min-width: 130px;
-      background: white;
+      font-size: 13px;
+      min-width: 220px;
+      background: rgba(255, 255, 255, .18);
+      color: white;
+      outline: none;
     }
 
-    .fg select:focus,
-    .fg input:focus {
-      outline: 2px solid #1a56db;
-      border-color: transparent;
+    #inp-search::placeholder {
+      color: rgba(255, 255, 255, .6);
     }
 
-    .year-row {
-      display: flex;
-      gap: 6px;
-      align-items: center;
+    #inp-search:focus {
+      background: rgba(255, 255, 255, .28);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, .4);
     }
 
-    .year-row label {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 12px;
-      cursor: pointer;
+    #search-count {
+      font-size: 11px;
+      opacity: .75;
       white-space: nowrap;
     }
 
@@ -111,9 +88,7 @@
       padding: 0 20px 24px;
     }
 
-    .pref-group {
-      margin-top: 20px;
-    }
+    .pref-group {}
 
     .pref-heading {
       font-size: 13px;
@@ -130,7 +105,7 @@
     .pref-heading-count {
       font-size: 11px;
       font-weight: 400;
-      color: #aaa;
+      color: #777;
     }
 
     .card-grid {
@@ -187,7 +162,7 @@
 
     .s-card-pref {
       font-size: 12px;
-      color: #aaa;
+      color: #777;
       margin-top: 2px;
     }
 
@@ -207,7 +182,7 @@
 
     .s-card-total-label {
       font-size: 11px;
-      color: #bbb;
+      color: #888;
       letter-spacing: .04em;
       text-transform: uppercase;
     }
@@ -222,7 +197,7 @@
 
     .s-card-total-unit {
       font-size: 11px;
-      color: #bbb;
+      color: #888;
       margin-left: 2px;
     }
 
@@ -338,7 +313,7 @@
 
     #loading-progress {
       font-size: 12px;
-      color: #aaa;
+      color: #777;
     }
 
     /* ---- エラー ---- */
@@ -455,7 +430,7 @@
 
     .sheet-sub {
       font-size: 12px;
-      color: #aaa;
+      color: #777;
       margin-top: 3px;
     }
 
@@ -493,7 +468,7 @@
       background: none;
       font-size: 13px;
       cursor: pointer;
-      color: #aaa;
+      color: #777;
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
       white-space: nowrap;
@@ -552,7 +527,7 @@
 
     .sum-box-unit {
       font-size: 11px;
-      color: #bbb;
+      color: #888;
       margin-left: 2px;
     }
 
@@ -591,7 +566,7 @@
     .cat-section-title {
       font-size: 10px;
       font-weight: 700;
-      color: #bbb;
+      color: #888;
       letter-spacing: .06em;
       text-transform: uppercase;
       margin-bottom: 8px;
@@ -661,7 +636,7 @@
     .empty {
       text-align: center;
       padding: 60px 20px;
-      color: #bbb;
+      color: #888;
       font-size: 14px;
     }
 
@@ -674,7 +649,7 @@
     .yr-section-title {
       font-size: 11px;
       font-weight: 700;
-      color: #bbb;
+      color: #888;
       letter-spacing: .06em;
       text-transform: uppercase;
       margin-bottom: 6px;
@@ -737,7 +712,7 @@
       padding-left: 32px;
       font-weight: normal;
       font-size: 11px;
-      color: #bbb;
+      color: #888;
     }
 
     .yr-table tbody td.latest-col {
@@ -775,14 +750,40 @@
 
     .diff-badge.flat {
       background: #f0f0f0;
-      color: #aaa;
+      color: #777;
+    }
+
+    .card-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: .02em;
+    }
+
+    .card-change.up {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .card-change.down {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .card-change.flat {
+      background: #f0f0f0;
+      color: #666;
     }
 
     .yr-table tbody tr.section-sep td {
       padding: 8px 8px 4px;
       font-size: 11px;
       font-weight: 700;
-      color: #bbb;
+      color: #888;
       letter-spacing: .06em;
       text-transform: uppercase;
       border-bottom: 2px solid #e4eaf8;
@@ -833,14 +834,12 @@
 
   <header>
     <h1>軽自動車税 台数表</h1>
+    <div id="hdr-search-wrap">
+      <input type="text" id="inp-search" placeholder="都道府県・団体名で検索…" autocomplete="off">
+      <span id="search-count"></span>
+    </div>
     <span id="hdr-count"></span>
   </header>
-
-  <div class="filter-bar">
-    <input type="text" id="inp-search" placeholder="都道府県・団体名で検索…" autocomplete="off"
-      style="padding:6px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;min-width:260px;outline:none;">
-    <span id="search-count" style="font-size:12px;color:#888;white-space:nowrap;align-self:center;"></span>
-  </div>
 
   <div id="main-content" style="display:none">
     <div class="card-area" id="card-area">
@@ -1009,14 +1008,6 @@
       document.getElementById('inp-search').addEventListener('input', e => {
         state.filterQuery = e.target.value.toLowerCase(); applyFilter();
       });
-      document.getElementById('inp-search').addEventListener('focus', e => {
-        e.target.style.borderColor = '#1a56db';
-        e.target.style.boxShadow = '0 0 0 2px #c7d9ff';
-      });
-      document.getElementById('inp-search').addEventListener('blur', e => {
-        e.target.style.borderColor = '#ccc';
-        e.target.style.boxShadow = '';
-      });
       document.getElementById('sheet-overlay').addEventListener('click', closeSheet);
       document.getElementById('sheet-close').addEventListener('click', closeSheet);
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
@@ -1039,7 +1030,7 @@
       state.filtered = [...state.entityMap.values()].filter(e =>
         (!q || e.pref.toLowerCase().includes(q) || e.name.toLowerCase().includes(q)) &&
         e.years.has(latest)
-      ).sort((a, b) => a.pref < b.pref ? -1 : a.pref > b.pref ? 1 : a.name < b.name ? -1 : 1);
+      ).sort((a, b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
       const total = state.entityMap.size;
       const hit = state.filtered.length;
       const countEl = document.getElementById('search-count');
@@ -1086,6 +1077,18 @@
       const yd = e.years.get(year) ?? new Map();
       const total = yd.get('合計')?.f ?? 0;
 
+      const years = state.allYears;
+      const prevYear = years.at(-4);
+      const prevTotal = prevYear ? (e.years.get(prevYear)?.get('合計')?.f ?? 0) : 0;
+      let changeBadge = '';
+      if (prevTotal > 0) {
+        const rate = (total - prevTotal) / prevTotal * 100;
+        const cls = rate > 0 ? 'up' : rate < 0 ? 'down' : 'flat';
+        const arrow = rate > 0 ? '▲' : rate < 0 ? '▼' : '─';
+        const sign = rate > 0 ? '+' : '';
+        changeBadge = `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span class="card-change ${cls}">${arrow} ${sign}${rate.toFixed(1)}%</span><span style="font-size:12px;color:#999">${prevYear}年度比</span></div>`;
+      }
+
       const segs = BAR_LABELS.map(b => {
         const v = yd.get(b.label)?.f ?? 0;
         const pct = total > 0 ? Math.max(1, v / total * 100) : 0;
@@ -1104,13 +1107,16 @@
         <div class="s-card-head">
           <div>
             <div class="s-card-name">${esc(e.name)}</div>
-            <div class="s-card-pref">${esc(e.pref)} · ${esc(e.code)}</div>
+            <div class="s-card-pref">${esc(e.pref)}</div>
           </div>
-          <div class="s-card-year">${year}年度</div>
+          ${changeBadge}
         </div>
         <div class="s-card-total">
-          <div class="s-card-total-label">合計（賦課期日現在）</div>
-          <div class="s-card-total-val">${total.toLocaleString('ja-JP')}<span class="s-card-total-unit">台</span></div>
+          <div class="s-card-total-label">合計台数</div>
+          <div class="s-card-total-val">
+            ${total.toLocaleString('ja-JP')}
+            <span class="s-card-total-unit">台</span>
+          </div>
         </div>
         <div class="s-card-bar-track">${segs}</div>
         <div class="s-card-legend">${legend}</div>
