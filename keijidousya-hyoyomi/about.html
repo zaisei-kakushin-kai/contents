@@ -118,19 +118,28 @@
         }
 
         .cta {
-            display: inline-block;
-            margin-top: 12px;
+            display: block;
+            width: fit-content;
+            margin: 16px auto 0;
             background: #1a56db;
             color: white;
             text-decoration: none;
-            padding: 9px 20px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 13px 28px;
+            border-radius: 50px;
+            font-size: 15px;
             font-weight: 700;
+            letter-spacing: 0.04em;
         }
 
         .cta:hover {
-            background: #1446b8;
+            background: #1a56db;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(26, 86, 219, .55);
+        }
+
+        .cta:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(26, 86, 219, .4);
         }
     </style>
 </head>
@@ -138,7 +147,6 @@
 <body>
 
     <header>
-        <a class="back" href="index.html">← 一覧に戻る</a>
         <h1>使い方・このサイトについて</h1>
     </header>
 
@@ -150,6 +158,7 @@
                 <p>全国の市区町村が公表している<strong>軽自動車税（種別割）の台数データ</strong>をもとに、各団体の登録台数の内訳・推移を手軽に確認できるツールです。</p>
                 <p>軽自動車税の減税を公約に掲げた場合の「票読み」するための参考情報として活用できます。</p>
                 <div class="note">データは総務省公表の地方財政状況調査（決算カード）に基づいています。</div>
+                <a class="cta" href="index.html">自治体ごとのデータを見る！</a>
             </div>
 
             <h2>市町村の判断で軽自動車税は減税できるのか？</h2>
@@ -213,7 +222,7 @@
                     <li><strong>指標を切り替える</strong> — 「賦課期日現在台数」と「差引課税台数」をボタンで切り替えられます。</li>
                     <li><strong>共有リンク</strong> — 団体の詳細画面で「共有リンク」ボタンを押すと、その団体へ直接アクセスできるURLをコピーできます。</li>
                 </ol>
-                <a class="cta" href="index.html">一覧を見る →</a>
+                <a class="cta" href="index.html">自治体ごとのデータを見る！</a>
             </div>
             <h2>データについて</h2>
             <div class="card">
