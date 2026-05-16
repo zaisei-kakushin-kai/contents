@@ -345,114 +345,207 @@
             color: var(--red);
         }
 
-        /* ── table ── */
-        .table-scroll {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+        /* ── sort bar ── */
+        .sort-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
         }
 
-        #result-table {
-            width: 100%;
-            min-width: 740px;
-            border-collapse: collapse;
-            table-layout: fixed;
-            font-size: 12px;
+        /* ── card grid ── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 10px;
         }
 
-        #result-table thead th {
-            font-family: var(--mono);
-            font-size: 11px;
-            color: var(--gray);
-            letter-spacing: 0.08em;
-            text-align: left;
-            padding: 6px 10px;
-            border-bottom: 2px solid var(--red-dim);
-            white-space: nowrap;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        #result-table thead th:hover {
-            color: var(--text);
-        }
-
-        #result-table thead th.sort-active {
-            color: var(--red);
-        }
-
-        #result-table thead th .sort-arr {
-            margin-left: 4px;
-            font-size: 9px;
-            opacity: 0.7;
-        }
-
-        #result-table thead th.right {
-            text-align: right;
-        }
-
-        #result-table tbody tr {
-            border-bottom: 1px solid var(--border);
-        }
-
-        #result-table tbody tr:hover {
+        .item-card {
             background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 14px 16px;
+            position: relative;
+            overflow: hidden;
         }
 
-        #result-table tbody td {
-            padding: 7px 10px;
-            vertical-align: middle;
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
         }
 
-        .td-rank {
+        .item-card.akaji::before { background: var(--red); }
+        .item-card.ok::before    { background: var(--green); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .card-header-left {
+            text-align: left;
+            flex-shrink: 0;
+            padding: 8px 12px;
+            min-width: 0;
+        }
+
+        .card-rank {
             font-family: var(--mono);
             font-size: 10px;
             color: var(--gray-dim);
-            text-align: right;
+            margin-bottom: 4px;
         }
 
-        .td-name {
+        .card-pref {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+
+        .card-name {
             font-family: var(--jp);
+            font-size: 18px;
             color: var(--text);
+            font-weight: bold;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .td-pref {
+        .card-futan-block {
+            text-align: right;
+            flex-shrink: 0;
+            background: #1a0a0a;
+            border: 1px solid var(--red-dim);
+            padding: 8px 12px;
+        }
+
+        .item-card.ok .card-futan-block {
+            background: #0a1a10;
+            border-color: #2a6644;
+        }
+
+        .card-futan-label {
             font-family: var(--mono);
-            font-size: 11px;
+            font-size: 10px;
+            color: var(--gray);
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .card-futan-val {
+            font-family: var(--mono);
+            font-size: 26px;
+            color: #f0f0f0;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .item-card.ok .card-futan-val {
+            color: #f0f0f0;
+        }
+
+        .card-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 10px 0;
+        }
+
+        /* ── compare bar ── */
+        .compare-bar-wrap {
+            margin-bottom: 10px;
+        }
+
+        .compare-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .compare-bar-label {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: #e8e8e8;
+            white-space: nowrap;
+            width: 120px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .compare-bar-track {
+            flex: 1;
+            height: 14px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .compare-bar-fill {
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            transition: width 0.3s ease;
+        }
+
+        .compare-bar-fill.sainyu {
+            background: #336699;
+        }
+
+        .compare-bar-fill.futan {
+            background: var(--red-dim);
+        }
+
+        .item-card.ok .compare-bar-fill.futan {
+            background: #2a6644;
+        }
+
+        .compare-bar-val {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: #e8e8e8;
+            white-space: nowrap;
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .card-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .card-row-label {
+            font-family: var(--mono);
+            font-size: 12px;
             color: var(--gray);
             white-space: nowrap;
         }
 
-        .td-num {
+        .card-row-val {
             font-family: var(--mono);
-            font-size: 11px;
+            font-size: 13px;
+            color: #aaa;
             text-align: right;
             white-space: nowrap;
-            color: #aaa;
         }
 
-        .td-num.akaji {
-            color: var(--red);
-        }
-
-        .td-num.yellow {
-            color: var(--yellow);
-        }
-
-        .td-bar-cell {
-            padding: 7px 8px;
-        }
-
-        .inline-bar {
-            height: 6px;
-            background: var(--red-dim);
-            opacity: 0.55;
-            border-radius: 1px;
-            min-width: 2px;
-        }
+        .card-row-val.akaji { color: var(--red); }
+        .card-row-val.yellow { color: var(--yellow); }
 
         /* ── loading ── */
         #loading {
@@ -550,8 +643,8 @@
                 <div class="callout">
                     <div class="callout-title">▎ 消費税負担の概算</div>
                     投資的経費(除く人件費)<br>
-                    ＋ 物件費
-                    ＋ 維持補修費
+                    ＋ 物件費 <br>
+                    ＋ 維持補修費 <br>
                     ＝ 消費税負担額
                 </div>
             </div>
@@ -583,39 +676,24 @@
 
                 <div class="result-count" id="result-count"></div>
 
-                <div class="table-scroll">
-                    <table id="result-table">
-                        <colgroup>
-                            <col style="width:4%"> <!-- rank -->
-                            <col style="width:10%"> <!-- 都道府県 -->
-                            <col style="width:14%"> <!-- 団体名 -->
-                            <col style="width:14%"> <!-- 消費税による歳入 -->
-                            <col style="width:14%"> <!-- 消費税負担額 -->
-                            <col style="width:14%"> <!-- 実質収入 -->
-                            <col style="width:10%"> <!-- 実質収入率 -->
-                            <col style="width:20%"> <!-- bar -->
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th data-col="pref">都道府県<span class="sort-arr"></span></th>
-                                <th data-col="name">団体名<span class="sort-arr"></span></th>
-                                <th data-col="sainyu" class="right">消費税による歳入<span class="sort-arr"></span></th>
-                                <th data-col="futan" class="right">消費税負担額<span class="sort-arr"></span></th>
-                                <th data-col="jisshu" class="right">実質収入<span class="sort-arr"></span></th>
-                                <th data-col="rate" class="right">実質収入率<span class="sort-arr"></span></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="result-tbody"></tbody>
-                    </table>
+                <div class="sort-bar">
+                    <span class="control-label">並び替え：</span>
+                    <button class="tab-btn" data-col="jisshu">実質収入</button>
+                    <button class="tab-btn" data-col="rate">実質負担率</button>
+                    <button class="tab-btn" data-col="sainyu">消費税による歳入</button>
+                    <button class="tab-btn" data-col="futan">消費税負担額</button>
+                    <button class="tab-btn" data-col="pref">都道府県</button>
+                    <button class="tab-btn" data-col="name">団体名</button>
                 </div>
+
+                <div class="card-grid" id="card-grid"></div>
             </div>
         </div>
 
         <div class="note">
             ※ 消費税による歳入 = 地方消費税交付金 ＋ 地方交付税（消費税分）<br>
             ※ 実質収入 = 消費税による歳入 − 消費税負担額<br>
+            ※ 実質負担率 = 消費税による歳入 ÷ 消費税負担額<br>
             ※ データ出典：令和5年度決算カード / 財政革新会による試算
         </div>
 
@@ -649,7 +727,7 @@
             sainyu: d['消費税による歳入'] ?? 0,
             futan: d['消費税負担額'] ?? 0,
             jisshu: d['実質収入'] ?? 0,
-            rate: d['実質収入率'] ?? 0,
+            rate: (d['消費税による歳入'] && d['消費税負担額']) ? d['消費税による歳入'] / d['消費税負担額'] : null,
         }))
 
         const AKAJI = DATA.filter(d => d.jisshu < 0)
@@ -707,9 +785,9 @@
         let sortCol = 'jisshu'
         let sortDir = 1  // 1=昇順（赤字大→小）
 
-        document.querySelectorAll('#result-table thead th[data-col]').forEach(th => {
-            th.addEventListener('click', () => {
-                const col = th.dataset.col
+        document.querySelectorAll('.sort-bar .tab-btn[data-col]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const col = btn.dataset.col
                 if (sortCol === col) sortDir = -sortDir
                 else { sortCol = col; sortDir = 1 }
                 updateSortUI()
@@ -718,10 +796,16 @@
         })
 
         function updateSortUI() {
-            document.querySelectorAll('#result-table thead th[data-col]').forEach(th => {
-                const active = th.dataset.col === sortCol
-                th.classList.toggle('sort-active', active)
-                th.querySelector('.sort-arr').textContent = active ? (sortDir === 1 ? ' ▲' : ' ▼') : ''
+            document.querySelectorAll('.sort-bar .tab-btn[data-col]').forEach(btn => {
+                const active = btn.dataset.col === sortCol
+                btn.classList.toggle('active', active)
+                btn.textContent = btn.dataset.col === 'jisshu' ? '実質収入'
+                    : btn.dataset.col === 'rate' ? '実質負担率'
+                    : btn.dataset.col === 'sainyu' ? '消費税による歳入'
+                    : btn.dataset.col === 'futan' ? '消費税負担額'
+                    : btn.dataset.col === 'pref' ? '都道府県'
+                    : '団体名'
+                if (active) btn.textContent += sortDir === 1 ? ' ▲' : ' ▼'
             })
         }
         updateSortUI()
@@ -731,6 +815,7 @@
 
         // ── format ───────────────────────────────────────────────────────
         function fmtVal(v) {
+            if (v == null || isNaN(v)) return '-'
             const abs = Math.abs(v)
             if (abs < 10) return Math.round(v).toLocaleString('ja-JP') + ' 千円'
             if (abs < 100000) return (v / 10).toLocaleString('ja-JP') + ' 万円'
@@ -752,29 +837,49 @@
                 return sortDir * (va - vb)
             })
 
-            const maxAbs = Math.max(...rows.map(d => Math.abs(d.jisshu)), 1)
-
             document.getElementById('result-count').innerHTML =
                 `<span>${rows.length.toLocaleString('ja-JP')}</span> 件`
 
-            const tbody = document.getElementById('result-tbody')
-            tbody.innerHTML = ''
+            const grid = document.getElementById('card-grid')
+            grid.innerHTML = ''
             rows.forEach((d, i) => {
                 const isAkaji = d.jisshu < 0
-                const barW = (Math.abs(d.jisshu) / maxAbs * 100).toFixed(1)
-                const ratePct = (d.rate * 100).toFixed(1) + '%'
-                const tr = document.createElement('tr')
-                tr.innerHTML = `
-            <td class="td-rank">${i + 1}</td>
-            <td class="td-pref">${d.pref}</td>
-            <td class="td-name">${d.name}</td>
-            <td class="td-num">${fmtVal(d.sainyu)}</td>
-            <td class="td-num">${fmtVal(d.futan)}</td>
-            <td class="td-num ${isAkaji ? 'akaji' : ''}">${isAkaji ? '▼ ' : ''}${fmtVal(Math.abs(d.jisshu))}</td>
-            <td class="td-num yellow">${ratePct}</td>
-            <td class="td-bar-cell"><div class="inline-bar" style="width:${barW}%"></div></td>
-        `
-                tbody.appendChild(tr)
+                const card = document.createElement('div')
+                card.className = `item-card ${isAkaji ? 'akaji' : 'ok'}`
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="card-pref">${d.pref}</div>
+                            <div class="card-name">${d.name}</div>
+                        </div>
+                        <div class="card-futan-block">
+                            <div class="card-futan-label">消費税負担額</div>
+                            <div class="card-futan-val">${fmtVal(d.futan)}</div>
+                        </div>
+                    </div>
+                    <hr class="card-divider">
+                    <div class="compare-bar-wrap">${(() => {
+                        const maxVal = Math.max(d.sainyu, d.futan, 1)
+                        const sainyuW = (d.sainyu / maxVal * 100).toFixed(1)
+                        const futanW  = (d.futan  / maxVal * 100).toFixed(1)
+                        return `
+                        <div class="compare-bar-row">
+                            <span class="compare-bar-label">消費税による歳入</span>
+                            <div class="compare-bar-track">
+                                <div class="compare-bar-fill sainyu" style="width:${sainyuW}%"></div>
+                            </div>
+                            <span class="compare-bar-val">${fmtVal(d.sainyu)}</span>
+                        </div>
+                        <div class="compare-bar-row">
+                            <span class="compare-bar-label">消費税負担額</span>
+                            <div class="compare-bar-track">
+                                <div class="compare-bar-fill futan" style="width:${futanW}%"></div>
+                            </div>
+                            <span class="compare-bar-val">${fmtVal(d.futan)}</span>
+                        </div>`
+                    })()}</div>
+                `
+                grid.appendChild(card)
             })
         }
 
