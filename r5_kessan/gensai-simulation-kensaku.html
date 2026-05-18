@@ -846,12 +846,13 @@
         }
 
         function buildGroups(indexedData) {
-            if (sortCol === '相殺割合.10特定目的') {
+            if (sortCol === '相殺割合.10財調') {
+                const rate = d => sousaiGakuMax(d) / (+(d['公債費.決算額']) || 1)
                 return rangeGroups(indexedData, [
-                    { title: '100%', test: d => +(d['相殺割合.10特定目的']) >= 1 },
-                    { title: '80% 以上', test: d => +(d['相殺割合.10特定目的']) >= 0.8 },
-                    { title: '50% 以上', test: d => +(d['相殺割合.10特定目的']) >= 0.5 },
-                    { title: '20% 以上', test: d => +(d['相殺割合.10特定目的']) >= 0.2 },
+                    { title: '100%',    test: d => rate(d) >= 1 },
+                    { title: '80% 以上', test: d => rate(d) >= 0.8 },
+                    { title: '50% 以上', test: d => rate(d) >= 0.5 },
+                    { title: '20% 以上', test: d => rate(d) >= 0.2 },
                     { title: '20% 未満', test: () => true },
                 ])
             }
