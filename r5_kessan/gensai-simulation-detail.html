@@ -862,11 +862,11 @@
         function renderScenarios(d) {
             const scenarios = [
                 { label: '減債のみ', color: 'var(--c-gensai)', name: '減債', rKey: '相殺割合.減債', aKey: '相殺額.減債' },
-                { label: '＋ 財調を半分投入', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.05財調', aKey: '相殺額.05財調' },
-                { label: '＋ 財調を全部投入', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.10財調', aKey: '相殺額.10財調' },
+                { label: '＋ 財調を半分活用', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.05財調', aKey: '相殺額.05財調' },
+                { label: '＋ 財調を全部活用', color: 'var(--c-zaichou)', name: '財調', rKey: '相殺割合.10財調', aKey: '相殺額.10財調' },
                 { label: '＋ 積立金', color: 'var(--c-tsumitate)', name: '積立金', rKey: '相殺割合.積立金', aKey: '相殺額.積立金' },
-                { label: '＋ 特定目的を半分投入', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.05特定目的', aKey: '相殺額.05特定目的' },
-                { label: '＋ 特定目的を全部入', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.10特定目的', aKey: '相殺額.10特定目的' },
+                { label: '＋ 特定目的を半分活用', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.05特定目的', aKey: '相殺額.05特定目的' },
+                { label: '＋ 特定目的を全部活用', color: 'var(--c-tokutei)', name: '特定目的', rKey: '相殺割合.10特定目的', aKey: '相殺額.10特定目的' },
             ]
 
             const ratios = scenarios.map(sc => +(d[sc.rKey] * 100) || 0)

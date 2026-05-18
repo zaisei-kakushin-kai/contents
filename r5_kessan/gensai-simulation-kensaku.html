@@ -236,133 +236,205 @@
             color: var(--orange);
         }
 
-        .table-scroll-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+        /* ── pref section ── */
+        .pref-section {
+            margin-bottom: 12px;
         }
 
-        #result-table {
-            width: 100%;
-            min-width: 640px;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-
-        #result-table thead th {
-            font-family: var(--mono);
-            font-size: 10px;
-            color: var(--gray);
-            letter-spacing: .08em;
-            text-align: left;
-            padding: 6px 10px;
-            border-bottom: 2px solid var(--orange-dim);
-            white-space: nowrap;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        #result-table thead th:hover {
-            color: var(--text);
-        }
-
-        #result-table thead th.sort-active {
-            color: var(--orange);
-        }
-
-        #result-table thead th .sort-arrow {
-            display: inline-block;
-            margin-left: 4px;
-            opacity: .5;
-            font-size: 9px;
-        }
-
-        #result-table thead th.sort-active .sort-arrow {
-            opacity: 1;
-        }
-
-        #result-table tbody tr {
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-        }
-
-        #result-table tbody tr:hover {
-            background: var(--bg-panel);
-        }
-
-        #result-table tbody td {
-            padding: 6px 10px;
-            vertical-align: middle;
-        }
-
-        .td-name {
-            font-family: var(--jp);
-            color: var(--text);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .td-pref {
+        .pref-section-title {
             font-family: var(--mono);
             font-size: 11px;
-            color: var(--text-dim);
-            white-space: nowrap;
+            color: var(--orange);
+            letter-spacing: 2px;
+            border-left: 3px solid var(--orange);
+            padding: 4px 12px;
+            background: var(--orange-glow);
+            margin-bottom: 12px;
         }
 
-        .td-val {
+        /* ── card grid ── */
+        .card-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .card-grid--3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: 860px) {
+            .card-grid--3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 560px) {
+            .card-grid--3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── デザインA カード ── */
+        .card-a {
+            background: var(--bg-panel);
+            border: 1px solid var(--orange-dim);
+            padding: 14px 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color .15s, background .15s;
+        }
+
+
+        .card-a-head {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .card-a-head-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .card-a-pref {
             font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        .card-a-name {
+            font-family: var(--jp);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-a-chihou {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .card-a-chihou-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        .card-a-chihou-value {
+            font-family: var(--mono);
+            font-size: 22px;
+            color: var(--orange);
+            font-weight: 300;
+            letter-spacing: -1px;
+        }
+
+        .card-a-kousai {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px 12px;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+
+        .card-a-kousai-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .card-a-kousai-col--right {
             text-align: right;
-            white-space: nowrap;
+        }
+
+        .card-a-kousai-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        .card-a-kousai-amount {
+            font-family: var(--mono);
+            font-size: 16px;
             color: var(--cyan);
         }
 
-        .td-val.danger {
-            color: var(--red);
+        .card-a-kousai-pct {
+            font-family: var(--mono);
+            font-size: 16px;
+            color: var(--text);
         }
 
-        .td-val.warn {
-            color: var(--yellow);
+        .card-a-zaisei {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px 12px;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
         }
 
-        .td-val.sousai-hi {
+        .card-a-zaisei-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            align-self: end;
+        }
+
+        .card-a-zaisei-max {
+            font-family: var(--mono);
+            font-size: 16px;
             color: var(--green);
         }
 
-        .td-val.sousai-mid {
-            color: var(--cyan);
+        .card-a-zaisei-abs-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        .td-val.sousai-low {
-            color: var(--yellow);
-        }
-
-        .td-ratio {
-            font-family: var(--mono);
-            font-size: 11px;
-            color: var(--text);
+        .card-a-zaisei-rate-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
             text-align: right;
-            white-space: nowrap;
         }
 
-        /* detail link cell */
-        .td-link {
-            text-align: center;
-            padding: 4px;
+        .card-a-zaisei-rate {
+            font-family: var(--mono);
+            font-size: 16px;
+            color: var(--green);
         }
 
-        .detail-btn {
+        .card-a-zaisei-sub {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--gray);
+        }
+
+        .card-link-btn {
             font-family: var(--mono);
             font-size: 10px;
             color: var(--gray);
             border: 1px solid var(--gray-dim);
-            background: var(--bg-2);
-            padding: 2px 8px;
+            background: transparent;
+            padding: 3px 10px;
             text-decoration: none;
             white-space: nowrap;
+            transition: color .15s, border-color .15s;
         }
 
-        .detail-btn:hover {
+        .card-link-btn:hover {
             color: var(--orange);
             border-color: var(--orange-dim);
         }
@@ -491,8 +563,7 @@
             <div class="section-title">繰り上げ償還との違い</div>
             <div class="section-body">
                 <p>自治体が地方債や借入金を繰上げ償還する場合、将来にわたって支払う予定だった利払金や補償金を支払う必要がある場合があります。</p>
-                <p>当会が推奨する「公債費負担の相殺」は、減債基金に資金を振り替えつつ、当該資金を投資適格の円貨債で運用することで、
-                    将来にわたって円債の償還に必要となる資金を確保しつつ、利払費も相殺しようという考えです。
+                <p>当会が推奨する「公債費負担の相殺」は、減債基金に資金を振り替えつつ、円貨公債を買い入れ、償還に必要となる資金を確保し、利払費も相殺しようという考えです。
                 </p>
                 <p>
                     繰り上げ償還よりも、経済的合理性があります。
@@ -571,29 +642,19 @@
                     <input type="text" id="name-search" placeholder="例：橋本市" style="min-width:160px;">
                 </div>
 
+                <div class="control-group">
+                    <span class="control-label">並び替え：</span>
+                    <div class="sort-tabs" id="sort-tabs">
+                        <button class="sort-tab" data-sort-col="都道府県順" data-sort-type="pref">都道府県順</button>
+                        <button class="sort-tab" data-sort-col="地方債" data-sort-type="num">地方債残高</button>
+                        <button class="sort-tab" data-sort-col="公債費.構成比" data-sort-type="num">公債費構成比</button>
+                        <button class="sort-tab" data-sort-col="相殺割合.10財調" data-sort-type="num">相殺率</button>
+                    </div>
+                </div>
+
                 <div class="result-count" id="result-count"></div>
 
-                <div class="table-scroll-wrapper">
-                    <table id="result-table">
-                        <thead>
-                            <tr>
-                                <th style="width:30px"></th>
-                                <th style="width:110px" data-sort-col="都道府県名" data-sort-type="str">都道府県<span
-                                        class="sort-arrow">↕</span></th>
-                                <th style="width:160px" data-sort-col="団体名" data-sort-type="str">団体名<span
-                                        class="sort-arrow">↕</span></th>
-                                <th style="width:140px; text-align:right" data-sort-col="地方債" data-sort-type="num">
-                                    地方債現在高<span class="sort-arrow">↕</span></th>
-                                <th style="width:140px; text-align:right" data-sort-col="公債費.構成比" data-sort-type="num">
-                                    公債費 構成比<span class="sort-arrow">↕</span></th>
-                                <th style="width:140px; text-align:right" data-sort-col="相殺割合.10財調"
-                                    data-sort-type="num">
-                                    相殺割合<span class="sort-arrow">↕</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="result-body"></tbody>
-                    </table>
-                </div>
+                <div id="result-cards"></div>
             </div>
         </div>
 
@@ -664,9 +725,25 @@
         let sortCol = '相殺額.10財調'
         let sortDir = 'desc'
         let nameQuery = ''
+        let prefOrder = []
 
         function sortData(data) {
             return [...data].sort((a, b) => {
+                if (sortCol === '都道府県順') {
+                    const ai = prefOrder.indexOf(a['都道府県名'] || '')
+                    const bi = prefOrder.indexOf(b['都道府県名'] || '')
+                    const cmp = (ai === -1 ? 9999 : ai) - (bi === -1 ? 9999 : bi)
+                    return sortDir === 'desc' ? -cmp : cmp
+                }
+                if (sortCol === '相殺割合.10財調') {
+                    const sign = sortDir === 'desc' ? -1 : 1
+                    return sign * (
+                        ((+(a['相殺割合.10財調']) || 0) - (+(b['相殺割合.10財調']) || 0)) ||
+                        ((+(a['地方債']) || 0) - (+(b['地方債']) || 0)) ||
+                        ((+(a['公債費.構成比']) || 0) - (+(b['公債費.構成比']) || 0)) ||
+                        (a['都道府県名'] || '').localeCompare(b['都道府県名'] || '', 'ja')
+                    )
+                }
                 const av = a[sortCol], bv = b[sortCol]
                 let cmp
                 if (typeof av === 'string' || typeof bv === 'string') {
@@ -678,17 +755,140 @@
             })
         }
 
-        function updateSortHeaders() {
-            document.querySelectorAll('#result-table thead th[data-sort-col]').forEach(th => {
-                const isActive = th.dataset.sortCol === sortCol
-                th.classList.toggle('sort-active', isActive)
-                th.querySelector('.sort-arrow').textContent = isActive ? (sortDir === 'desc' ? '↓' : '↑') : '↕'
+        function updateSortTabs() {
+            document.querySelectorAll('#sort-tabs .sort-tab').forEach(btn => {
+                const isActive = btn.dataset.sortCol === sortCol
+                btn.classList.toggle('active', isActive)
+                btn.textContent = btn.textContent.replace(/ [↓↑]$/, '')
+                if (isActive) btn.textContent += sortDir === 'desc' ? ' ↓' : ' ↑'
             })
         }
 
         function detailUrl(d) {
             return `gensai-simulation-detail.html?id=${encodeURIComponent(d['id'] || '')}`
         }
+
+        function sousaiGakuMin(d) {
+            if (d['相殺額.減債'] != null) return d['相殺額.減債']
+            const r = Math.min((+(d['減債']) || 0) / (+(d['地方債']) || 1), 1)
+            return (+(d['公債費.決算額']) || 0) * r
+        }
+
+        function sousaiGakuMax(d) {
+            if (d['相殺額.10財調'] != null) {
+                console.log(d)
+                return Math.min(d['相殺額.10財調'], d['公債費.決算額'])
+            } else {
+                return null
+            }
+        }
+
+        function kousaiColor(t) {
+            // t: 財源/公債費 の比率（0〜1）。1→青、0→黄
+            const clamped = Math.max(0, Math.min(1, t))
+            const h = Math.round(50 + clamped * 170) // 50(黄) → 220(青)
+            const s = 80
+            const l = 55
+            return `hsl(${h},${s}%,${l}%)`
+        }
+
+        function cardAHtml(d, globalIdx) {
+            const max = sousaiGakuMax(d)
+            const kousai = +(d['公債費.決算額']) || 1
+            const borderColor = kousaiColor(max / kousai)
+            return `<div class="card-a" data-idx="${globalIdx}" style="border-color:${borderColor}">
+                <div class="card-a-head">
+                    <div class="card-a-head-left">
+                        <span class="card-a-pref">${d['都道府県名'] || ''}</span>
+                        <span class="card-a-name">${d['団体名'] || ''}</span>
+                    </div>
+                    <a class="card-link-btn" href="${detailUrl(d)}">詳細 →</a>
+                </div>
+                <div class="card-a-chihou">
+                    <span class="card-a-chihou-label">地方債現在高</span>
+                    <span class="card-a-chihou-value">${fmtKin(d['地方債'])}</span>
+                </div>
+                <div class="card-a-kousai">
+                    <div class="card-a-kousai-col">
+                        <span class="card-a-kousai-label">公債費</span>
+                        <span class="card-a-kousai-amount">${fmtKin(d['公債費.決算額'])}</span>
+                    </div>
+                    <div class="card-a-kousai-col card-a-kousai-col--right">
+                        <span class="card-a-kousai-label">構成比</span>
+                        <span class="card-a-kousai-pct">${(+(d['公債費.構成比']) || 0).toFixed(1)}%</span>
+                    </div>
+                </div>
+                <div class="card-a-zaisei">
+                    <div class="card-a-zaisei-abs-col">
+                        <span class="card-a-kousai-label">公債費の相殺額（最大）</span>
+                        <span class="card-a-zaisei-max">${fmtKin(max)}</span>
+                    </div>
+                    <div class="card-a-zaisei-rate-col">
+                        <span class="card-a-kousai-label">相殺率</span>
+                        <span class="card-a-zaisei-rate">${fmtPct(max / kousai * 100)}</span>
+                    </div>
+                    <div class="card-a-zaisei-sub">
+                        <span>※全基金（財調や積立金、特定目的含む）を活用した場合</span>
+                    </div>
+                </div>
+            </div>`
+        }
+
+        function rangeGroups(indexedData, defs) {
+            const buckets = defs.map(({ title, test }) => ({ title, items: [], test }))
+            for (const item of indexedData) {
+                for (const bucket of buckets) {
+                    if (bucket.test(item.d)) { bucket.items.push(item); break }
+                }
+            }
+            const result = buckets.filter(b => b.items.length > 0)
+            return sortDir === 'asc' ? result.slice().reverse() : result
+        }
+
+        function buildGroups(indexedData) {
+            if (sortCol === '相殺割合.10特定目的') {
+                return rangeGroups(indexedData, [
+                    { title: '100%', test: d => +(d['相殺割合.10特定目的']) >= 1 },
+                    { title: '80% 以上', test: d => +(d['相殺割合.10特定目的']) >= 0.8 },
+                    { title: '50% 以上', test: d => +(d['相殺割合.10特定目的']) >= 0.5 },
+                    { title: '20% 以上', test: d => +(d['相殺割合.10特定目的']) >= 0.2 },
+                    { title: '20% 未満', test: () => true },
+                ])
+            }
+            if (sortCol === '地方債') {
+                return rangeGroups(indexedData, [
+                    { title: '1兆円以上', test: d => +(d['地方債']) >= 1_000_000_000 },
+                    { title: '5000億円以上', test: d => +(d['地方債']) >= 500_000_000 },
+                    { title: '1000億円以上', test: d => +(d['地方債']) >= 100_000_000 },
+                    { title: '100億円以上', test: d => +(d['地方債']) >= 10_000_000 },
+                    { title: '50億円以上', test: d => +(d['地方債']) >= 5_000_000 },
+                    { title: '1億円以上', test: d => +(d['地方債']) >= 1_000_00 },
+                    { title: '1億円未満', test: () => true },
+                ])
+            }
+            if (sortCol === '公債費.構成比') {
+                return rangeGroups(indexedData, [
+                    { title: '30% 以上', test: d => +(d['公債費.構成比']) >= 30 },
+                    { title: '20% 以上', test: d => +(d['公債費.構成比']) >= 20 },
+                    { title: '15% 以上', test: d => +(d['公債費.構成比']) >= 15 },
+                    { title: '10% 以上', test: d => +(d['公債費.構成比']) >= 10 },
+                    { title: '5% 以上', test: d => +(d['公債費.構成比']) >= 5 },
+                    { title: '5% 未満', test: () => true },
+                ])
+            }
+            // デフォルト: 都道府県別（pref-array.json の順序）
+            const prefMap = new Map()
+            for (const item of indexedData) {
+                const pref = item.d['都道府県名'] || ''
+                if (!prefMap.has(pref)) prefMap.set(pref, [])
+                prefMap.get(pref).push(item)
+            }
+            const order = prefOrder.length ? prefOrder : [...prefMap.keys()]
+            const prefGroups = order.filter(p => prefMap.has(p)).map(pref => ({ title: pref, items: prefMap.get(pref) }))
+            return sortDir === 'asc' ? prefGroups : prefGroups.slice().reverse()
+        }
+
+        renderTable._gen = 0
 
         function renderTable() {
             let data = allData
@@ -701,36 +901,39 @@
 
             document.getElementById('result-count').innerHTML = `<span>${filteredData.length.toLocaleString()}</span> 件`
 
-            const tbody = document.getElementById('result-body')
+            const container = document.getElementById('result-cards')
             if (filteredData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">該当する自治体がありません</td></tr>`
+                container.innerHTML = `<div class="no-data-msg">該当する自治体がありません</div>`
                 return
             }
 
-            tbody.innerHTML = filteredData.map(d => {
-                const r = +(d['相殺割合.10財調']) || 0
-                const sousaiCls = r >= 0.15 ? 'sousai-hi' : r >= 0.10 ? 'sousai-mid' : r >= 0.05 ? 'sousai-low' : ''
-                return `<tr>
-                    <td class="td-link"><a class="detail-btn" href="${detailUrl(d)}">詳細</a></td>
-                    <td class="td-pref">${d['都道府県名'] || ''}</td>
-                    <td class="td-name">${d['団体名'] || ''}</td>
-                    <td class="td-val">${fmtKin(d['地方債'])}</td>
-                    <td class="td-val">${(d['公債費.構成比'])} %</td>
-                    <td class="td-val ${sousaiCls}">${((d['相殺割合.10財調'] * 100).toFixed(1))} %</td>
-                </tr>`
-            }).join('')
+            const indexedData = filteredData.map((d, i) => ({ d, i }))
+            const groupList = buildGroups(indexedData)
 
-            // 行クリックでも詳細ページへ
-            tbody.querySelectorAll('tr').forEach((tr, i) => {
-                tr.addEventListener('click', e => {
-                    if (e.target.closest('a')) return
-                    location.href = detailUrl(filteredData[i])
-                })
-            })
+            container.innerHTML = ''
+            const thisGen = ++renderTable._gen
+
+            function renderGroup(idx) {
+                if (thisGen !== renderTable._gen) return
+                if (idx >= groupList.length) return
+
+                const { title, items } = groupList[idx]
+                const cardsHtml = items.map(({ d, i }) => cardAHtml(d, i)).join('')
+                const header = groupList.length > 1 ? `<div class="pref-section-title">${title}</div>` : ''
+                const section = document.createElement('div')
+                section.className = 'pref-section'
+                section.innerHTML = header + `<div class="card-grid card-grid--3">${cardsHtml}</div>`
+                container.appendChild(section)
+
+                requestAnimationFrame(() => renderGroup(idx + 1))
+            }
+
+            renderGroup(0)
         }
 
         async function buildPrefTabs() {
             const prefs = await fetch("pref-array.json").then(e => e.json())
+            prefOrder = prefs
             const container = document.getElementById('pref-tabs')
             container.innerHTML = `<button class="pref-tab active" data-pref="">すべて</button>` +
                 prefs.map(p => `<button class="pref-tab" data-pref="${p}">${p}</button>`).join('')
@@ -756,7 +959,10 @@
                     '都道府県名': '和歌山県', '団体名': '橋本市',
                     '積立金': 3490, '公債費.構成比': 10.9, '公債費.決算額': 3318265,
                     '公債費.経常収支比率': 19.6, '公債費.経常経費充当一般財源等': 3318158,
-                    '地方債': 24166172, '財調': 3564767, '減債': 360995, '特定目的': 1938263
+                    '地方債': 24166172, '財調': 3564767, '減債': 360995, '特定目的': 1938263,
+                    '相殺割合.10財調': (360995 + 3564767) / 24166172,
+                    '相殺額.減債': 3318265 * Math.min(360995 / 24166172, 1),
+                    '相殺額.10財調': 3318265 * Math.min((360995 + 3564767) / 24166172, 1),
                 }]
             }
 
@@ -766,20 +972,20 @@
 
             await buildPrefTabs()
 
-            document.querySelectorAll('#result-table thead th[data-sort-col]').forEach(th => {
-                th.addEventListener('click', () => {
-                    if (sortCol === th.dataset.sortCol) {
+            document.querySelectorAll('#sort-tabs .sort-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (sortCol === btn.dataset.sortCol) {
                         sortDir = sortDir === 'desc' ? 'asc' : 'desc'
                     } else {
-                        sortCol = th.dataset.sortCol
-                        sortDir = th.dataset.sortType === 'str' ? 'asc' : 'desc'
+                        sortCol = btn.dataset.sortCol
+                        sortDir = (btn.dataset.sortType === 'str' || btn.dataset.sortType === 'pref') ? 'asc' : 'desc'
                     }
-                    updateSortHeaders()
+                    updateSortTabs()
                     renderTable()
                 })
             })
 
-            updateSortHeaders()
+            updateSortTabs()
 
             document.getElementById('name-search').addEventListener('input', e => {
                 nameQuery = e.target.value
