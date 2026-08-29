@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>香美市 税制改革に関するご提案｜財政革新会</title>
+<meta name="description" content="財政革新会による香美市への税制改革提案書。法人税割・法人均等割、軽自動車税、入湯税、固定資産税の減税案と、会計帳簿の公開・厚生年金保険料に関する提言。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700;800&family=Noto+Serif+JP:wght@400;500;600;700&family=Zen+Kaku+Gothic+Antique:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFF1E6;
+    --paper-deep:#E4E8D8;
+    --ink:#1E2A38;
+    --ink-soft:#4B5768;
+    --ledger:#8CA895;
+    --ledger-soft:rgba(140,168,149,0.35);
+    --ledger-faint:rgba(140,168,149,0.14);
+    --seal:#A63B2E;
+    --seal-soft:rgba(166,59,46,0.08);
+    --gold:#93722A;
+    --indigo:#16233A;
+    --indigo-mid:#223350;
+    --cream:#F4F1E6;
+    --max-w:800px;
+    --font-display:'Shippori Mincho', serif;
+    --font-body:'Noto Serif JP', serif;
+    --font-ui:'Zen Kaku Gothic Antique', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 2.05em,
+        var(--ledger-faint) 2.05em,
+        var(--ledger-faint) calc(2.05em + 1px)
+      ),
+      var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:17px;
+    line-height:1.95;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--font-display); color:var(--indigo); margin:0;}
+  a{color:var(--gold);}
+  a:hover{color:var(--seal);}
+  .wrap{max-width:var(--max-w); margin:0 auto; padding:0 1.5rem;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:linear-gradient(180deg, var(--indigo) 0%, var(--indigo-mid) 100%);
+    color:var(--cream); padding:2.6rem 0 2.1rem; position:relative; overflow:hidden;
+  }
+  .hero .wrap{position:relative;}
+  .hero h1{
+    color:var(--cream); font-size:2.15rem; font-weight:700; line-height:1.5;
+    margin:0;
+  }
+  .hero-rule{
+    border:none; border-top:1px solid rgba(244,241,230,0.35);
+    width:100%; margin:1.5rem 0;
+  }
+  .hero-org{
+    font-family:var(--font-ui); font-size:.95rem; letter-spacing:.08em;
+    color:#D9D3BE; margin:0;
+  }
+
+  /* ---------- Sections ---------- */
+  section{padding:3.1rem 0;}
+  section + section{border-top:1px solid var(--ledger-soft);}
+  h2{font-size:1.5rem; font-weight:700; margin-bottom:1.3rem; line-height:1.6;}
+  h2 .h2-num{
+    display:block; font-family:var(--font-ui); font-weight:700; font-size:.85rem;
+    color:var(--seal); letter-spacing:.05em; margin-bottom:.4em;
+  }
+  p{margin:0 0 1.15em;}
+  ul.benefits{margin:0 0 1.15em; padding:0; list-style:none;}
+  ul.benefits li{
+    position:relative; padding:.15em 0 .15em 1.5em; margin-bottom:.7em;
+  }
+  ul.benefits li::before{
+    content:"◆"; position:absolute; left:0; color:var(--gold); font-size:.72em; top:.45em;
+  }
+  .fig{color:var(--seal); font-weight:700; font-style:normal;}
+
+  .note{
+    border:1px solid var(--ledger-soft); border-left:4px solid var(--seal);
+    background:var(--seal-soft); padding:1.1rem 1.3rem; margin:0 0 1.6rem;
+    font-size:.94rem;
+  }
+  .note .label{
+    display:block; font-family:var(--font-ui); font-weight:700; font-size:.72rem;
+    letter-spacing:.12em; color:var(--seal); margin-bottom:.5em;
+  }
+
+  .ref{
+    font-family:var(--font-ui); font-size:.82rem; color:var(--ink-soft);
+    border-top:1px dashed var(--ledger-soft); padding-top:.9rem; margin-top:1.6rem;
+  }
+  .ref .label{color:var(--gold); font-weight:700; margin-right:.5em;}
+  .ref a{word-break:break-all;}
+
+  /* ---------- KPI cards ---------- */
+  .kpi-pair{
+    display:grid; grid-template-columns:1fr 1fr; gap:1px;
+    background:var(--ledger-soft); border:1px solid var(--ledger-soft);
+    border-radius:4px; overflow:hidden; margin:1.6rem 0;
+  }
+  .kpi-card{background:var(--paper); padding:1.1rem 1.2rem;}
+  .kpi-card--accent{background:var(--seal-soft);}
+  .kpi-label{display:block; font-family:var(--font-ui); font-size:.78rem; color:var(--ink-soft); margin-bottom:.5rem;}
+  .kpi-value{font-family:var(--font-ui); font-size:1.55rem; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums;}
+  .kpi-card--accent .kpi-value{color:var(--seal);}
+  .kpi-value small{font-size:.55em; font-weight:500; margin-left:.2em; color:var(--ink-soft);}
+  @media (max-width:640px){ .kpi-pair{grid-template-columns:1fr;} }
+
+  /* ---------- Table ---------- */
+  .table-scroll{overflow-x:auto; margin:0 0 .6rem; -webkit-overflow-scrolling:touch;}
+  table.ledger{
+    width:100%; min-width:520px; border-collapse:collapse; font-family:var(--font-ui); font-size:.88rem;
+  }
+  table.ledger thead th{
+    background:var(--indigo); color:var(--cream); font-weight:500;
+    padding:.75em 1em; text-align:left; letter-spacing:.03em; white-space:nowrap;
+  }
+  table.ledger thead th.num{text-align:right;}
+  table.ledger tbody td{
+    padding:.7em 1em; border-bottom:1px solid var(--ledger-soft); vertical-align:top;
+  }
+  table.ledger tbody td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  table.ledger tbody tr.total td{
+    border-top:3px double var(--ink); border-bottom:none; font-weight:700;
+    background:rgba(147,114,42,0.09);
+  }
+  .table-cap{font-family:var(--font-ui); font-size:.78rem; color:var(--ink-soft); margin:0 0 1rem;}
+  .table-foot{font-family:var(--font-ui); font-size:.74rem; color:var(--ink-soft); margin-top:.6rem;}
+
+  .toc-list{
+    list-style:none; counter-reset:toc; margin:0; padding:0;
+    font-family:var(--font-ui); font-size:.92rem;
+    display:grid; gap:.15rem;
+  }
+  .toc-list li{
+    counter-increment:toc;
+    border-bottom:1px dashed var(--ledger-soft);
+  }
+  .toc-list a{
+    display:flex; align-items:baseline; gap:.7em;
+    padding:.55em .1em; color:var(--ink); text-decoration:none;
+  }
+  .toc-list a::before{
+    content:"第" counter(toc,japanese-informal);
+    font-family:var(--font-ui); font-weight:700; color:var(--seal); font-size:.85em;
+  }
+  .toc-list a:hover{color:var(--gold);}
+
+  /* ---------- Footer ---------- */
+  footer{padding:3rem 0 4.5rem;}
+  .closing{
+    text-align:right; font-family:var(--font-display); font-size:1.1rem; margin-bottom:2.2rem;
+  }
+  .foot-org{
+    display:flex; align-items:center; gap:1rem; padding-top:1.6rem; border-top:1px solid var(--ledger-soft);
+    font-family:var(--font-ui); font-size:.78rem; color:var(--ink-soft);
+  }
+
+  @media (max-width:640px){
+    body{font-size:16px;}
+    .hero{padding:2rem 0 1.6rem;}
+    .hero h1{font-size:1.55rem;}
+    section{padding:2.3rem 0;}
+    .compare-row .clabel{flex-basis:7em; font-size:.76rem;}
+  }
+  @media print{
+    .hero{background:none; color:var(--ink); padding:1rem 0;}
+    .hero h1{color:var(--ink);}
+    .hero-org{color:var(--ink-soft);}
+    .hero-rule{border-top-color:var(--ledger-soft);}
+    body{background:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>香美市 税制改革に関するご提案</h1>
+    <hr class="hero-rule">
+    <p class="hero-org">財政革新会</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section id="sec-toc" style="padding-top:1.2rem;">
+      <p class="table-cap" style="margin-bottom:.9rem;">目次</p>
+      <ol class="toc-list">
+        <li><a href="#sec-population">人口減少対策としての効果のある減税政策について</a></li>
+        <li><a href="#sec-corporate">法人税割・法人均等割</a></li>
+        <li><a href="#sec-kei">軽自動車税</a></li>
+        <li><a href="#sec-onsen">入湯税</a></li>
+        <li><a href="#sec-fixed">固定資産税</a></li>
+        <li><a href="#sec-revenue">歳入減少額（試算）</a></li>
+        <li><a href="#sec-disclosure">財源問題・会計帳簿の公開</a></li>
+        <li><a href="#sec-pension">厚生年金の雇用者負担分</a></li>
+      </ol>
+    </section>
+
+    <section id="sec-population">
+      <h2><span class="h2-num">第一</span>人口減少対策としての効果のある減税政策について</h2>
+      <p>東京は出生率が非常に低い一方で、人口増加が顕著です。都市のブランド価値など、様々な要素がありますが、当方は、良質な雇用都心が主要な要因であると捉えています。</p>
+      <p>東京23区では郊外であっても、コンビニの店員の時給が<span class="fig">1,500円</span>超え、大量採用しているような会社では新卒の大学生に年収<span class="fig">600万円</span>を超える条件を提示することも珍しくありません。</p>
+      <p>高齢者もそうですが、特に若い世代の定住を促し、離脱を防ぐには良質な雇用が必要不可欠であることは広く理解の得られる事であると思います。</p>
+    </section>
+
+    <section id="sec-corporate">
+      <h2><span class="h2-num">第二</span>法人税割・法人均等割</h2>
+      <p>そこで、良質な雇用を増やすことを念頭に、法人税割や法人均等割を一律で非課税とする減税案を提案します。</p>
+      <p>企業は、税引き後純利益の最大化を目標としますので、この二つによる負担が減少することは、企業誘致はもちろん、地元の企業の経営状態の改善に寄与するものと思います。</p>
+      <p>大阪府と大阪市は、「国際金融都市OSAKA」の実現に向けた取り組みとして、「金融系外国企業等」を対象に、法人府民税及び法人事業税が最大で全額控除、10年間の間、軽減する措置をとっております。事実、大阪府と大阪市には名だたる大企業が集結しておりまして、大きな効果をもたらしております。</p>
+      <p>また、地元の企業も、税引き後純利益が増加するということは、企業の後継者を獲得しやすくなり、設備投資がしやすい状態が創れ、より付加価値の高い事業に挑戦しやすい環境が出来る、ひいては、給料の引き上げや福利厚生の改善がしやすくなるということですので、地元の企業も良質な雇用を生み出しやすい環境が出来るということになるかと思います。</p>
+      <p>資金調達の観点でも、融資の返済に充てることのできる原資が増えますし、出資者はより大きなリターンを期待することができるようになりますので、資金調達がしやすい都市にもなるのではないかと思います。</p>
+      <p>仮に、法的に一律で非課税とすることが難しい、ということであれば、法人税割は税率を0.01%とし、法人均等割は一律に1円とする案を提案します。この場合、徴税費で赤字になりますが「徴税しない」ことは法的に難しいかもしれませんので、納税した人に対して「1円だけ納税しました！」といったような文言の記載のある名刺型のカードを提供し、減税を周知する機会とすることが良いのではないかと思います。</p>
+      <div class="ref">
+        <span class="label">参考</span><a href="https://www.pref.osaka.lg.jp/o020060/kikaku/osaka-kokusaikinyu/index.html" target="_blank" rel="noopener">大阪府「国際金融都市OSAKA」の実現に向けた取り組み</a>
+      </div>
+    </section>
+
+    <section id="sec-kei">
+      <h2><span class="h2-num">第三</span>軽自動車税</h2>
+      <p>次に、軽自動車税についてです。軽自動車は高い利便性と経済性から、企業はもちろんのこと、家庭においても豊かな市民生活を実現するための移動手段として広く用いられておりますので、軽自動車税の減税は、家庭・企業の両方に恩恵があるものと思います。</p>
+      <p>香美市の世帯数が1万3千ある一方、課税対象となっている軽自動車は1万5千台を超えておりますので、市民が豊かな生活を実現するうえで必要不可欠であるといって、差し支えないものと思います。</p>
+
+      <div class="kpi-pair">
+        <div class="kpi-card">
+          <span class="kpi-label">香美市の世帯数</span>
+          <span class="kpi-value"><small>約</small>1.3<small>万世帯</small></span>
+        </div>
+        <div class="kpi-card kpi-card--accent">
+          <span class="kpi-label">軽自動車 課税対象台数</span>
+          <span class="kpi-value">1.5<small>万台超</small></span>
+        </div>
+      </div>
+
+      <p>市民への負担軽減、企業の税引き後純利益の増加、そして、自治体の事務の削減を念頭に、軽自動車税の課税対象となる車種を全て課税免除とする減税案を提案します。</p>
+      <p>市民の負担軽減や税引き後純利益の増加は当然のこと、軽自動車税の減税は官民の事務負担の軽減にもつながるものです。税金には支払う負担のこと、支払いにあたっての事務負担も生じます。軽自動車税であれば、納税を求めるはがきが家に届いて、これを払うわけですが、支払い手続きにも時間がかかります。</p>
+      <p>個人であれば、本来別のことに使えていたはずの時間を奪われることになりますし、事業者であれば、事務処理のために人件費が生じます。軽自動車税は福祉事業者等、一定の条件を満たす場合に課税免除の申請が出来るというふうになっておりますが、申請書を提出する必要があるため、納税者に煩雑な事務負担を強いている、というのが現状です。当然、行政側も対応のために人手を割かなければなりませんので、徴税費として負担しているものと思います。</p>
+      <p>法的には、地方税法第六条の課税免除の規定によって、特定の車種について課税免除することは可能であり、地方税法第六条の規定による課税免除は、地方債を発行するにあたって、許可が必要とならないものと思います。なお、現在、総務省に確認中です。</p>
+      <div class="ref">
+        <span class="label">参考</span><a href="https://www.city.kami.lg.jp/soshiki/13-1/keizigenmen.html" target="_blank" rel="noopener">香美市「軽自動車税の減免」</a>
+      </div>
+    </section>
+
+    <section id="sec-onsen">
+      <h2><span class="h2-num">第四</span>入湯税</h2>
+      <p>第三に入湯税についてです。香美市の入湯税は、当会が問題視する、不採算税に該当すると考えております。不採算税とは、「歳入額の小ささから財源問題の解決が容易であり、」というものです。</p>
+      <p>入湯税の歳入額は<span class="fig">55万2千円</span>（令和8年度　一般会計予算書）です。歳入総額は約207億円であることを考えると、必要歳出シーリングは全体の0.01%に満たないため、財源問題が解決しやすいという特徴があります。</p>
+      <p>財源問題が解決しやすい以上、反対する場合は財源以外の理由をあげる必要が生じるため、財源以外の理由、例えば、行政側に「1円の減税も許さない」といったような政治信念があれば、それが発露されることとなります。</p>
+      <p>入湯税を廃止する理由として、観光産業の振興並びに、官民の事務負担削減が念頭にあります。人手不足が深刻であり、今後も長期にわたってその傾向が持続するとされる昨今、行政の業務量の削減は必要不可欠です。また、業務量減少という観点では、入湯税の廃止によって事業者の業務量が減少するため、観光産業における人手不足対策にもなるものと思います。</p>
+      <p>なお、仮に法律の定めによって、入湯税を廃止することが出来ない、となった場合は税率を1円としたうえで、入湯税を課すことが自治体の裁量であることを明確化するよう国に働きかけることを提案します。</p>
+    </section>
+
+    <section id="sec-fixed">
+      <h2><span class="h2-num">第五</span>固定資産税</h2>
+      <p>第四に固定資産税について、当方の考えを明記します。固定資産税を減税する場合は、租税支出ではなく、一律の減税とすべきであると考えます。租税支出は複雑な条件を前提に、行政側が承認した場合にのみ適用となるもので、公平・中立・簡素の原則からの乖離が著しいため、減税というべきものではないと考えます。</p>
+      <p>そのうえで、一律の減税には以下の利点があると思います。</p>
+      <ul class="benefits">
+        <li>家計支援の観点では、税負担が減少するため、防貧政策となる点。</li>
+        <li>産業振興の観点では、固定費が減少するため、損益分岐点が下がり、商品の値下げや価格を据え置いたまま商品の質をあげるといった、措置をとることができるようになる点。</li>
+        <li>歳出の観点では、固定資産税の価格転嫁が減少することが期待できることから、生活保護の住宅扶助費の減少が期待できるほか、その他の行政サービスを実施するための必要経費が減少することが期待できる点。</li>
+        <li>恒久性を担保することで、長期的な視点をもって香美市を検討できる点。</li>
+      </ul>
+      <p>特に産業振興は、人口減少対策とも連動するものと思いますので、ぜひ御検討ください。</p>
+    </section>
+
+    <section id="sec-revenue">
+      <h2><span class="h2-num">第六</span>歳入減少額（試算）</h2>
+      <p>それぞれの税目を減税することによって、生じる歳入の減少額、歳出合計に対する必要なマイナスシーリング率を列挙します。</p>
+      <p class="table-cap">単位：千円（歳出合計を除く数値は減税による歳入減少額）</p>
+      <div class="table-scroll">
+        <table class="ledger">
+          <thead>
+            <tr>
+              <th>項目名</th>
+              <th class="num">金額</th>
+              <th class="num">必要マイナスシーリング率</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>法人均等割</td><td class="num">42,634</td><td class="num">約 0.21%</td></tr>
+            <tr><td>法人税割</td><td class="num">39,386</td><td class="num">約 0.19%</td></tr>
+            <tr><td>軽自動車税</td><td class="num">111,459</td><td class="num">約 0.54%</td></tr>
+            <tr><td>入湯税</td><td class="num">552</td><td class="num">約 0.003%</td></tr>
+            <tr><td>固定資産税</td><td class="num">1,360,849</td><td class="num">約 6.56%</td></tr>
+            <tr><td>固定資産税を0.01%下げる場合<br>（例：1.4%→1.39%）※1</td><td class="num">10,044</td><td class="num">約 0.05%</td></tr>
+            <tr class="total"><td>歳出合計</td><td class="num">20,744,440</td><td class="num">―</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-foot">※1　固定資産税の税率を0.01ポイント引き下げるごとに生じる歳入減少額。</p>
+      <div class="ref">
+        <span class="label">参考</span><a href="https://www.city.kami.lg.jp/uploaded/attachment/50198.pdf" target="_blank" rel="noopener">令和8年度当初予算</a>
+      </div>
+    </section>
+
+    <section id="sec-disclosure">
+      <h2><span class="h2-num">第七</span>財源問題・会計帳簿の公開</h2>
+      <p>財源問題について、当方は歳出のマイナスシーリングを実施すべきと考えておりますが、削減すべき事業を特定すべきである、という考えの方も少なくありません。</p>
+      <p>そこに対する反論として、事務事業評価の公表・拡充とあわせて、会計帳簿の公開も併せて求めることを提案します。</p>
+      <p>会計帳簿には複数種類がありますが、自治体の支出が一件ごとに記載されており、支出した日付、件名、相手方、並びに、支払方法が記載されておりますので、高度な財政分析が可能となります。</p>
+      <p>しかも、会計帳簿は条例で定められており、公開請求があれば必ず公開しなければいけないものですので、自治体の側で、あえて公開しない理由はありません。事務事業評価のように公表を拒否することが難しく、実現可能性の高い公約となるものと思います。</p>
+      <p>実施している事務事業を全て把握出来ていない自治体も多いなか、会計帳簿の公表をとおして、把握出来ていない事務事業の精査も可能となる、という点が大きいのではないかと思います。</p>
+      <p>なお、自治体の実施する事業には、法定受託事務と事務事業のほかに、法的根拠の無い事業（＝自治体の裁量で改廃できるもの）があります。行革する場合は、法的根拠の無いものを中心に見ていくことになるものと思います。</p>
+      <div class="ref">
+        <span class="label">参考</span><a href="https://www1.g-reiki.net/kami/reiki_honbun/r255RG00000156.html#e000004266" target="_blank" rel="noopener">香美市財務規則　第123条　備付帳簿</a>
+      </div>
+    </section>
+
+    <section id="sec-pension">
+      <h2><span class="h2-num">第八</span>厚生年金の雇用者負担分</h2>
+      <p>今回の選挙は、党の紹介としての側面もあるのではないかと思っており、港区のチーム未来の得票率が高いことが話題となりましたが、乗換先の候補として検討してもらうためにも、多少なりと国政マターにも触れるべきではないかと思っております。</p>
+      <p>そこで、香美市に強く関連する話題として、他の地域と比べて厚生年金保険料の受給額が少ない一方で、厚生年金保険料の負担は同じであることを踏まえて、年金支給額の上限を設け、厚生年金保険料や消費税を引き下げることを国に働きかけることを提案します。</p>
+      <p>厚生年金保険料は保険者であった時期の納付額に応じて受給額が変わるため、「年収の高い人の受給額が高止まりする」という格差の固定化をはかる制度となっています。</p>
+      <p>地域性がはっきりと出ており、工業地域や都市部の受給額が高く、農村部の受給額が低いという特徴があります。太平洋ベルトから離れた地域ほど低くなる傾向があるのも重要な特徴です。</p>
+      <p>自治体ごとの支給額を見ると、高知県は下から数えたほうが早く、厚生年金保険（第一号）の平均年金月額は約13万2千円となっており、神奈川県が約17万円と最も高くなっております。香美市は農業の占める割合が多い自治体となりますので、高知県の平均よりも低いのではないかと思います。</p>
+
+      <div class="kpi-pair">
+        <div class="kpi-card kpi-card--accent">
+          <span class="kpi-label">高知県 平均月額</span>
+          <span class="kpi-value"><small>約</small>13.2<small>万円</small></span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">神奈川県 平均月額</span>
+          <span class="kpi-value"><small>約</small>17.0<small>万円</small></span>
+        </div>
+      </div>
+
+      <p>仮に、年金制度に格差を固定化する仕組みが備わっておらず、全国の自治体での支給額が高知県と同等であれば、厚生年金保険料や公費によって補填する際の財源となっているとされる消費税は、今よりも税率が低くとも制度の運営は可能であるはずで、香美市市民は過剰な負担を強いられているというべきものです。</p>
+      <p>また、香美市自体も職員の厚生年金保険料の雇用者負担分や消費税（＝取引にあたって事業者は消費税負担を加味した価格を提示する）を負担しており、高額年金受給者のために過剰な負担を強いられているというべきものです。当然、厚生年金保険料が下がれば、香美市職員の人件費は減少し、企業の負担も減少することから、税収増加が見込めるものと思います。</p>
+      <p>以上、国政マターでありながら、自治体における特異な状況に着目しつつ、香美市における過剰な租税公課の負担の削減を求めるものであり、地方選挙で取り上げる道理のある内容かと思います。</p>
+      <div class="ref">
+        <span class="label">参考</span><a href="https://claude.ai/public/artifacts/35c1aefe-0835-440e-bfa3-0747f7fd2bc5" target="_blank" rel="noopener">年金支給額の上限設定により消費税、若しくは、厚生年金保険料の引下げを求める意見書（当会作成）</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="closing">以上</p>
+    <div class="foot-org">
+      <span>財政革新会（Zaisei Kakushinkai）　｜　令和8年8月28日 公開</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
